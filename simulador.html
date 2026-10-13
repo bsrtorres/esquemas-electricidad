@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de conmutadas</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d63;
+    --line: #9a9aa2; --live: #b4471a; --neutral: #1f5fbf; --accent: #2d6a4f;
+    --lamp-on: #ffd23f; --btn: #e9e6dd; --btn-on: #1d1d1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 18px; line-height: 1.5;
+  }
+  header { padding: 16px 24px 8px; }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  header p { margin: 0; color: var(--muted); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 24px 16px; }
+  .tabs button {
+    font: inherit; font-size: 17px; padding: 6px 14px; border-radius: 8px;
+    border: 2px solid var(--ink); background: var(--btn); color: var(--ink); cursor: pointer;
+  }
+  .tabs button[aria-pressed="true"] { background: var(--btn-on); color: #fff; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 0 24px 24px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card h2 { margin: 0 0 8px; font-size: 22px; }
+  svg { width: 100%; height: auto; max-height: 72vh; display: block; }
+  .w { stroke: var(--line); stroke-width: .8; fill: none; stroke-linecap: round; }
+  .w.live { stroke: var(--live); stroke-width: 1.3; }
+  .w.n { stroke: var(--neutral); stroke-width: 1; }
+  .act { stroke: var(--ink); stroke-width: .6; stroke-dasharray: 1.6 1.2; fill: none; }
+  .tick { stroke: var(--ink); stroke-width: .8; fill: none; }
+  .lbl { font-size: 5px; fill: var(--ink); font-family: Calibri, Arial, sans-serif; text-anchor: middle; }
+  .bar { font-size: 6px; font-weight: bold; }
+  .lamp circle.bulb { fill: #fff; stroke: var(--ink); stroke-width: .8; transition: fill .15s; }
+  .lamp.on circle.bulb { fill: var(--lamp-on); filter: drop-shadow(0 0 3px #ffbf00); }
+  .lamp line { stroke: var(--ink); stroke-width: .7; }
+  .toma circle.body { fill: #fff; stroke: var(--ink); stroke-width: .8; }
+  .toma.on circle.body { fill: #d8f3dc; stroke: var(--accent); }
+  .toma circle.hole { fill: #fff; stroke: var(--ink); stroke-width: .6; }
+  .timbre path, .timbre line { stroke: var(--ink); stroke-width: .8; fill: none; }
+  .timbre.on .dome { fill: #ffd8a8; animation: shake .12s infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
+  .timbre .wave { opacity: 0; stroke: var(--live); }
+  .timbre.on .wave { opacity: 1; animation: blink .4s infinite alternate; }
+  @keyframes shake { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+  @keyframes blink { from { opacity: .2; } to { opacity: 1; } }
+  .dev { cursor: pointer; }
+  .dev .hit { fill: transparent; }
+  .dev:hover .hit, .dev:focus .hit { fill: rgba(45,106,79,.12); }
+  .dev:focus { outline: none; }
+  .dot { fill: var(--ink); }
+  ul.state { list-style: none; padding: 0; margin: 0; }
+  ul.state li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+  .on-txt { color: #9a6700; font-weight: bold; }
+  .off-txt { color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 16px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 24px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; background: var(--c); }
+  .row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .row-btns button, .row-btns label {
+    font: inherit; font-size: 16px; padding: 6px 12px; border-radius: 8px; border: 2px solid var(--ink);
+    background: var(--btn); cursor: pointer;
+  }
+  .tip { font-size: 16px; color: var(--muted); margin-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador: conmutadas y cruzamiento</h1>
+  <p>Haz clic en los mecanismos del esquema funcional. Los <b>interruptores</b> y <b>conmutadores</b> cambian de posición con cada clic; los <b>pulsadores</b> funcionan mientras los mantienes pulsados.</p>
+</header>
+<nav class="tabs" id="tabs" aria-label="Ejercicios"></nav>
+<main>
+  <section class="card">
+    <h2 id="title"></h2>
+    <svg id="svg" role="img" aria-label="Esquema funcional interactivo"></svg>
+    <div class="legend">
+      <span style="--c: var(--live)">Conductor con tensión (fase)</span>
+      <span style="--c: var(--line)">Sin tensión</span>
+      <span style="--c: var(--neutral)">Neutro</span>
+    </div>
+  </section>
+  <aside class="card">
+    <h2>Estado</h2>
+    <ul class="state" id="state"></ul>
+    <div class="row-btns">
+      <button id="reset">Reiniciar</button>
+      <label><input type="checkbox" id="sound"> Sonido del timbre</label>
+    </div>
+    <p class="tip"><b>Recuerda:</b> en una conmutada la lámpara luce cuando los dos conmutadores conectan con el <b>mismo</b> conductor (hilo puente). Cada conmutador de cruce que accionas cambia los hilos puente de lugar.</p>
+  </aside>
+</main>
+
+<script>
+const EX = {
+  "002": [{t: "conmutada", c1: "C1", x: [], c2: "C2", loads: [["L", "L1"], ["L", "L2"]]},
+          {t: "simple", ctrl: ["S", "S1"], loads: [["L", "L3"]]},
+          {t: "simple", ctrl: null, loads: [["T", "T1"]]}],
+  "003": [{t: "conmutada", c1: "C1", x: ["X1"], c2: "C2", loads: [["L", "L1"], ["L", "L2"]]},
+          {t: "simple", ctrl: ["P", "P1"], loads: [["Z", "Z1"]]}],
+  "005": [{t: "conmutada", c1: "C1", x: [], c2: "C2", loads: [["L", "L1"]]},
+          {t: "selector", c: "C3", la: ["L", "L2"], lb: ["L", "L3"]},
+          {t: "simple", ctrl: null, loads: [["T", "T1"]]}],
+  "006": [{t: "simple", ctrl: ["S", "S1"], loads: [["L", "L1"]]},
+          {t: "simple", ctrl: ["S", "S2"], loads: [["L", "L2"]]},
+          {t: "conmutada", c1: "C1", x: [], c2: "C2", loads: [["L", "L3"]]}],
+  "007": [{t: "conmutada", c1: "C1", x: [], c2: "C2", loads: [["L", "L1"], ["L", "L2"]]},
+          {t: "simple", ctrl: ["S", "S1"], loads: [["L", "L3"]]},
+          {t: "simple", ctrl: ["P", "P1"], loads: [["Z", "Z1"]]},
+          {t: "simple", ctrl: null, loads: [["T", "T1"]]}],
+  "008": [{t: "conmutada", c1: "C1", x: ["X1", "X2"], c2: "C2", loads: [["L", "L1"], ["L", "L2"], ["L", "L3"]]},
+          {t: "simple", ctrl: null, loads: [["T", "T1"], ["T", "T2"]]}],
+  "010": [{t: "conmutada", c1: "C1", x: ["X1"], c2: "C2", loads: [["L", "L1"]]},
+          {t: "conmutada", c1: "C3", x: [], c2: "C4", loads: [["L", "L2"], ["L", "L3"]]},
+          {t: "simple", ctrl: null, loads: [["T", "T1"]]}],
+  "011": [{t: "paralelo", ctrls: [["P", "P1"], ["P", "P2"]], loads: [["Z", "Z1"]]},
+          {t: "simple", ctrl: ["S", "S1"], loads: [["L", "L1"], ["L", "L2"]]},
+          {t: "conmutada", c1: "C1", x: [], c2: "C2", loads: [["L", "L3"]]}],
+  "012": [{t: "conmutada", c1: "C1", x: ["X1"], c2: "C2", loads: [["L", "L1"], ["L", "L2"]]},
+          {t: "simple", ctrl: ["S", "S1"], loads: [["L", "L3"]]},
+          {t: "simple", ctrl: ["S", "S2"], loads: [["L", "L4"]]}],
+};
+
+const XL = 14, XBUS = XL + 112, XLOAD = XL + 120, XN = XL + 168, Y0 = 22, DY = 24;
+let cur = "003", st = {}, loadsOn = [], out = [];
+
+const Y = r => Y0 + r * DY;
+const seg = (x1, y1, x2, y2, cls) => out.push(`<line class="w ${cls}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`);
+const poly = (pts, cls) => out.push(`<polyline class="w ${cls}" points="${pts.map(p => p.join(",")).join(" ")}"/>`);
+const dot = (x, y) => out.push(`<circle class="dot" cx="${x}" cy="${y}" r=".9"/>`);
+const label = (x, y, s) => out.push(`<text class="lbl" x="${x}" y="${y}">${s}</text>`);
+const L = b => b ? "live" : "";
+const fr = (ox, oy, m = 1) => (u, v) => [ox + m * u, oy - v];
+
+function hit(P, name, kind, extra = "") {
+  const [x1, y1] = P(-1, 11), [x2, y2] = P(17, -6);
+  const x = Math.min(x1, x2), y = Math.min(y1, y2);
+  out.push(`<g class="dev" tabindex="0" role="button" data-dev="${name}" data-kind="${kind}" aria-label="${name}${extra}">`
+    + `<rect class="hit" x="${x}" y="${y}" width="${Math.abs(x2 - x1)}" height="${Math.abs(y2 - y1)}" rx="2"/></g>`);
+}
+
+function actuator(P, ua, va, top, kind) {
+  out.push(`<line class="act" x1="${P(ua, va)[0]}" y1="${P(ua, va)[1]}" x2="${P(ua, top)[0]}" y2="${P(ua, top)[1]}"/>`);
+  out.push(`<line class="tick" x1="${P(ua - 1.5, top)[0]}" y1="${P(ua - 1.5, top)[1]}" x2="${P(ua + 1.5, top)[0]}" y2="${P(ua + 1.5, top)[1]}"/>`);
+  if (kind === "P") {
+    for (const du of [-1.5, 1.5]) {
+      out.push(`<line class="tick" x1="${P(ua + du, top)[0]}" y1="${P(ua + du, top)[1]}" x2="${P(ua + du, top - 1)[0]}" y2="${P(ua + du, top - 1)[1]}"/>`);
+    }
+  } else {
+    out.push(`<polyline class="tick" points="${[P(ua, top - 1.4), P(ua - 1.1, top - 1.9), P(ua, top - 2.4)].map(p => p.join(",")).join(" ")}"/>`);
+  }
+}
+
+/* ---------- símbolos ---------- */
+function swSym(kind, name, ox, y, inLive) {
+  const P = fr(ox, y), closed = !!st[name];
+  seg(...P(0, 0), ...P(5, 0), L(inLive));
+  if (closed) seg(...P(5, 0), ...P(11.3, 0.7), L(inLive));
+  else seg(...P(5, 0), ...P(12, 4), L(inLive));
+  seg(...P(11, 0), ...P(16, 0), L(inLive && closed));
+  actuator(P, 8.5, closed ? 0.4 : 2, 8, kind);
+  label(...P(3.5, 7.5), name);
+  hit(P, name, kind, kind === "P" ? ": pulsador" : ": interruptor");
+  return inLive && closed;
+}
+
+function conmSym(name, ox, y, m, feed) {
+  // feed: {common: bool} si se alimenta por el común; {a, b} si por los contactos
+  const P = fr(ox, y, m), s = st[name] || 0;
+  let liveA, liveB, bladeLive, comLive;
+  if ("common" in feed) { comLive = bladeLive = feed.common; liveA = comLive && s === 0; liveB = comLive && s === 1; }
+  else { liveA = feed.a; liveB = feed.b; bladeLive = comLive = s === 0 ? liveA : liveB; }
+  seg(...P(0, 0), ...P(5, 0), L(comLive));
+  seg(...P(12, 4), ...P(16, 4), L(liveA));
+  seg(...P(12, -4), ...P(16, -4), L(liveB));
+  seg(...P(5, 0), ...P(12, s === 0 ? 4 : -4), L(bladeLive));
+  actuator(P, 8.5, s === 0 ? 2.3 : -2.3, 9, "S");
+  label(...(m > 0 ? P(3.5, 8) : P(-1.5, 8)), name);
+  hit(P, name, "C", `: conmutador, posición ${s + 1}`);
+  return {a: liveA, b: liveB, com: comLive};
+}
+
+function cruceSym(name, ox, y, t) {
+  // t: 0 = tensión en el hilo superior, 1 = inferior, -1 = ninguno
+  const P = fr(ox, y), s = st[name] || 0;
+  const inA = t === 0, inB = t === 1;
+  seg(...P(0, 4), ...P(3.5, 4), L(inA)); seg(...P(0, -4), ...P(3.5, -4), L(inB));
+  let outA, outB;
+  if (s === 0) {
+    seg(...P(3.5, 4), ...P(12.5, 4), L(inA)); seg(...P(3.5, -4), ...P(12.5, -4), L(inB));
+    outA = inA; outB = inB;
+  } else {
+    seg(...P(3.5, 4), ...P(12.5, -4), L(inA)); seg(...P(3.5, -4), ...P(12.5, 4), L(inB));
+    outA = inB; outB = inA;
+  }
+  seg(...P(12.5, 4), ...P(16, 4), L(outA)); seg(...P(12.5, -4), ...P(16, -4), L(outB));
+  actuator(P, 8, s === 0 ? 4 : 0, 10, "S");
+  label(...P(3, 9.5), name);
+  hit(P, name, "X", `: conmutador de cruce, posición ${s + 1}`);
+  return outA ? 0 : outB ? 1 : -1;
+}
+
+function loadSym(kind, name, ox, y, on) {
+  const P = fr(ox, y);
+  seg(...P(0, 0), ...P(3, 0), L(on));
+  seg(...P(11, 0), ...P(14, 0), "n");
+  const [cx, cy] = P(7, 0);
+  if (kind === "L") {
+    const k = 4 * 0.707;
+    out.push(`<g class="lamp ${on ? "on" : ""}"><circle class="bulb" cx="${cx}" cy="${cy}" r="4"/>`
+      + `<line x1="${cx - k}" y1="${cy - k}" x2="${cx + k}" y2="${cy + k}"/><line x1="${cx - k}" y1="${cy + k}" x2="${cx + k}" y2="${cy - k}"/></g>`);
+  } else if (kind === "T") {
+    out.push(`<g class="toma ${on ? "on" : ""}"><circle class="body" cx="${cx}" cy="${cy}" r="4"/>`
+      + `<circle class="hole" cx="${cx - 1.6}" cy="${cy}" r=".9"/><circle class="hole" cx="${cx + 1.6}" cy="${cy}" r=".9"/></g>`);
+  } else {
+    const d = `M ${cx - 3.5} ${cy - 2} A 3.5 3.5 0 0 1 ${cx + 3.5} ${cy - 2} Z`;
+    out.push(`<g class="timbre ${on ? "on" : ""}">`
+      + `<polyline class="w ${L(on)}" points="${P(3, 0)} ${P(5, 0)} ${P(5, 2)}"/>`
+      + `<polyline class="w n" points="${P(11, 0)} ${P(9, 0)} ${P(9, 2)}"/>`
+      + `<path class="dome" d="${d}"/>`
+      + `<path class="wave" d="M ${cx + 5} ${cy - 7} q 1.5 1.5 0 3 M ${cx + 6.5} ${cy - 8} q 2.5 2.5 0 5 M ${cx - 5} ${cy - 7} q -1.5 1.5 0 3 M ${cx - 6.5} ${cy - 8} q -2.5 2.5 0 5"/></g>`);
+  }
+  label(cx, cy - 6.5, name);
+  loadsOn.push([kind, name, on]);
+}
+
+function loads(r0, list, live, xFrom) {
+  const ys = list.map((_, k) => Y(r0 + k));
+  seg(xFrom, ys[0], XLOAD, ys[0], L(live));
+  if (list.length > 1) { seg(XBUS, ys[0], XBUS, ys[ys.length - 1], L(live)); dot(XBUS, ys[0]); }
+  list.forEach(([kind, name], k) => {
+    const y = ys[k];
+    if (k > 0) seg(XBUS, y, XLOAD, y, L(live));
+    loadSym(kind, name, XLOAD, y, live);
+    seg(XLOAD + 14, y, XN, y, "n"); dot(XN, y);
+  });
+  return list.length;
+}
+
+/* ---------- circuitos ---------- */
+function drawSimple(r, c) {
+  const y = Y(r); dot(XL, y);
+  if (!c.ctrl) return loads(r, c.loads, true, XL);
+  seg(XL, y, XL + 8, y, "live");
+  const on = swSym(c.ctrl[0], c.ctrl[1], XL + 8, y, true);
+  return loads(r, c.loads, on, XL + 24);
+}
+
+function drawParalelo(r, c) {
+  const xb = XL + 40;
+  let any = false;
+  const outs = c.ctrls.map(([kind, name], k) => {
+    const y = Y(r + k); dot(XL, y); seg(XL, y, XL + 8, y, "live");
+    const on = swSym(kind, name, XL + 8, y, true); any = any || on; return on;
+  });
+  outs.forEach((on, k) => seg(XL + 24, Y(r + k), xb, Y(r + k), L(on)));
+  seg(xb, Y(r), xb, Y(r + c.ctrls.length - 1), L(any)); dot(xb, Y(r));
+  return Math.max(c.ctrls.length, loads(r, c.loads, any, xb));
+}
+
+function drawConmutada(r, c) {
+  const y = Y(r); dot(XL, y);
+  seg(XL, y, XL + 6, y, "live");
+  const c1 = conmSym(c.c1, XL + 6, y, 1, {common: true});
+  let t = c1.a ? 0 : c1.b ? 1 : -1, x = XL + 22;
+  for (const name of c.x) {
+    seg(x, y - 4, x + 4, y - 4, L(t === 0)); seg(x, y + 4, x + 4, y + 4, L(t === 1));
+    t = cruceSym(name, x + 4, y, t); x += 20;
+  }
+  seg(x, y - 4, x + 4, y - 4, L(t === 0)); seg(x, y + 4, x + 4, y + 4, L(t === 1));
+  const c2 = conmSym(c.c2, x + 20, y, -1, {a: t === 0, b: t === 1});
+  return loads(r, c.loads, c2.com, x + 20);
+}
+
+function drawSelector(r, c) {
+  const y = Y(r), y2 = Y(r + 1); dot(XL, y);
+  seg(XL, y, XL + 8, y, "live");
+  const s = conmSym(c.c, XL + 8, y, 1, {common: true});
+  poly([[XL + 24, y - 4], [XL + 30, y - 4], [XL + 30, y], [XLOAD, y]], L(s.a));
+  poly([[XL + 24, y + 4], [XL + 34, y + 4], [XL + 34, y2], [XLOAD, y2]], L(s.b));
+  [[c.la, y, s.a], [c.lb, y2, s.b]].forEach(([[kind, name], yy, on]) => {
+    loadSym(kind, name, XLOAD, yy, on); seg(XLOAD + 14, yy, XN, yy, "n"); dot(XN, yy);
+  });
+  return 2;
+}
+
+/* ---------- render ---------- */
+const svg = document.getElementById("svg");
+function render() {
+  out = []; loadsOn = [];
+  let r = 0;
+  for (const c of EX[cur]) {
+    r += c.t === "simple" ? drawSimple(r, c) : c.t === "paralelo" ? drawParalelo(r, c)
+       : c.t === "conmutada" ? drawConmutada(r, c) : drawSelector(r, c);
+  }
+  const h = Y(r - 1) + 16;
+  const bars = `<line class="w live" x1="${XL}" y1="8" x2="${XL}" y2="${h - 6}"/>`
+    + `<line class="w n" x1="${XN}" y1="8" x2="${XN}" y2="${h - 6}"/>`
+    + `<text class="lbl bar" x="${XL}" y="6">L</text><text class="lbl bar" x="${XN}" y="6">N</text>`;
+  svg.setAttribute("viewBox", `0 0 ${XN + 10} ${h}`);
+  svg.innerHTML = bars + out.join("");
+  document.getElementById("title").textContent = `Esquema ${cur} · Esquema funcional`;
+  document.getElementById("state").innerHTML = loadsOn.map(([k, n, on]) => {
+    const what = k === "L" ? (on ? "encendida" : "apagada") : k === "Z" ? (on ? "suena" : "en silencio") : (on ? "con tensión" : "sin tensión");
+    return `<li><span>${n}</span><span class="${on ? "on-txt" : "off-txt"}">${what}</span></li>`;
+  }).join("");
+  updateSound();
+}
+
+/* ---------- interacción ---------- */
+function press(name, kind, down) {
+  if (kind === "P") { st[name] = down; }
+  else if (down) { st[name] = kind === "S" ? !st[name] : 1 - (st[name] || 0); }
+  else return;
+  const focused = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.dev : null;
+  render();
+  if (focused) { const el = svg.querySelector(`[data-dev="${focused}"]`); if (el) el.focus(); }
+}
+svg.addEventListener("pointerdown", e => {
+  const g = e.target.closest(".dev"); if (!g) return;
+  e.preventDefault(); press(g.dataset.dev, g.dataset.kind, true);
+  if (g.dataset.kind === "P") {
+    const up = () => { press(g.dataset.dev, "P", false); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); };
+    window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+  }
+});
+svg.addEventListener("keydown", e => {
+  const g = e.target.closest && e.target.closest(".dev"); if (!g || e.repeat) return;
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); press(g.dataset.dev, g.dataset.kind, true); }
+});
+svg.addEventListener("keyup", e => {
+  const g = e.target.closest && e.target.closest(".dev"); if (!g) return;
+  if ((e.key === "Enter" || e.key === " ") && g.dataset.kind === "P") press(g.dataset.dev, "P", false);
+});
+
+let audio = null, osc = null;
+function updateSound() {
+  const ringing = loadsOn.some(([k, , on]) => k === "Z" && on) && document.getElementById("sound").checked;
+  try {
+    if (ringing && !osc) {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      osc = audio.createOscillator(); const g = audio.createGain();
+      osc.type = "square"; osc.frequency.value = 880; g.gain.value = 0.04;
+      osc.connect(g).connect(audio.destination); osc.start();
+    } else if (!ringing && osc) { osc.stop(); osc = null; }
+  } catch (err) { osc = null; }
+}
+document.getElementById("sound").addEventListener("change", updateSound);
+document.getElementById("reset").addEventListener("click", () => { st = {}; render(); });
+
+const tabs = document.getElementById("tabs");
+Object.keys(EX).forEach(k => {
+  const b = document.createElement("button");
+  b.textContent = `Esquema ${k}`;
+  b.onclick = () => { cur = k; st = {}; [...tabs.children].forEach(x => x.setAttribute("aria-pressed", x === b)); render(); };
+  b.setAttribute("aria-pressed", k === cur);
+  tabs.appendChild(b);
+});
+render();
+</script>
+</body>
+</html>
