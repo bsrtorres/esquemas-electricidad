@@ -6,6 +6,8 @@ Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares
 
 ## Contenido
 
+- `menu.js`: menú común de todas las páginas (incluye las otras webs de la cuenta). Al añadir una ficha o página nueva, añadirla también aquí.
+
 - `simulador.html`: simulador interactivo de los esquemas con conmutada y cruzamiento (002, 003, 005, 006, 007, 008, 010, 011 y 012) y del telerruptor (013).
 - `cuadro.html`: simulador del cuadro general de mando y protección (IGA, diferencial y PIA de C1 a C5).
 - `calculos/`: calculadoras de circuitos de vivienda (ITC-BT-25 e ITC-BT-19), ejemplo de una toma del C2 y teoría en PDF.
