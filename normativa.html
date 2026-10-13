@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normativa · Esquemas de electricidad</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 70px; font-weight: bold; }
+  td.f { width: 70px; }
+  a { color: var(--accent); }
+  .all { margin-top: 12px; }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grid p { margin: 0 0 12px; }
+  td.k { width: 230px; font-weight: bold; }
+  .jump { margin: -12px 0 20px; }
+</style>
+<script src="menu.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Normativa</h1>
+  <p class="lead">Reglamento y referencias para las instalaciones de vivienda.</p>
+
+  <section class="card">
+    <h2>Reglamento Electrotécnico para Baja Tensión</h2>
+    <p>Real Decreto 842/2002 y sus instrucciones técnicas complementarias (ITC-BT).</p>
+    <a class="big" href="https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099" target="_blank" rel="noopener">Abrir el REBT en el BOE</a>
+  </section>
+
+  <section class="card">
+    <h2>Instrucciones que usamos en clase</h2>
+    <table>
+      <tbody>
+        <tr><td class="k">ITC-BT-10</td><td>Previsión de cargas: grados de electrificación básica y elevada</td></tr>
+        <tr><td class="k">ITC-BT-15</td><td>Derivación individual</td></tr>
+        <tr><td class="k">ITC-BT-17</td><td>Cuadro general de mando y protección: IGA, diferencial y PIA</td></tr>
+        <tr><td class="k">ITC-BT-19</td><td>Prescripciones generales de las instalaciones interiores: intensidades admisibles, caída de tensión y colores de los conductores</td></tr>
+        <tr><td class="k">ITC-BT-21</td><td>Tubos y canales protectoras</td></tr>
+        <tr><td class="k">ITC-BT-25</td><td>Número de circuitos de la vivienda y sus características (C1 a C12)</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+</body>
+</html>

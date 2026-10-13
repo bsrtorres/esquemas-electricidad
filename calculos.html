@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cálculos · Esquemas de electricidad</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 70px; font-weight: bold; }
+  td.f { width: 70px; }
+  a { color: var(--accent); }
+  .all { margin-top: 12px; }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grid p { margin: 0 0 12px; }
+  td.k { width: 230px; font-weight: bold; }
+  .jump { margin: -12px 0 20px; }
+</style>
+<script src="menu.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cálculos</h1>
+  <p class="lead">Cálculo de circuitos de vivienda según la ITC-BT-25 y la ITC-BT-19: intensidad, calentamiento y caída de tensión, paso a paso.</p>
+
+  <section class="card" id="calculos">
+    <table>
+      <tbody>
+        <tr><td class="k"><a href="calculos/calculo_circuitos_vivienda.html">Circuitos C1 a C11</a></td><td>Calculadora de todos los circuitos de la vivienda, con la tabla resumen de la ITC-BT-25</td></tr>
+        <tr><td class="k"><a href="calculos/calculo_tomas_C2.html">Tomas C2</a></td><td>Calculadora del circuito de tomas de uso general</td></tr>
+        <tr><td class="k"><a href="calculos/ejemplo_toma_C2_12m.html">Ejemplo: toma a 12 m</a></td><td>Plano, unifilar, multifilar, cálculo y lista de materiales de una toma del C2</td></tr>
+        <tr><td class="k"><a href="calculos/teoria_calculo_secciones_vivienda.pdf">Teoría (PDF)</a></td><td>Teoría completa, ejemplos resueltos y ejercicios con soluciones</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+</body>
+</html>

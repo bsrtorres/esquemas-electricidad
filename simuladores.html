@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simuladores · Esquemas de electricidad</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 70px; font-weight: bold; }
+  td.f { width: 70px; }
+  a { color: var(--accent); }
+  .all { margin-top: 12px; }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grid p { margin: 0 0 12px; }
+  td.k { width: 230px; font-weight: bold; }
+  .jump { margin: -12px 0 20px; }
+</style>
+<script src="menu.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Simuladores</h1>
+  <p class="lead">Prácticas interactivas: acciona los mecanismos y comprueba qué pasa.</p>
+
+  <section class="card" id="simuladores">
+    <div class="grid">
+      <div>
+        <h3>Conmutadas, cruzamiento y telerruptor</h3>
+        <p>Acciona interruptores, conmutadores, conmutadores de cruce, pulsadores y telerruptores y comprueba qué receptores funcionan y por dónde llega la fase.</p>
+        <a class="big" href="simulador.html">Abrir el simulador</a>
+      </div>
+      <div>
+        <h3>Cuadro general de mando y protección</h3>
+        <p>IGA, diferencial y PIA de los circuitos C1 a C5. Enciende receptores y provoca sobrecargas, cortocircuitos y fugas a tierra para ver qué protección actúa.</p>
+        <a class="big" href="cuadro.html">Abrir el cuadro</a>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

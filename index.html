@@ -5,95 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Esquemas de electricidad</title>
 <style>
-  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #6b6b72; --accent: #b4471a; }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body { margin: 0; background: var(--bg); color: var(--ink);
-         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
-  h1 { font-size: 32px; margin: 0 0 4px; }
-  h2 { font-size: 24px; margin: 0 0 12px; }
-  p.lead { color: var(--muted); margin: 0 0 24px; }
-  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
-          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
-         color: #fff; text-decoration: none; font-weight: bold; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
-  th { font-size: 16px; color: var(--muted); font-weight: normal; }
-  td.n { width: 70px; font-weight: bold; }
-  td.f { width: 70px; }
-  a { color: var(--accent); }
-  .all { margin-top: 12px; }
-  h3 { font-size: 20px; margin: 0 0 4px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
-  .grid p { margin: 0 0 12px; }
-  td.k { width: 230px; font-weight: bold; }
-  .jump { margin: -12px 0 20px; }
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.4;
+         display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
+  h1 { font-size: clamp(30px, 5vw, 44px); margin: 0; font-weight: 700; letter-spacing: -.01em; text-align: center; }
+  p { color: var(--muted); margin: 8px 0 40px; text-align: center; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); gap: 20px; }
+  @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+  .grid a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+            aspect-ratio: 1; background: var(--panel); color: var(--ink); text-decoration: none;
+            border-radius: 20px; font-size: clamp(19px, 2.6vw, 24px); font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08); border: 2px solid transparent;
+            transition: transform .15s, box-shadow .15s, border-color .15s; }
+  .grid a:hover, .grid a:focus-visible { transform: translateY(-3px); border-color: var(--accent);
+            box-shadow: 0 8px 24px rgba(0,0,0,.12); outline: none; color: var(--accent); }
+  .grid svg { width: 56px; height: 56px; stroke: currentColor; fill: none; stroke-width: 1.8;
+              stroke-linecap: round; stroke-linejoin: round; }
 </style>
-<script src="menu.js" defer></script>
 </head>
 <body>
-<div class="wrap">
   <h1>Esquemas de electricidad</h1>
-  <p class="lead">Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares para completar.</p>
-
-  <section class="card" id="simuladores">
-    <h2>Simuladores</h2>
-    <div class="grid">
-      <div>
-        <h3>Conmutadas, cruzamiento y telerruptor</h3>
-        <p>Acciona interruptores, conmutadores, conmutadores de cruce, pulsadores y telerruptores y comprueba qué receptores funcionan y por dónde llega la fase.</p>
-        <a class="big" href="simulador.html">Abrir el simulador</a>
-      </div>
-      <div>
-        <h3>Cuadro general de mando y protección</h3>
-        <p>IGA, diferencial y PIA de los circuitos C1 a C5. Enciende receptores y provoca sobrecargas, cortocircuitos y fugas a tierra para ver qué protección actúa.</p>
-        <a class="big" href="cuadro.html">Abrir el cuadro</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="card" id="calculos">
-    <h2>Cálculo de circuitos de vivienda</h2>
-    <p>Sección de los conductores según la ITC-BT-25 y la ITC-BT-19: intensidad, calentamiento y caída de tensión, paso a paso.</p>
-    <table>
-      <tbody>
-        <tr><td class="k"><a href="calculos/calculo_circuitos_vivienda.html">Circuitos C1 a C11</a></td><td>Calculadora de todos los circuitos de la vivienda, con la tabla resumen de la ITC-BT-25</td></tr>
-        <tr><td class="k"><a href="calculos/calculo_tomas_C2.html">Tomas C2</a></td><td>Calculadora del circuito de tomas de uso general</td></tr>
-        <tr><td class="k"><a href="calculos/ejemplo_toma_C2_12m.html">Ejemplo: toma a 12 m</a></td><td>Plano, unifilar, multifilar, cálculo y lista de materiales de una toma del C2</td></tr>
-        <tr><td class="k"><a href="calculos/teoria_calculo_secciones_vivienda.pdf">Teoría (PDF)</a></td><td>Teoría completa, ejemplos resueltos y ejercicios con soluciones</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section class="card" id="fichas">
-    <h2>Fichas para completar</h2>
-    <p>En cada ficha: esquema funcional, unifilar (planta) y multifilar con las cajas de derivación vacías.</p>
-    <table>
-      <thead><tr><th>N.º</th><th>Formato</th><th>Contenido</th></tr></thead>
-      <tbody>
-        <tr><td class="n"><a href="pdf/A4/esquema-001-A4.pdf">001</a></td><td class="f">A4</td><td>Interruptor, conmutador que elige entre dos lámparas, pulsador y timbre</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-002-A4.pdf">002</a></td><td class="f">A4</td><td>Conmutada para 2 lámparas, interruptor y enchufe</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-003-A4.pdf">003</a></td><td class="f">A4</td><td>Cruzamiento para 2 lámparas, pulsador y timbre</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-004-A4.pdf">004</a></td><td class="f">A4</td><td>Dos interruptores (uno para 2 lámparas), pulsador y timbre</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-005-A4.pdf">005</a></td><td class="f">A4</td><td>Conmutada, conmutador que elige entre dos lámparas y enchufe</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-006-A4.pdf">006</a></td><td class="f">A4</td><td>Dos interruptores y una conmutada</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-007-A3.pdf">007</a></td><td class="f">A3</td><td>Conmutada para 2 lámparas, interruptor, timbre y enchufe</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-008-A3.pdf">008</a></td><td class="f">A3</td><td>Doble cruzamiento para 3 lámparas y 2 enchufes</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-009-A3.pdf">009</a></td><td class="f">A3</td><td>Conmutador que elige entre dos lámparas, interruptor para 2 lámparas, timbre y enchufe</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-010-A3.pdf">010</a></td><td class="f">A3</td><td>Cruzamiento, conmutada para 2 lámparas y enchufe</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-011-A3.pdf">011</a></td><td class="f">A3</td><td>Timbre con dos pulsadores, interruptor para 2 lámparas y conmutada</td></tr>
-        <tr><td class="n"><a href="pdf/A3/esquema-012-A3.pdf">012</a></td><td class="f">A3</td><td>Cruzamiento para 2 lámparas y dos interruptores</td></tr>
-        <tr><td class="n"><a href="pdf/A4/esquema-013-A4.pdf">013</a></td><td class="f">A4</td><td>Telerruptor con tres pulsadores y 2 lámparas en paralelo · <a href="pdf/A4/esquema-013-A4-solucion.pdf">solución</a></td></tr>
-      </tbody>
-    </table>
-    <p class="all">Todas juntas: <a href="pdf/esquemas-001-006-A4.pdf">001–006 (A4)</a> · <a href="pdf/esquemas-007-012-A3.pdf">007–012 (A3)</a></p>
-  </section>
-
-  <section class="card" id="normativa">
-    <h2>Normativa</h2>
-    <p><a href="https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099">Reglamento Electrotécnico para Baja Tensión (REBT, RD 842/2002) en el BOE</a>: ITC-BT-10, 17, 19, 21 y 25.</p>
-  </section>
-</div>
+  <p>Instalaciones eléctricas de interior</p>
+  <nav class="grid" aria-label="Secciones">
+    <a href="simuladores.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      Simuladores
+    </a>
+    <a href="calculos.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg>
+      Cálculos
+    </a>
+    <a href="fichas.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>
+      Fichas
+    </a>
+    <a href="normativa.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+      Normativa
+    </a>
+  </nav>
 </body>
 </html>

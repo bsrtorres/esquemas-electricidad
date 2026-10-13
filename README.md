@@ -6,6 +6,8 @@ Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares
 
 ## Contenido
 
+- `index.html`: portada con cuatro botones que llevan a `simuladores.html`, `calculos.html`, `fichas.html` y `normativa.html`.
+
 - `menu.js`: menú común de todas las páginas. Al añadir una ficha o página nueva, añadirla también aquí.
 
 - `simulador.html`: simulador interactivo de los esquemas con conmutada y cruzamiento (002, 003, 005, 006, 007, 008, 010, 011 y 012) y del telerruptor (013).

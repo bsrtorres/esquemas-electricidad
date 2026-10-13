@@ -5,16 +5,19 @@
   const MENU = [
     {t: "Inicio", href: "index.html"},
     {t: "Simuladores", items: [
+      {t: "Todos los simuladores", href: "simuladores.html"},
       {t: "Conmutadas, cruzamiento y telerruptor", href: "simulador.html"},
       {t: "Cuadro general de mando y protección", href: "cuadro.html"},
     ]},
     {t: "Cálculos", items: [
+      {t: "Todos los cálculos", href: "calculos.html"},
       {t: "Circuitos de la vivienda (C1 a C11)", href: "calculos/calculo_circuitos_vivienda.html"},
       {t: "Tomas de uso general (C2)", href: "calculos/calculo_tomas_C2.html"},
       {t: "Ejemplo: toma del C2 a 12 m", href: "calculos/ejemplo_toma_C2_12m.html"},
       {t: "Teoría del cálculo de secciones (PDF)", href: "calculos/teoria_calculo_secciones_vivienda.pdf"},
     ]},
     {t: "Fichas", items: [
+      {t: "Todas las fichas", href: "fichas.html"},
       {h: "A4"},
       {t: "001 · Interruptor, conmutador, pulsador y timbre", href: "pdf/A4/esquema-001-A4.pdf"},
       {t: "002 · Conmutada, interruptor y enchufe", href: "pdf/A4/esquema-002-A4.pdf"},
@@ -34,9 +37,7 @@
       {t: "012 · Cruzamiento y dos interruptores", href: "pdf/A3/esquema-012-A3.pdf"},
       {t: "007–012 juntas", href: "pdf/esquemas-007-012-A3.pdf"},
     ]},
-    {t: "Normativa", items: [
-      {t: "REBT (RD 842/2002) en el BOE", href: "https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099", ext: true},
-    ]},
+    {t: "Normativa", href: "normativa.html"},
   ];
 
   const css = `
