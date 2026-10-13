@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simulador de conmutadas</title>
+<title>Simulador de conmutadas y telerruptor</title>
 <style>
   :root {
     --bg: #f6f4ef; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d63;
@@ -48,6 +48,10 @@
   .timbre.on .wave { opacity: 1; animation: blink .4s infinite alternate; }
   @keyframes shake { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
   @keyframes blink { from { opacity: .2; } to { opacity: 1; } }
+  .coil rect { fill: #fff; stroke: var(--ink); stroke-width: .8; transition: fill .15s; }
+  .coil.on rect { fill: #ffd8a8; stroke: var(--live); }
+  .coil polyline { stroke: var(--ink); stroke-width: .5; fill: none; }
+  .tiny { font-size: 3.2px; fill: var(--muted); }
   .dev { cursor: pointer; }
   .dev .hit { fill: transparent; }
   .dev:hover .hit, .dev:focus .hit { fill: rgba(45,106,79,.12); }
@@ -69,7 +73,7 @@
 </head>
 <body>
 <header>
-  <h1>Simulador: conmutadas y cruzamiento</h1>
+  <h1>Simulador: conmutadas, cruzamiento y telerruptor</h1>
   <p>Haz clic en los mecanismos del esquema funcional. Los <b>interruptores</b> y <b>conmutadores</b> cambian de posición con cada clic; los <b>pulsadores</b> funcionan mientras los mantienes pulsados.</p>
 </header>
 <nav class="tabs" id="tabs" aria-label="Ejercicios"></nav>
@@ -90,7 +94,7 @@
       <button id="reset">Reiniciar</button>
       <label><input type="checkbox" id="sound"> Sonido del timbre</label>
     </div>
-    <p class="tip"><b>Recuerda:</b> en una conmutada la lámpara luce cuando los dos conmutadores conectan con el <b>mismo</b> conductor (hilo puente). Cada conmutador de cruce que accionas cambia los hilos puente de lugar.</p>
+    <p class="tip" id="tip"></p>
   </aside>
 </main>
 
@@ -122,6 +126,13 @@ const EX = {
   "012": [{t: "conmutada", c1: "C1", x: ["X1"], c2: "C2", loads: [["L", "L1"], ["L", "L2"]]},
           {t: "simple", ctrl: ["S", "S1"], loads: [["L", "L3"]]},
           {t: "simple", ctrl: ["S", "S2"], loads: [["L", "L4"]]}],
+  "013": [{t: "telerruptor", k: "KA1", ctrls: [["P", "P1"], ["P", "P2"], ["P", "P3"]],
+           loads: [["L", "L1"], ["L", "L2"]]}],
+};
+
+const TIPS = {
+  def: "<b>Recuerda:</b> en una conmutada la lámpara luce cuando los dos conmutadores conectan con el <b>mismo</b> conductor (hilo puente). Cada conmutador de cruce que accionas cambia los hilos puente de lugar.",
+  "013": "<b>Recuerda:</b> los pulsadores van en <b>paralelo</b> y alimentan la bobina A1-A2 del telerruptor. Cada impulso en la bobina cambia el contacto 11-14: si estaba abierto se cierra y si estaba cerrado se abre. Las lámparas siguen encendidas o apagadas al soltar el pulsador.",
 };
 
 const XL = 14, XBUS = XL + 112, XLOAD = XL + 120, XN = XL + 168, Y0 = 22, DY = 24;
@@ -261,6 +272,45 @@ function drawParalelo(r, c) {
   return Math.max(c.ctrls.length, loads(r, c.loads, any, xb));
 }
 
+function drawTelerruptor(r, c) {
+  // mando: pulsadores en paralelo -> bobina; potencia: contacto 11-14 -> receptores
+  const xb = XL + 40, n = c.ctrls.length, rc = r + Math.floor((n - 1) / 2);
+  let coil = false;
+  const outs = c.ctrls.map(([kind, name], k) => {
+    const y = Y(r + k); dot(XL, y); seg(XL, y, XL + 8, y, "live");
+    const on = swSym(kind, name, XL + 8, y, true); coil = coil || on; return on;
+  });
+  outs.forEach((on, k) => seg(XL + 24, Y(r + k), xb, Y(r + k), L(on)));
+  seg(xb, Y(r), xb, Y(r + n - 1), L(coil)); dot(xb, Y(rc));
+  const yc = Y(rc);
+  seg(xb, yc, XLOAD + 3, yc, L(coil));
+  out.push(`<g class="coil ${coil ? "on" : ""}"><rect x="${XLOAD + 3}" y="${yc - 2.5}" width="8" height="5"/>`
+    + `<polyline points="${XLOAD + 5.5},${yc + 1.2} ${XLOAD + 5.5},${yc - 1.2} ${XLOAD + 7},${yc - 1.2} ${XLOAD + 7},${yc + 1.2}"/></g>`);
+  seg(XLOAD + 11, yc, XN, yc, "n"); dot(XN, yc);
+  label(XLOAD + 7, yc - 4, c.k);
+  out.push(`<text class="lbl tiny" x="${XLOAD + 1}" y="${yc + 5}">A1</text><text class="lbl tiny" x="${XLOAD + 13}" y="${yc + 5}">A2</text>`);
+  // contacto 11-14 (no se acciona con el ratón: lo mueve la bobina)
+  const y = Y(r + n), closed = !!st[c.k], P = fr(XL + 8, y);
+  dot(XL, y); seg(XL, y, XL + 8, y, "live");
+  seg(...P(0, 0), ...P(5, 0), "live");
+  seg(...P(5, 0), ...(closed ? P(11.3, 0.7) : P(12, 4)), "live");
+  seg(...P(11, 0), ...P(16, 0), L(closed));
+  label(...P(8, 6.5), c.k);
+  out.push(`<text class="lbl tiny" x="${P(2, -3)[0]}" y="${P(2, -3)[1]}">11</text><text class="lbl tiny" x="${P(14, -3)[0]}" y="${P(14, -3)[1]}">14</text>`);
+  loadsOn.push(["B", `${c.k} (bobina)`, coil], ["K", `${c.k} (contacto 11-14)`, closed]);
+  return n + loads(r + n, c.loads, closed, XL + 24);
+}
+
+// Cada vez que la bobina recibe tensión (flanco de subida) el telerruptor cambia de estado
+function updateTelerruptores() {
+  for (const c of EX[cur]) {
+    if (c.t !== "telerruptor") continue;
+    const coil = c.ctrls.some(([, name]) => st[name]);
+    if (coil && !st[`_bob_${c.k}`]) st[c.k] = !st[c.k];
+    st[`_bob_${c.k}`] = coil;
+  }
+}
+
 function drawConmutada(r, c) {
   const y = Y(r); dot(XL, y);
   seg(XL, y, XL + 6, y, "live");
@@ -294,7 +344,8 @@ function render() {
   let r = 0;
   for (const c of EX[cur]) {
     r += c.t === "simple" ? drawSimple(r, c) : c.t === "paralelo" ? drawParalelo(r, c)
-       : c.t === "conmutada" ? drawConmutada(r, c) : drawSelector(r, c);
+       : c.t === "conmutada" ? drawConmutada(r, c) : c.t === "telerruptor" ? drawTelerruptor(r, c)
+       : drawSelector(r, c);
   }
   const h = Y(r - 1) + 16;
   const bars = `<line class="w live" x1="${XL}" y1="8" x2="${XL}" y2="${h - 6}"/>`
@@ -304,9 +355,11 @@ function render() {
   svg.innerHTML = bars + out.join("");
   document.getElementById("title").textContent = `Esquema ${cur} · Esquema funcional`;
   document.getElementById("state").innerHTML = loadsOn.map(([k, n, on]) => {
-    const what = k === "L" ? (on ? "encendida" : "apagada") : k === "Z" ? (on ? "suena" : "en silencio") : (on ? "con tensión" : "sin tensión");
+    const what = k === "L" ? (on ? "encendida" : "apagada") : k === "Z" ? (on ? "suena" : "en silencio")
+      : k === "K" ? (on ? "cerrado" : "abierto") : (on ? "con tensión" : "sin tensión");
     return `<li><span>${n}</span><span class="${on ? "on-txt" : "off-txt"}">${what}</span></li>`;
   }).join("");
+  document.getElementById("tip").innerHTML = TIPS[cur] || TIPS.def;
   updateSound();
 }
 
@@ -315,6 +368,7 @@ function press(name, kind, down) {
   if (kind === "P") { st[name] = down; }
   else if (down) { st[name] = kind === "S" ? !st[name] : 1 - (st[name] || 0); }
   else return;
+  updateTelerruptores();
   const focused = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.dev : null;
   render();
   if (focused) { const el = svg.querySelector(`[data-dev="${focused}"]`); if (el) el.focus(); }
