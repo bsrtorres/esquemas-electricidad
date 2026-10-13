@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toma C2 a 12 m</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --text: #1d2733; --muted: #5b6875;
+    --accent: #1f6fb2; --accent-bg: #e3eef8; --ok: #1e8e3e; --ok-bg: #e6f4ea;
+    --bad: #c5221f; --bad-bg: #fce8e6; --line: #d9dee3; --wall: #9aa4ae; --room: #fafbfc;
+    --fase: #8a5a2b; --neutro: #1f5fbf; --pe-g: #2e9a3e; --pe-y: #f2c200;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d; --card: #1e242b; --text: #e6eaee; --muted: #9aa6b2;
+      --accent: #6cb4f0; --accent-bg: #1d3347; --ok: #7fd08f; --ok-bg: #1f3325;
+      --bad: #f28b82; --bad-bg: #3a2222; --line: #333c46; --wall: #6b7682; --room: #232a32;
+      --fase: #c48a55; --neutro: #5d9bf0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181d; --card: #1e242b; --text: #e6eaee; --muted: #9aa6b2;
+    --accent: #6cb4f0; --accent-bg: #1d3347; --ok: #7fd08f; --ok-bg: #1f3325;
+    --bad: #f28b82; --bad-bg: #3a2222; --line: #333c46; --wall: #6b7682; --room: #232a32;
+    --fase: #c48a55; --neutro: #5d9bf0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: system-ui, "Segoe UI", Arial, sans-serif; line-height: 1.5; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+          padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 1.1rem; margin: 0 0 4px; color: var(--accent); }
+  .nota { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
+  .lbl { display: block; font-weight: 600; margin-top: 4px; }
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .val { min-width: 64px; text-align: right; font-size: 1.3rem; font-weight: 700;
+         font-variant-numeric: tabular-nums; color: var(--accent); }
+  .bad { background: var(--bad-bg); color: var(--bad); }
+  .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .dato { background: var(--accent-bg); border-radius: 8px; padding: 10px 12px; }
+  .dato span { display: block; font-size: .8rem; color: var(--muted); }
+  .dato b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+
+  /* Dibujos */
+  svg.dib { width: 100%; height: auto; display: block; }
+  .scroll { overflow-x: auto; }
+  .scroll svg.dib { min-width: 560px; }
+  .s   { fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sf  { fill: var(--text); }
+  .sfb { fill: var(--card); stroke: var(--text); stroke-width: 2; }
+  .caja { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .muro { fill: var(--room); stroke: var(--wall); stroke-width: 10; }
+  .tubo { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 9 6; }
+  .cota { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+  .t   { fill: var(--text); font-size: 14px; font-family: system-ui, "Segoe UI", Arial, sans-serif; }
+  .tb  { font-weight: 700; }
+  .tm  { fill: var(--muted); font-size: 12.5px; }
+  .ta  { fill: var(--accent); font-weight: 700; }
+  .fase   { fill: none; stroke: var(--fase); stroke-width: 4; stroke-linecap: round; }
+  .neutro { fill: none; stroke: var(--neutro); stroke-width: 4; stroke-linecap: round; }
+  .peg { fill: none; stroke: var(--pe-g); stroke-width: 4; stroke-linecap: round; }
+  .pey { fill: none; stroke: var(--pe-y); stroke-width: 4; stroke-dasharray: 7 7; }
+  .flujo { fill: none; stroke: #fff; stroke-width: 2; stroke-dasharray: 3 13; opacity: 0;
+           transition: opacity .3s; }
+  .on .flujo { opacity: .9; animation: corre .6s linear infinite; }
+  .on .flujo.vuelta { animation-direction: reverse; }
+  @keyframes corre { to { stroke-dashoffset: -16; } }
+  .lamp { fill: var(--line); transition: fill .3s; }
+  .on .lamp { fill: #ffcf33; }
+
+  .btn { font: inherit; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+         border: 1px solid var(--accent); background: var(--card); color: var(--accent); }
+  .btn.on { background: var(--accent); color: var(--card); }
+  .barra-btn { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px; }
+
+  /* Leyenda */
+  .leyenda { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .sim { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line);
+         border-radius: 8px; padding: 8px 10px; }
+  .sim svg { width: 70px; height: 44px; flex: none; }
+  .sim b { display: block; font-size: .95rem; }
+  .sim small { color: var(--muted); }
+
+  /* Cálculo */
+  .paso { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; margin: 14px 0; }
+  .paso b { display: block; }
+  .formula { font-family: Consolas, "Courier New", monospace; font-size: 1.02rem; overflow-wrap: anywhere; }
+  .res { font-weight: 700; color: var(--accent); }
+  .check { padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-weight: 600; }
+  .ok { background: var(--ok-bg); color: var(--ok); }
+  .barra { height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; margin-top: 6px; }
+  .barra div { height: 100%; background: var(--ok); }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 6px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .9rem; }
+  td:last-child, th:last-child { text-align: right; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- Símbolos reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 1 L10 5 L0 9 z" fill="var(--muted)"/>
+    </marker>
+    <!-- Base de enchufe 2P+T (UNE-EN 60617), conexión por arriba, cúpula hacia abajo -->
+    <g id="toma">
+      <path class="s" d="M0 -26 V-12 M-10 -18 H10 M-13 0 A13 13 0 0 1 13 0 Z"/>
+    </g>
+    <!-- Cuadro general de mando y protección -->
+    <g id="cgmp">
+      <rect class="sfb" x="-18" y="-10" width="36" height="20"/>
+      <path class="sf" d="M-18 10 L18 -10 L18 10 Z"/>
+    </g>
+    <!-- Caja de registro -->
+    <g id="registro">
+      <circle class="sfb" r="8"/>
+    </g>
+  </defs>
+</svg>
+
+<main>
+  <p style="margin:0 0 8px"><a href="../" style="color:var(--accent)">← Esquemas de electricidad</a> · <a href="../#calculos" style="color:var(--accent)">Cálculos</a></p>
+  <h1>Ejemplo: una toma de corriente del circuito C2</h1>
+  <p class="sub">Toma a <span class="Lv">12</span> m del cuadro general · vivienda 230 V · ITC-BT-25 e ITC-BT-19 del REBT</p>
+
+  <div class="card">
+    <h2>Datos del ejemplo</h2>
+    <p class="nota">Circuito C2: tomas de corriente de uso general</p>
+    <label for="L" class="lbl">Longitud desde el cuadro hasta la toma</label>
+    <div class="row">
+      <input id="L" type="range" min="2" max="60" step="1" value="12">
+      <span class="val"><span class="Lv">12</span> m</span>
+      <button class="btn" id="reset" type="button">12 m</button>
+    </div>
+    <div class="datos">
+      <div class="dato"><span>Número de tomas</span><b>1</b></div>
+      <div class="dato"><span>Longitud cuadro → toma</span><b><span class="Lv">12</span> m</b></div>
+      <div class="dato"><span>Protección (PIA)</span><b>16 A</b></div>
+      <div class="dato"><span>Conductor</span><b>3 × 2,5 mm² Cu</b></div>
+      <div class="dato"><span>Tubo empotrado</span><b>Ø 20 mm</b></div>
+      <div class="dato"><span>Toma</span><b>16 A 2P+T</b></div>
+    </div>
+  </div>
+
+  <!-- 1. PLANO DE SITUACIÓN -->
+  <div class="card">
+    <h2>1. Plano de situación</h2>
+    <p class="nota">El tubo va empotrado por la pared. La longitud se mide por el recorrido real del tubo, no en línea recta.</p>
+    <div class="scroll">
+    <svg class="dib" viewBox="0 0 780 380" role="img" aria-label="Plano de una habitación con el cuadro general, el recorrido del tubo de 7 m más 5 m y la toma de corriente">
+      <!-- Habitación -->
+      <rect class="muro" x="60" y="45" width="430" height="300"/>
+      <!-- Puerta (hueco + barrido) -->
+      <rect x="90" y="339" width="80" height="12" fill="var(--card)"/>
+      <path class="cota" d="M90 345 L90 265 A80 80 0 0 1 170 345"/>
+      <text class="t tm" x="130" y="372" text-anchor="middle">Puerta</text>
+      <text class="t" x="275" y="215" text-anchor="middle" fill="var(--muted)" style="font-size:22px;fill:var(--muted)">SALÓN</text>
+
+      <!-- Recorrido del tubo: 7 m (350 px) + 5 m (250 px), escala 50 px = 1 m -->
+      <path class="tubo" d="M120 62 H470 V312"/>
+
+      <!-- Cuadro, registro y toma -->
+      <use href="#cgmp" x="102" y="62"/>
+      <use href="#registro" x="470" y="62"/>
+      <use href="#toma" transform="translate(470 338) rotate(0)"/>
+
+      <!-- Etiquetas -->
+      <text class="t tb" x="102" y="95" text-anchor="middle">CGMP</text>
+      <text class="t tm" x="102" y="110" text-anchor="middle">Cuadro general</text>
+      <text class="t tm" x="455" y="92" text-anchor="end">Caja de registro</text>
+      <text class="t tb" x="455" y="300" text-anchor="end">Toma C2</text>
+      <text class="t tm" x="455" y="315" text-anchor="end">16 A 2P+T</text>
+      <text class="t tm" x="300" y="82" text-anchor="middle" fill="var(--accent)" style="fill:var(--accent)">tubo Ø20 empotrado</text>
+
+      <!-- Cotas -->
+      <path class="cota" d="M120 22 V38 M470 22 V38"/>
+      <path class="cota" d="M122 28 H468" marker-start="url(#flecha)" marker-end="url(#flecha)"/>
+      <rect x="272" y="16" width="56" height="22" rx="4" fill="var(--card)"/>
+      <text class="t ta" x="300" y="33" text-anchor="middle" id="ca">7 m</text>
+
+      <path class="cota" d="M500 62 H530 M500 312 H530"/>
+      <path class="cota" d="M522 64 V310" marker-start="url(#flecha)" marker-end="url(#flecha)"/>
+      <rect x="506" y="176" width="34" height="22" rx="4" fill="var(--card)"/>
+      <text class="t ta" x="523" y="193" text-anchor="middle" id="cb">5 m</text>
+
+      <!-- Resumen -->
+      <rect x="565" y="120" width="200" height="120" rx="10" fill="var(--accent-bg)"/>
+      <text class="t tm" x="665" y="148" text-anchor="middle">Recorrido total</text>
+      <text class="t" x="665" y="180" text-anchor="middle" style="font-size:20px" id="suma">7 + 5 =</text>
+      <text class="t ta" x="665" y="218" text-anchor="middle" style="font-size:30px">L = <tspan class="Lv">12</tspan> m</text>
+      <text class="t tm" x="665" y="262" text-anchor="middle" id="escala">Escala 1 m = 50 px</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- 2. ESQUEMA UNIFILAR -->
+  <div class="card">
+    <h2>2. Esquema unifilar</h2>
+    <p class="nota">Un solo trazo representa todos los conductores; las rayas oblicuas indican cuántos son (3: fase, neutro y tierra).</p>
+    <div class="scroll">
+    <svg class="dib" viewBox="0 0 780 250" role="img" aria-label="Esquema unifilar: derivación individual, IGA 40 A, diferencial 40 A 30 mA, PIA 16 A, línea de 12 m y toma de corriente">
+      <rect class="caja" x="95" y="30" width="360" height="175" rx="8"/>
+      <text class="t tm" x="105" y="197">Cuadro general de mando y protección (CGMP)</text>
+
+      <!-- Línea principal -->
+      <path class="s" d="M20 130 H120 M180 130 H240 M300 130 H340 M400 130 H713"/>
+      <text class="t tm" x="20" y="118">Derivación</text>
+      <text class="t tm" x="20" y="150">individual</text>
+
+      <!-- IGA -->
+      <path class="s" d="M120 130 H135 M135 130 L165 110 M165 130 H180 M160 125 L170 135 M170 125 L160 135"/>
+      <text class="t tb" x="150" y="78" text-anchor="middle">IGA</text>
+      <text class="t tm" x="150" y="95" text-anchor="middle">40 A</text>
+
+      <!-- Diferencial -->
+      <path class="s" d="M240 130 H255 M255 130 L285 110 M285 130 H300"/>
+      <ellipse class="s" cx="247" cy="130" rx="5" ry="12"/>
+      <path class="s" d="M247 142 V156 H270 V121" stroke-dasharray="4 4"/>
+      <text class="t tb" x="270" y="78" text-anchor="middle">ID</text>
+      <text class="t tm" x="270" y="95" text-anchor="middle">40 A · 30 mA</text>
+
+      <!-- PIA C2 -->
+      <path class="s" d="M340 130 H355 M355 130 L385 110 M385 130 H400 M380 125 L390 135 M390 125 L380 135"/>
+      <text class="t tb" x="370" y="78" text-anchor="middle">PIA C2</text>
+      <text class="t tm" x="370" y="95" text-anchor="middle">16 A · 1P+N</text>
+
+      <!-- 3 conductores -->
+      <path class="s" d="M540 140 L552 120 M550 140 L562 120 M560 140 L572 120"/>
+      <text class="t" x="585" y="162" text-anchor="middle">3 × 2,5 mm² Cu H07V-K</text>
+      <text class="t tm" x="585" y="180" text-anchor="middle">tubo Ø20 mm empotrado</text>
+
+      <!-- Cota 12 m -->
+      <path class="cota" d="M455 50 V122 M725 50 V110"/>
+      <path class="cota" d="M457 60 H723" marker-start="url(#flecha)" marker-end="url(#flecha)"/>
+      <rect x="560" y="48" width="60" height="22" rx="4" fill="var(--card)"/>
+      <text class="t ta" x="590" y="65" text-anchor="middle"><tspan class="Lv">12</tspan> m</text>
+
+      <!-- Toma -->
+      <use href="#toma" transform="translate(739 130) rotate(-90)"/>
+      <text class="t tb" x="735" y="170" text-anchor="middle">Toma</text>
+      <text class="t tm" x="735" y="186" text-anchor="middle">16 A 2P+T</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- 3. ESQUEMA MULTIFILAR -->
+  <div class="card">
+    <h2>3. Esquema multifilar</h2>
+    <p class="nota">Se dibuja cada conductor con su color normalizado. Pulsa el botón para ver por dónde circula la corriente.</p>
+    <div class="barra-btn">
+      <button class="btn" id="btnCarga" type="button">▶ Enchufar un receptor</button>
+      <span class="nota" id="estado" style="margin:0">Sin receptor: no circula corriente.</span>
+    </div>
+    <div class="scroll">
+    <svg class="dib" id="multi" viewBox="0 0 780 330" role="img" aria-label="Esquema multifilar con fase marrón, neutro azul y tierra verde-amarilla desde el cuadro hasta la toma">
+      <rect class="caja" x="15" y="30" width="410" height="285" rx="8"/>
+      <text class="t tm" x="25" y="305">CGMP</text>
+
+      <!-- Conductores -->
+      <path class="fase"   d="M30 110 H86 M142 110 H196 M252 110 H306 M362 110 H640"/>
+      <path class="neutro" d="M30 170 H86 M142 170 H196 M252 170 H306 M362 170 H640"/>
+      <path class="peg" d="M30 260 H640"/><path class="pey" d="M30 260 H640"/>
+      <!-- Flujo de corriente (animado) -->
+      <path class="flujo" d="M30 110 H86 M142 110 H196 M252 110 H306 M362 110 H640"/>
+      <path class="flujo vuelta" d="M30 170 H86 M142 170 H196 M252 170 H306 M362 170 H640"/>
+
+      <text class="t tb" x="30" y="100" fill="var(--fase)" style="fill:var(--fase)">L</text>
+      <text class="t tb" x="30" y="160" fill="var(--neutro)" style="fill:var(--neutro)">N</text>
+      <text class="t tb" x="30" y="250" fill="var(--pe-g)" style="fill:var(--pe-g)">PE</text>
+      <text class="t tm" x="60" y="285">Borne principal de tierra</text>
+      <circle class="sf" cx="30" cy="260" r="5"/>
+
+      <!-- IGA 2P -->
+      <path class="s" d="M86 110 H98 L126 90 M126 110 H142 M121 105 L131 115 M131 105 L121 115"/>
+      <path class="s" d="M86 170 H98 L126 150 M126 170 H142 M121 165 L131 175 M131 165 L121 175"/>
+      <path class="s" d="M112 100 V160" stroke-dasharray="4 4"/>
+      <text class="t tb" x="114" y="60" text-anchor="middle">IGA</text>
+      <text class="t tm" x="114" y="76" text-anchor="middle">40 A</text>
+
+      <!-- ID 2P -->
+      <path class="s" d="M196 110 H214 L242 90 M242 110 H252"/>
+      <path class="s" d="M196 170 H214 L242 150 M242 170 H252"/>
+      <ellipse class="s" cx="205" cy="140" rx="7" ry="44"/>
+      <path class="s" d="M228 100 V160 M205 184 V200 H228 V160" stroke-dasharray="4 4"/>
+      <text class="t tb" x="224" y="60" text-anchor="middle">ID</text>
+      <text class="t tm" x="224" y="76" text-anchor="middle">40 A · 30 mA</text>
+
+      <!-- PIA 1P+N -->
+      <path class="s" d="M306 110 H318 L346 90 M346 110 H362 M341 105 L351 115 M351 105 L341 115"/>
+      <path class="s" d="M306 170 H318 L346 150 M346 170 H362"/>
+      <path class="s" d="M332 100 V160" stroke-dasharray="4 4"/>
+      <text class="t tb" x="334" y="60" text-anchor="middle">PIA C2</text>
+      <text class="t tm" x="334" y="76" text-anchor="middle">16 A</text>
+
+      <!-- Cota -->
+      <path class="cota" d="M425 30 V100 M640 30 V100"/>
+      <path class="cota" d="M427 40 H638" marker-start="url(#flecha)" marker-end="url(#flecha)"/>
+      <rect x="502" y="29" width="60" height="22" rx="4" fill="var(--card)"/>
+      <text class="t ta" x="532" y="46" text-anchor="middle"><tspan class="Lv">12</tspan> m</text>
+      <text class="t" x="532" y="210" text-anchor="middle">H07V-K 3 × 2,5 mm²</text>
+      <text class="t tm" x="532" y="228" text-anchor="middle">marrón · azul · verde-amarillo</text>
+
+      <!-- Mecanismo de la toma -->
+      <rect x="640" y="80" width="125" height="205" rx="12" fill="var(--room)" stroke="var(--text)" stroke-width="2"/>
+      <circle cx="640" cy="110" r="6" fill="var(--card)" stroke="var(--fase)" stroke-width="3"/>
+      <circle cx="640" cy="170" r="6" fill="var(--card)" stroke="var(--neutro)" stroke-width="3"/>
+      <circle cx="640" cy="260" r="6" fill="var(--card)" stroke="var(--pe-g)" stroke-width="3"/>
+      <text class="t tm" x="652" y="104">L</text>
+      <text class="t tm" x="652" y="164">N</text>
+      <text class="t tm" x="652" y="254">⏚</text>
+      <!-- Cara frontal schuko -->
+      <circle cx="712" cy="180" r="44" fill="var(--card)" stroke="var(--text)" stroke-width="2"/>
+      <circle cx="712" cy="180" r="32" fill="none" stroke="var(--line)" stroke-width="2"/>
+      <circle class="sf" cx="697" cy="180" r="5"/>
+      <circle class="sf" cx="727" cy="180" r="5"/>
+      <rect x="706" y="146" width="12" height="6" rx="2" fill="var(--pe-g)"/>
+      <rect x="706" y="208" width="12" height="6" rx="2" fill="var(--pe-g)"/>
+      <circle class="lamp" cx="712" cy="112" r="10"/>
+      <text class="t tm" x="712" y="276" text-anchor="middle">Toma 16 A</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- 4. LEYENDA -->
+  <div class="card">
+    <h2>4. Leyenda de símbolos</h2>
+    <p class="nota">Símbolos normalizados (UNE-EN 60617) usados en los esquemas.</p>
+    <div class="leyenda">
+      <div class="sim"><svg viewBox="0 0 70 44"><use href="#cgmp" x="35" y="22"/></svg>
+        <div><b>Cuadro general (CGMP)</b><small>Cuadro general de mando y protección</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><path class="s" d="M5 30 H18 L46 12 M46 30 H65 M41 25 L51 35 M51 25 L41 35"/></svg>
+        <div><b>Interruptor automático</b><small>IGA y PIA (magnetotérmico)</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><path class="s" d="M5 30 H22 L50 12 M50 30 H65"/><ellipse class="s" cx="13" cy="30" rx="4" ry="9"/><path class="s" d="M13 39 V42 H36 V21" stroke-dasharray="3 3"/></svg>
+        <div><b>Interruptor diferencial</b><small>ID 30 mA: protege a las personas</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><use href="#toma" transform="translate(35 34)"/></svg>
+        <div><b>Base de enchufe 2P+T</b><small>Toma de corriente con tierra</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><use href="#registro" x="35" y="22"/></svg>
+        <div><b>Caja de registro</b><small>Para empalmes y derivaciones</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><path class="tubo" d="M4 22 H66"/></svg>
+        <div><b>Tubo empotrado</b><small>Canalización bajo el yeso</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><path class="s" d="M4 22 H66 M24 32 L34 12 M32 32 L42 12 M40 32 L50 12"/></svg>
+        <div><b>Tres conductores</b><small>En esquema unifilar</small></div></div>
+      <div class="sim"><svg viewBox="0 0 70 44"><path class="fase" d="M6 10 H64"/><path class="neutro" d="M6 22 H64"/><path class="peg" d="M6 34 H64"/><path class="pey" d="M6 34 H64"/></svg>
+        <div><b>Colores de los conductores</b><small>Fase marrón · neutro azul · tierra verde-amarillo</small></div></div>
+    </div>
+  </div>
+
+  <!-- 5. CÁLCULO -->
+  <div class="card">
+    <h2>5. Cálculo del circuito</h2>
+    <p class="nota">Cu con aislamiento PVC en tubo empotrado · γ = 48 m/(Ω·mm²) · Iz (2,5 mm²) = 21 A</p>
+
+    <div class="paso">
+      <b>1. Intensidad de una toma</b>
+      <span class="formula">Ia = P / U = 3450 / 230 = <span class="res">15 A</span></span>
+    </div>
+
+    <div class="paso">
+      <b>2. Intensidad del circuito (ITC-BT-25)</b>
+      <span class="formula">Ib = n · Ia · Fs · Fu = 1 · 15 · 0,2 · 0,25 = <span class="res">0,75 A</span></span>
+      <div class="check ok">✔ 1 toma: no pasa del máximo de 20 tomas por circuito</div>
+    </div>
+
+    <div class="paso">
+      <b>3. ¿Aguanta el cable? (Ib ≤ In ≤ Iz)</b>
+      <span class="formula">0,75 A ≤ 16 A ≤ 21 A</span>
+      <div class="check ok">✔ El cable de 2,5 mm² está bien protegido por el PIA de 16 A</div>
+    </div>
+
+    <div class="paso">
+      <b>4. Caída de tensión (máximo 3 %)</b>
+      <span class="formula" id="f4"></span><br>
+      <span class="formula" id="f4b"></span>
+      <div class="barra"><div id="bar4"></div></div>
+      <div id="c4"></div>
+    </div>
+
+    <div class="paso">
+      <b>5. Comprobación en el caso más desfavorable</b>
+      <span class="nota" style="display:block;margin:0 0 4px">¿Y si enchufamos un aparato de 3450 W (15 A) en esta toma?</span>
+      <span class="formula" id="f5"></span>
+      <div class="barra"><div id="bar5"></div></div>
+      <div id="c5"></div>
+    </div>
+
+    <div id="final" style="margin-top:16px"></div>
+  </div>
+
+  <!-- 6. MATERIALES -->
+  <div class="card">
+    <h2>6. Lista de materiales</h2>
+    <table>
+      <tr><th>Material</th><th>Cantidad</th></tr>
+      <tr><td>Interruptor automático (PIA) 16 A, 1P+N, curva C</td><td>1</td></tr>
+      <tr><td>Cable H07V-K 2,5 mm² marrón (fase)</td><td>≈ <span class="Lc">13</span> m</td></tr>
+      <tr><td>Cable H07V-K 2,5 mm² azul (neutro)</td><td>≈ <span class="Lc">13</span> m</td></tr>
+      <tr><td>Cable H07V-K 2,5 mm² verde-amarillo (tierra)</td><td>≈ <span class="Lc">13</span> m</td></tr>
+      <tr><td>Tubo corrugado flexible Ø20 mm</td><td><span class="Lv">12</span> m</td></tr>
+      <tr><td>Caja de registro empotrable</td><td>1</td></tr>
+      <tr><td>Caja de mecanismo universal</td><td>1</td></tr>
+      <tr><td>Base de enchufe 16 A 2P+T (schuko) con placa</td><td>1</td></tr>
+    </table>
+    <p class="nota" style="margin:10px 0 0">Se deja cerca de 1 m más de cable para las conexiones en el cuadro y en la toma.</p>
+  </div>
+</main>
+
+<script>
+  // ---- Longitud variable ----
+  const $ = id => document.getElementById(id);
+  const f = (x, d = 2) => x.toFixed(d).replace(".", ",");
+  const n1 = x => (Number.isInteger(x) ? String(x) : f(x, 1));
+  const gamma = 48, S = 2.5, U = 230, Ib = 0.75, Imax = 15;
+  const chk = (ok, txt) => `<div class="check ${ok ? "ok" : "bad"}">${ok ? "✔" : "⚠"} ${txt}</div>`;
+
+  function calcular() {
+    const L = +$("L").value;
+    document.querySelectorAll(".Lv").forEach(e => e.textContent = L);
+    document.querySelectorAll(".Lc").forEach(e => e.textContent = L + 1);
+
+    // Plano: el recorrido se reparte en tramo horizontal y vertical (7/12 y 5/12)
+    const a = Math.round(L * 7 / 12 * 2) / 2, b = L - a;
+    $("ca").textContent = n1(a) + " m";
+    $("cb").textContent = n1(b) + " m";
+    $("suma").textContent = n1(a) + " + " + n1(b) + " =";
+    $("escala").textContent = L === 12 ? "Dibujo a escala" : "Dibujo no a escala";
+
+    // 4. Caída de tensión según ITC-BT-25
+    const dU = 2 * L * Ib / (gamma * S), p = dU / U * 100;
+    $("f4").innerHTML = `ΔU = 2 · L · Ib / (γ · S) = 2 · ${L} · 0,75 / (48 · 2,5) = <span class="res">${f(dU)} V</span>`;
+    $("f4b").innerHTML = `ΔU % = ${f(dU)} / 230 · 100 = <span class="res">${f(p)} %</span>`;
+    $("bar4").style.width = Math.min(p / 3 * 100, 100) + "%";
+    $("bar4").style.background = p <= 3 ? "var(--ok)" : "var(--bad)";
+    $("c4").innerHTML = chk(p <= 3, p <= 3 ? `${f(p)} % está por debajo del 3 %` : `${f(p)} % supera el 3 %`);
+
+    // 5. Caso más desfavorable: 15 A
+    const dU5 = 2 * L * Imax / (gamma * S), p5 = dU5 / U * 100;
+    $("f5").innerHTML = `ΔU = 2 · ${L} · 15 / (48 · 2,5) = <span class="res">${f(dU5)} V</span> → ${f(dU5)} / 230 · 100 = <span class="res">${f(p5)} %</span>`;
+    $("bar5").style.width = Math.min(p5 / 3 * 100, 100) + "%";
+    $("bar5").style.background = p5 <= 3 ? "var(--ok)" : "var(--bad)";
+    const Lmax = Math.floor(0.03 * U * gamma * S / (2 * Imax) * 10) / 10;   // 27,6 m
+    let msg5;
+    if (p5 <= 3) {
+      msg5 = `Incluso a plena carga la caída es menor del 3 % (con 2,5 mm² se llega hasta ${f(Lmax, 1)} m)`;
+    } else {
+      const Smin = 2 * L * Imax / (gamma * 0.03 * U);
+      const Snorm = [4, 6, 10, 16].find(s => s >= Smin);
+      msg5 = `A plena carga se pasaría del 3 % (el límite con 2,5 mm² son ${f(Lmax, 1)} m). ` +
+             `Para asegurarlo haría falta S ≥ ${f(Smin)} mm² → cable de ${String(Snorm).replace(".", ",")} mm²`;
+    }
+    $("c5").innerHTML = chk(p5 <= 3, msg5);
+
+    $("final").innerHTML = chk(p <= 3,
+      `CIRCUITO CORRECTO: PIA 16 A, cable 3 × 2,5 mm² (fase + neutro + tierra), tubo Ø20 mm, L = ${L} m` +
+      (p5 > 3 ? ". Cumple con el criterio de la ITC-BT-25, pero con un receptor de 15 A la caída superaría el 3 %." : ""));
+  }
+  $("L").addEventListener("input", calcular);
+  $("reset").addEventListener("click", () => { $("L").value = 12; calcular(); });
+  calcular();
+
+  // ---- Animación del multifilar ----
+  const btn = document.getElementById("btnCarga");
+  const multi = document.getElementById("multi");
+  const estado = document.getElementById("estado");
+  btn.addEventListener("click", () => {
+    const on = multi.classList.toggle("on");
+    btn.classList.toggle("on", on);
+    btn.textContent = on ? "■ Desenchufar el receptor" : "▶ Enchufar un receptor";
+    estado.textContent = on
+      ? "La corriente va por la fase (marrón) y vuelve por el neutro (azul). Por la tierra no circula corriente salvo si hay un defecto."
+      : "Sin receptor: no circula corriente.";
+  });
+</script>
+</body>
+</html>

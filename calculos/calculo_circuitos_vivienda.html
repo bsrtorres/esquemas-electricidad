@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuitos de vivienda</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --text: #1d2733; --muted: #5b6875;
+    --accent: #1f6fb2; --accent-bg: #e3eef8; --ok: #1e8e3e; --ok-bg: #e6f4ea;
+    --bad: #c5221f; --bad-bg: #fce8e6; --line: #d9dee3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d; --card: #1e242b; --text: #e6eaee; --muted: #9aa6b2;
+      --accent: #6cb4f0; --accent-bg: #1d3347; --ok: #7fd08f; --ok-bg: #1f3325;
+      --bad: #f28b82; --bad-bg: #3a2222; --line: #333c46;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181d; --card: #1e242b; --text: #e6eaee; --muted: #9aa6b2;
+    --accent: #6cb4f0; --accent-bg: #1d3347; --ok: #7fd08f; --ok-bg: #1f3325;
+    --bad: #f28b82; --bad-bg: #3a2222; --line: #333c46;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: system-ui, "Segoe UI", Arial, sans-serif; line-height: 1.5; }
+  main { max-width: 800px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+          padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 1.1rem; margin: 0 0 12px; color: var(--accent); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tabs button { font: inherit; font-weight: 700; padding: 8px 12px; border-radius: 8px;
+                 border: 1px solid var(--line); background: var(--card); color: var(--text);
+                 cursor: pointer; min-width: 52px; }
+  .tabs button.on { background: var(--accent); color: var(--card); border-color: var(--accent); }
+  .nombre { margin-top: 12px; font-size: 1.15rem; font-weight: 700; }
+  .nota { color: var(--muted); font-size: .92rem; margin-top: 4px; }
+  label { display: block; font-weight: 600; margin-top: 12px; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  .val { min-width: 70px; text-align: right; font-size: 1.2rem; font-weight: 700;
+         font-variant-numeric: tabular-nums; }
+  select { font-size: 1rem; padding: 4px 8px; margin-top: 4px; background: var(--card);
+           color: var(--text); border: 1px solid var(--line); border-radius: 6px; }
+  .paso { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; margin: 12px 0; }
+  .paso b { display: block; }
+  .formula { font-family: Consolas, "Courier New", monospace; font-size: 1.05rem;
+             overflow-wrap: anywhere; }
+  .res { font-weight: 700; color: var(--accent); }
+  .check { padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-weight: 600; }
+  .ok { background: var(--ok-bg); color: var(--ok); }
+  .bad { background: var(--bad-bg); color: var(--bad); }
+  .barra { height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; margin-top: 6px; }
+  .barra div { height: 100%; transition: width .2s; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: left; }
+  #datos td:last-child { text-align: right; font-weight: 600; }
+  .resumen { font-size: .9rem; overflow-x: auto; }
+  .resumen th { color: var(--muted); font-weight: 600; }
+  .resumen td, .resumen th { text-align: center; white-space: nowrap; }
+  .resumen td:nth-child(2), .resumen th:nth-child(2) { text-align: left; white-space: normal; }
+  .resumen tr.sel td { background: var(--accent-bg); }
+</style>
+</head>
+<body>
+<main>
+  <p style="margin:0 0 8px"><a href="../" style="color:var(--accent)">← Esquemas de electricidad</a> · <a href="../#calculos" style="color:var(--accent)">Cálculos</a></p>
+  <h1>Cálculo de los circuitos de una vivienda</h1>
+  <p class="sub">230 V · conductores de Cu con aislamiento PVC en tubo empotrado · ITC-BT-25 e ITC-BT-19</p>
+
+  <div class="card">
+    <h2>Elige el circuito</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="nombre" id="nombre"></div>
+    <div class="nota" id="nota"></div>
+  </div>
+
+  <div class="card">
+    <h2>Datos</h2>
+    <div id="bloqueN">
+      <label for="n" id="nLabel">Número de tomas</label>
+      <div class="row"><input id="n" type="range" min="1" max="25" value="1"><span class="val" id="nV"></span></div>
+    </div>
+
+    <label for="L">Longitud desde el cuadro hasta el punto más lejano</label>
+    <div class="row"><input id="L" type="range" min="2" max="60" value="15"><span class="val" id="LV"></span></div>
+
+    <label for="S">Sección del conductor</label>
+    <select id="S">
+      <option value="1.5">1,5 mm²</option>
+      <option value="2.5">2,5 mm²</option>
+      <option value="4">4 mm²</option>
+      <option value="6">6 mm²</option>
+      <option value="10">10 mm²</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Datos fijos del circuito (ITC-BT-25, Tabla 1)</h2>
+    <table id="datos"></table>
+  </div>
+
+  <div class="card">
+    <h2>Cálculo paso a paso</h2>
+
+    <div class="paso">
+      <b>1. Intensidad de un punto de utilización</b>
+      <span class="formula" id="f1"></span>
+    </div>
+
+    <div class="paso">
+      <b>2. Intensidad del circuito</b>
+      <span class="formula" id="f2"></span>
+      <div id="c2"></div>
+    </div>
+
+    <div class="paso">
+      <b>3. Sección mínima del reglamento</b>
+      <div id="c3a"></div>
+    </div>
+
+    <div class="paso">
+      <b>4. ¿Aguanta el cable? (Ib ≤ In ≤ Iz)</b>
+      <span class="formula" id="f3"></span>
+      <div id="c3"></div>
+    </div>
+
+    <div class="paso">
+      <b>5. Caída de tensión (máximo 3 %)</b>
+      <span class="formula" id="f4"></span><br>
+      <span class="formula" id="f4b"></span>
+      <div class="barra"><div id="bar"></div></div>
+      <div id="c4"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Resultado</h2>
+    <div id="final"></div>
+  </div>
+
+  <div class="card">
+    <h2>Tabla resumen de circuitos (ITC-BT-25)</h2>
+    <div class="resumen"><table id="resumen"></table></div>
+    <p class="nota">C6, C7 y C12 son circuitos adicionales: se calculan igual que C1, C2 y C3/C4/C5 respectivamente.</p>
+  </div>
+</main>
+
+<script>
+  // Datos de la ITC-BT-25, Tabla 1. fijo = circuito de un solo receptor (sin Fs ni Fu)
+  const CIRC = {
+    C1:  { nom: "Iluminación", P: 200, Fs: 0.75, Fu: 0.5, In: 10, max: 30, Smin: 1.5, tubo: 16,
+           punto: "puntos de luz", L: 20 },
+    C2:  { nom: "Tomas de uso general", P: 3450, Fs: 0.2, Fu: 0.25, In: 16, max: 20, Smin: 2.5, tubo: 20,
+           punto: "tomas", L: 15 },
+    C3:  { nom: "Cocina y horno", P: 5400, Fs: 0.5, Fu: 0.75, In: 25, max: 2, Smin: 6, tubo: 25,
+           punto: "tomas", L: 10, nota: "Toma de 25 A 2P+T para la cocina y el horno." },
+    C4:  { nom: "Lavadora, lavavajillas y termo", P: 3450, Fs: 0.66, Fu: 0.75, In: 20, max: 3, Smin: 4, tubo: 20,
+           punto: "tomas", L: 10, aviso: true,
+           nota: "Puede dividirse en tres circuitos de 16 A y 2,5 mm² (uno por aparato). Ojo: con 3 tomas la fórmula da 22,3 A, más que el PIA de 20 A; el REBT fija igualmente 20 A." },
+    C5:  { nom: "Baño y tomas de cocina", P: 3450, Fs: 0.4, Fu: 0.5, In: 16, max: 6, Smin: 2.5, tubo: 20,
+           punto: "tomas", L: 12, aviso: true,
+           nota: "Ojo: con 6 tomas la fórmula da 18 A, más que el PIA de 16 A; el REBT fija igualmente 16 A." },
+    C8:  { nom: "Calefacción eléctrica", P: 5750, In: 25, Smin: 6, tubo: 25, fijo: true, L: 15,
+           nota: "Solo en electrificación elevada. Se calcula con la potencia del receptor." },
+    C9:  { nom: "Aire acondicionado", P: 5750, In: 25, Smin: 6, tubo: 25, fijo: true, L: 15,
+           nota: "Solo en electrificación elevada. Se calcula con la potencia del receptor." },
+    C10: { nom: "Secadora", P: 3450, Fs: 1, Fu: 0.75, In: 16, max: 1, Smin: 2.5, tubo: 20,
+           punto: "tomas", L: 10, nota: "Solo en electrificación elevada." },
+    C11: { nom: "Automatización y seguridad", P: 2000, In: 10, Smin: 1.5, tubo: 16, fijo: true, L: 15,
+           nota: "Solo en electrificación elevada (domótica, alarma...)." },
+  };
+  // Intensidad admisible, ITC-BT-19 Tabla 1, método B, 2 conductores PVC
+  const IZ = { 1.5: 15, 2.5: 21, 4: 27, 6: 36, 10: 50 };
+  const U = 230, gamma = 48; // Cu a 70 °C
+  const $ = id => document.getElementById(id);
+  const f = (x, d = 2) => (+x).toFixed(d).replace(".", ",");
+  const c = x => String(x).replace(".", ",");
+  const chk = (ok, txt) => `<div class="check ${ok ? "ok" : "bad"}">${ok ? "✔" : "✘"} ${txt}</div>`;
+  let actual = "C2";
+
+  // Botones y tabla resumen
+  $("tabs").innerHTML = Object.keys(CIRC).map(k => `<button data-k="${k}">${k}</button>`).join("");
+  $("tabs").addEventListener("click", e => { if (e.target.dataset.k) elegir(e.target.dataset.k); });
+  $("resumen").innerHTML =
+    "<tr><th>Circuito</th><th>Uso</th><th>P por toma</th><th>Fs</th><th>Fu</th><th>Máx.</th><th>PIA</th><th>Sección</th><th>Tubo</th></tr>" +
+    Object.entries(CIRC).map(([k, d]) =>
+      `<tr id="r${k}"><td><b>${k}</b></td><td>${d.nom}</td><td>${d.P} W</td><td>${d.fijo ? "—" : c(d.Fs)}</td>` +
+      `<td>${d.fijo ? "—" : c(d.Fu)}</td><td>${d.fijo ? "—" : d.max}</td><td>${d.In} A</td>` +
+      `<td>${c(d.Smin)} mm²</td><td>Ø${d.tubo}</td></tr>`).join("");
+
+  function elegir(k) {
+    actual = k;
+    const d = CIRC[k];
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+    document.querySelectorAll(".resumen tr").forEach(r => r.classList.toggle("sel", r.id === "r" + k));
+    $("nombre").textContent = `${k} · ${d.nom}`;
+    $("nota").textContent = d.nota || "";
+    $("bloqueN").style.display = d.fijo ? "none" : "";
+    if (!d.fijo) {
+      $("nLabel").textContent = "Número de " + d.punto;
+      $("n").max = d.max + (d.max > 5 ? 5 : 2);
+      $("n").value = Math.max(1, Math.ceil(d.max / 2));
+    }
+    $("L").value = d.L;
+    $("S").value = String(d.Smin);
+    $("datos").innerHTML = d.fijo
+      ? `<tr><td>Potencia prevista</td><td>${d.P} W</td></tr>
+         <tr><td>Interruptor automático (PIA)</td><td>${d.In} A</td></tr>
+         <tr><td>Sección mínima</td><td>${c(d.Smin)} mm²</td></tr>
+         <tr><td>Tubo</td><td>Ø${d.tubo} mm</td></tr>`
+      : `<tr><td>Potencia prevista por toma</td><td>${d.P} W</td></tr>
+         <tr><td>Factor de simultaneidad Fs</td><td>${c(d.Fs)}</td></tr>
+         <tr><td>Factor de utilización Fu</td><td>${c(d.Fu)}</td></tr>
+         <tr><td>Interruptor automático (PIA)</td><td>${d.In} A</td></tr>
+         <tr><td>Máximo de ${d.punto} por circuito</td><td>${d.max}</td></tr>
+         <tr><td>Sección mínima</td><td>${c(d.Smin)} mm²</td></tr>
+         <tr><td>Tubo</td><td>Ø${d.tubo} mm</td></tr>`;
+    calcular();
+  }
+
+  function calcular() {
+    const d = CIRC[actual];
+    const n = d.fijo ? 1 : +$("n").value;
+    const L = +$("L").value, s = +$("S").value;
+    $("nV").textContent = n;
+    $("LV").textContent = L + " m";
+
+    // 1 y 2. Intensidades
+    const Ia = d.P / U;
+    let Ib, okN = true;
+    if (d.fijo) {
+      Ib = Ia;
+      $("f1").innerHTML = `I = P / U = ${d.P} / 230 = <span class="res">${f(Ia)} A</span>`;
+      $("f2").innerHTML = `Un solo receptor: Ib = <span class="res">${f(Ib)} A</span>`;
+      $("c2").innerHTML = "";
+    } else {
+      Ib = n * Ia * d.Fs * d.Fu;
+      $("f1").innerHTML = `Ia = P / U = ${d.P} / 230 = <span class="res">${f(Ia)} A</span>`;
+      $("f2").innerHTML = `Ib = n · Ia · Fs · Fu = ${n} · ${f(Ia)} · ${c(d.Fs)} · ${c(d.Fu)} = <span class="res">${f(Ib)} A</span>`;
+      okN = n <= d.max;
+      $("c2").innerHTML = chk(okN, okN
+        ? `${n} ${d.punto}: no pasa del máximo de ${d.max}`
+        : `${n} ${d.punto}: pasa del máximo de ${d.max}. Hay que añadir otro circuito`);
+    }
+
+    // 3. Sección mínima
+    const okS = s >= d.Smin;
+    $("c3a").innerHTML = chk(okS, okS
+      ? `${c(s)} mm² ≥ ${c(d.Smin)} mm² que exige el REBT para ${actual}`
+      : `${c(s)} mm² es menor que los ${c(d.Smin)} mm² que exige el REBT para ${actual}`);
+
+    // 4. Calentamiento
+    const iz = IZ[s];
+    $("f3").innerHTML = `${f(Ib)} A ≤ ${d.In} A ≤ ${iz} A (Iz de ${c(s)} mm²)`;
+    const toleradoREBT = d.aviso && okN && Ib > d.In;
+    const okI = (Ib <= d.In || toleradoREBT) && d.In <= iz;
+    const msg = d.In > iz
+      ? `El cable solo aguanta ${iz} A y el PIA deja pasar ${d.In} A: el cable se calentaría`
+      : toleradoREBT
+        ? `Ib supera los ${d.In} A, pero el REBT fija este PIA para ${actual} (no todos los aparatos funcionan a la vez). El cable está protegido`
+      : Ib > d.In
+      ? `La intensidad supera los ${d.In} A del PIA: saltaría el automático`
+        : `El cable está bien protegido por el PIA de ${d.In} A`;
+    $("c3").innerHTML = chk(okI, msg);
+
+    // 5. Caída de tensión
+    const dU = 2 * L * Ib / (gamma * s);
+    const pct = dU / U * 100;
+    $("f4").innerHTML = `ΔU = 2 · L · Ib / (γ · S) = 2 · ${L} · ${f(Ib)} / (48 · ${c(s)}) = <span class="res">${f(dU)} V</span>`;
+    $("f4b").innerHTML = `ΔU % = ${f(dU)} / 230 · 100 = <span class="res">${f(pct)} %</span>`;
+    const okU = pct <= 3;
+    $("bar").style.width = Math.min(pct / 3 * 100, 100) + "%";
+    $("bar").style.background = okU ? "var(--ok)" : "var(--bad)";
+    $("c4").innerHTML = chk(okU, okU
+      ? `${f(pct)} % está por debajo del 3 %`
+      : `${f(pct)} % supera el 3 %: acorta el circuito o aumenta la sección`);
+
+    // Resultado
+    $("final").innerHTML = (okN && okS && okI && okU)
+      ? `<div class="check ok">✔ ${actual} CORRECTO: PIA ${d.In} A, cable 3 × ${c(s)} mm² (fase + neutro + tierra), tubo Ø${d.tubo} mm</div>`
+      : `<div class="check bad">✘ El circuito NO cumple. Revisa los puntos marcados en rojo.</div>`;
+  }
+
+  ["n", "L", "S"].forEach(id => $(id).addEventListener("input", calcular));
+  elegir("C2");
+</script>
+</body>
+</html>

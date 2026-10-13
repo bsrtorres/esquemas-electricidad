@@ -1,12 +1,14 @@
 # Esquemas de electricidad
 
-Fichas de esquemas multifilares para completar y simulador de conmutadas, cruzamientos y telerruptor.
+Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares para completar.
 
 **Web:** https://bsrtorres.github.io/esquemas-electricidad/
 
 ## Contenido
 
 - `simulador.html`: simulador interactivo de los esquemas con conmutada y cruzamiento (002, 003, 005, 006, 007, 008, 010, 011 y 012) y del telerruptor (013).
+- `cuadro.html`: simulador del cuadro general de mando y protección (IGA, diferencial y PIA de C1 a C5).
+- `calculos/`: calculadoras de circuitos de vivienda (ITC-BT-25 e ITC-BT-19), ejemplo de una toma del C2 y teoría en PDF.
 - `pdf/A4/`: esquemas 001–006 y 013 (telerruptor, con su solución) en A4 apaisado.
 - `pdf/A3/`: esquemas 007–012 en A3 apaisado, con marco y cajetín.
 - `pdf/esquemas-001-006-A4.pdf` y `pdf/esquemas-007-012-A3.pdf`: todas las fichas de cada formato en un solo PDF.

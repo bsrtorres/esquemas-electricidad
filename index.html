@@ -24,20 +24,49 @@
   td.f { width: 70px; }
   a { color: var(--accent); }
   .all { margin-top: 12px; }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grid p { margin: 0 0 12px; }
+  td.k { width: 230px; font-weight: bold; }
+  .jump { margin: -12px 0 20px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Esquemas de electricidad</h1>
-  <p class="lead">Fichas de esquemas multifilares para completar y simulador de conmutadas, cruzamientos y telerruptor.</p>
+  <p class="lead">Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares para completar.</p>
+  <nav class="jump"><a href="#simuladores">Simuladores</a> · <a href="#calculos">Cálculos</a> · <a href="#fichas">Fichas</a> · <a href="#normativa">Normativa</a></nav>
 
-  <section class="card">
-    <h2>Simulador</h2>
-    <p>Acciona interruptores, conmutadores, conmutadores de cruce, pulsadores y telerruptores y comprueba qué receptores funcionan y por dónde llega la fase.</p>
-    <a class="big" href="simulador.html">Abrir el simulador</a>
+  <section class="card" id="simuladores">
+    <h2>Simuladores</h2>
+    <div class="grid">
+      <div>
+        <h3>Conmutadas, cruzamiento y telerruptor</h3>
+        <p>Acciona interruptores, conmutadores, conmutadores de cruce, pulsadores y telerruptores y comprueba qué receptores funcionan y por dónde llega la fase.</p>
+        <a class="big" href="simulador.html">Abrir el simulador</a>
+      </div>
+      <div>
+        <h3>Cuadro general de mando y protección</h3>
+        <p>IGA, diferencial y PIA de los circuitos C1 a C5. Enciende receptores y provoca sobrecargas, cortocircuitos y fugas a tierra para ver qué protección actúa.</p>
+        <a class="big" href="cuadro.html">Abrir el cuadro</a>
+      </div>
+    </div>
   </section>
 
-  <section class="card">
+  <section class="card" id="calculos">
+    <h2>Cálculo de circuitos de vivienda</h2>
+    <p>Sección de los conductores según la ITC-BT-25 y la ITC-BT-19: intensidad, calentamiento y caída de tensión, paso a paso.</p>
+    <table>
+      <tbody>
+        <tr><td class="k"><a href="calculos/calculo_circuitos_vivienda.html">Circuitos C1 a C11</a></td><td>Calculadora de todos los circuitos de la vivienda, con la tabla resumen de la ITC-BT-25</td></tr>
+        <tr><td class="k"><a href="calculos/calculo_tomas_C2.html">Tomas C2</a></td><td>Calculadora del circuito de tomas de uso general</td></tr>
+        <tr><td class="k"><a href="calculos/ejemplo_toma_C2_12m.html">Ejemplo: toma a 12 m</a></td><td>Plano, unifilar, multifilar, cálculo y lista de materiales de una toma del C2</td></tr>
+        <tr><td class="k"><a href="calculos/teoria_calculo_secciones_vivienda.pdf">Teoría (PDF)</a></td><td>Teoría completa, ejemplos resueltos y ejercicios con soluciones</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" id="fichas">
     <h2>Fichas para completar</h2>
     <p>En cada ficha: esquema funcional, unifilar (planta) y multifilar con las cajas de derivación vacías.</p>
     <table>
@@ -59,6 +88,11 @@
       </tbody>
     </table>
     <p class="all">Todas juntas: <a href="pdf/esquemas-001-006-A4.pdf">001–006 (A4)</a> · <a href="pdf/esquemas-007-012-A3.pdf">007–012 (A3)</a></p>
+  </section>
+
+  <section class="card" id="normativa">
+    <h2>Normativa</h2>
+    <p><a href="https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099">Reglamento Electrotécnico para Baja Tensión (REBT, RD 842/2002) en el BOE</a>: ITC-BT-10, 17, 19, 21 y 25.</p>
   </section>
 </div>
 </body>

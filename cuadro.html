@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuadro general de mando y protección</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d63;
+    --off: #a3a3aa; --fase: #8b4513; --neutro: #1f5fbf; --accent: #b4471a;
+    --ok: #1e7a3c; --ok-bg: #e3f3e8; --bad: #b00020; --bad-bg: #fde7ea; --warn: #9a6700; --warn-bg: #fff4d6;
+    --btn: #e9e6dd; --mod: #fbfaf7;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 18px; line-height: 1.5; }
+  header { padding: 16px 24px 8px; }
+  header a { color: var(--accent); }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  header p { margin: 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; padding: 8px 24px 24px; }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; padding: 8px 16px 24px; } header { padding: 16px 16px 8px; } }
+  .card { background: var(--panel); border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card h2 { margin: 0 0 8px; font-size: 22px; }
+  .card h3 { margin: 16px 0 4px; font-size: 19px; }
+  svg { width: 100%; height: auto; display: block; }
+  .w { fill: none; stroke: var(--off); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .w.f { stroke: var(--fase); stroke-width: 3; }
+  .w.n { stroke: var(--neutro); stroke-width: 3; }
+  .dot { fill: var(--ink); }
+  .t { font-family: Calibri, Arial, sans-serif; font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .t.b { font-weight: bold; font-size: 13px; }
+  .t.s { font-size: 10.5px; fill: var(--muted); }
+  .t.l { text-anchor: start; }
+  .mod rect.body { fill: var(--mod); stroke: var(--ink); stroke-width: 1.5; }
+  .mod.trip rect.body { fill: var(--bad-bg); stroke: var(--bad); stroke-width: 2.5; }
+  .lever { stroke: var(--ink); stroke-width: 1.2; }
+  .dev { cursor: pointer; }
+  .dev:focus { outline: none; }
+  .dev:focus rect.body, .dev:hover rect.body { stroke: var(--accent); stroke-width: 2.5; }
+  .test { cursor: pointer; }
+  .test circle { fill: #ffd84d; stroke: var(--ink); stroke-width: 1.2; }
+  .test:hover circle, .test:focus circle { fill: #ffbf00; }
+  .load rect { stroke: var(--ink); stroke-width: 1.2; }
+  .heat { fill: var(--accent); }
+  .pe1 { stroke: #2e9a3e; stroke-width: 3.5; fill: none; }
+  .pe2 { stroke: #f2c200; stroke-width: 3.5; fill: none; stroke-dasharray: 8 8; }
+  .leak { stroke: var(--bad); stroke-width: 2; stroke-dasharray: 4 3; fill: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 16px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 24px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; background: var(--c); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .tabs button, .btn {
+    font: inherit; font-size: 17px; padding: 6px 12px; border-radius: 8px;
+    border: 2px solid var(--ink); background: var(--btn); color: var(--ink); cursor: pointer;
+  }
+  .tabs button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .btn.danger { border-color: var(--bad); color: var(--bad); background: #fff; }
+  .btn.danger[aria-pressed="true"] { background: var(--bad); color: #fff; }
+  .loads label { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid #eee; cursor: pointer; }
+  .loads input { width: 20px; height: 20px; margin-right: 8px; vertical-align: middle; accent-color: var(--accent); }
+  .loads span.p { color: var(--muted); white-space: nowrap; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  input[type=range] { flex: 1; min-width: 120px; accent-color: var(--bad); }
+  .val { font-weight: bold; min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid #eee; }
+  th { color: var(--muted); font-weight: normal; font-size: 16px; }
+  td.r, th.r { text-align: right; }
+  .msg { padding: 8px 12px; border-radius: 8px; margin: 6px 0 0; font-weight: bold; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.bad { background: var(--bad-bg); color: var(--bad); }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); }
+  ul.log { padding-left: 20px; margin: 6px 0 0; font-size: 16px; }
+  .tip { font-size: 16px; color: var(--muted); }
+  .info p { margin: 6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <p><a href="./">← Esquemas de electricidad</a></p>
+  <h1>Cuadro general de mando y protección</h1>
+  <p>Vivienda con electrificación básica: <b>IGA 25 A</b>, <b>diferencial 40 A / 30 mA</b> y un <b>PIA</b> por circuito (C1 a C5). Haz clic en cada aparato para subirlo o bajarlo. Enciende receptores, provoca averías y mira qué protección actúa.</p>
+</header>
+<main>
+  <div>
+    <section class="card">
+      <h2>Esquema del cuadro (multifilar)</h2>
+      <svg id="svg" viewBox="0 60 640 345" role="img" aria-label="Cuadro general con IGA, diferencial y cinco PIA"></svg>
+      <div class="legend">
+        <span style="--c: var(--fase)">Fase con tensión</span>
+        <span style="--c: var(--neutro)">Neutro conectado</span>
+        <span style="--c: var(--off)">Sin tensión</span>
+        <span style="--c: #2e9a3e">Tierra (PE)</span>
+      </div>
+      <div id="estado"></div>
+    </section>
+
+    <section class="card">
+      <h2>Esquema unifilar del cuadro</h2>
+      <svg id="uni" viewBox="0 0 640 276" role="img" aria-label="Esquema unifilar: derivación individual, IGA 25 A, diferencial 40 A 30 mA y cinco PIA"></svg>
+    </section>
+
+    <section class="card info">
+      <h2>¿Qué hace cada aparato?</h2>
+      <h3>IGA · interruptor general automático (25 A)</h3>
+      <p>Es un magnetotérmico que protege <b>toda la instalación</b>. Corta si la suma de todos los circuitos pasa de su calibre (25 A en electrificación básica y 40 A en elevada). Permite además dejar sin tensión toda la vivienda.</p>
+      <h3>ID · interruptor diferencial (40 A / 30 mA)</h3>
+      <p>Protege a las <b>personas</b>. Compara la corriente que sale por la fase con la que vuelve por el neutro. Si falta más de 30 mA, es que esa corriente se está yendo a tierra (por una avería o por una persona) y corta en milisegundos. <b>No</b> protege contra sobrecargas ni cortocircuitos. Su botón <b>T</b> (test) simula una fuga: hay que pulsarlo periódicamente para comprobar que funciona.</p>
+      <h3>PIA · pequeño interruptor automático (magnetotérmico)</h3>
+      <p>Hay uno por circuito y protege el <b>cable</b> de ese circuito. Tiene dos partes:</p>
+      <p>• <b>Térmica</b> (bimetal): actúa ante una <b>sobrecarga</b>. Cuanto mayor es la sobrecarga, antes corta. Con poca sobrecarga puede tardar minutos (en el simulador el tiempo va acelerado).</p>
+      <p>• <b>Magnética</b> (bobina): actúa ante un <b>cortocircuito</b>. Corta al instante cuando la corriente supera de 5 a 10 veces su calibre (curva C).</p>
+      <h3>Calibres de los PIA (ITC-BT-25)</h3>
+      <table>
+        <thead><tr><th>Circuito</th><th>Uso</th><th class="r">PIA</th><th class="r">Sección</th></tr></thead>
+        <tbody id="tabla"></tbody>
+      </table>
+      <p class="tip">Todos los PIA están aguas abajo del diferencial. En viviendas grandes se pone más de un diferencial para que una fuga no deje sin luz toda la casa.</p>
+    </section>
+  </div>
+
+  <aside>
+    <section class="card">
+      <h2>Receptores</h2>
+      <div class="tabs" id="tabs"></div>
+      <div id="cname" style="font-weight:bold"></div>
+      <div class="loads" id="loads"></div>
+      <div class="row">
+        <button class="btn danger" id="short" aria-pressed="false">Provocar cortocircuito</button>
+      </div>
+      <div class="row">
+        <label for="fuga">Fuga a tierra</label>
+        <input id="fuga" type="range" min="0" max="60" step="5" value="0">
+        <span class="val" id="fugaV">0 mA</span>
+      </div>
+      <p class="tip">La fuga simula un aparato con el aislamiento dañado: parte de la corriente se va a tierra por la carcasa.</p>
+    </section>
+
+    <section class="card">
+      <h2>Corrientes</h2>
+      <table>
+        <thead><tr><th>Aparato</th><th class="r">I</th><th class="r">Calibre</th></tr></thead>
+        <tbody id="corr"></tbody>
+      </table>
+      <div class="row">
+        <button class="btn" id="reset">Reiniciar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Qué ha pasado</h2>
+      <ul class="log" id="log"><li>Todo conectado. Enciende receptores.</li></ul>
+    </section>
+  </aside>
+</main>
+
+<script>
+const U = 230;
+const CIRC = [
+  {id: "C1", nom: "Iluminación", In: 10, S: "1,5", loads: [
+    ["Lámparas del salón (3 × 60 W)", 180], ["Lámparas de cocina y baño", 120], ["Lámparas de dormitorios", 150],
+    ["Foco halógeno de 500 W", 500], ["Dos focos de obra de 1000 W", 2000]]},
+  {id: "C2", nom: "Tomas de uso general", In: 16, S: "2,5", loads: [
+    ["Frigorífico", 250], ["Televisor", 150], ["Ordenador", 300], ["Aspiradora", 1500], ["Plancha", 2200], ["Estufa eléctrica", 2000]]},
+  {id: "C3", nom: "Cocina y horno", In: 25, S: "6", loads: [["Placa de cocina", 3500], ["Horno", 2500]]},
+  {id: "C4", nom: "Lavadora, lavavajillas y termo", In: 20, S: "4", loads: [["Lavadora", 2200], ["Lavavajillas", 2000], ["Termo eléctrico", 1500]]},
+  {id: "C5", nom: "Baño y tomas de cocina", In: 16, S: "2,5", loads: [
+    ["Secador de pelo", 1800], ["Microondas", 1000], ["Tostadora", 900], ["Hervidor de agua", 2000]]},
+];
+const IGA_IN = 25, ID_IN = 40, ID_MA = 30, ISC = 1500;
+
+let S;
+function initState() {
+  S = {
+    iga: {on: true, trip: false, heat: 0}, id: {on: true, trip: false},
+    pia: CIRC.map(() => ({on: true, trip: false, heat: 0})),
+    sel: CIRC.map(c => c.loads.map(() => false)), short: CIRC.map(() => false), fuga: CIRC.map(() => 0),
+  };
+  S.sel[1][0] = true; S.sel[0][0] = true;   // frigorífico y luz del salón encendidos
+}
+let cur = 0, logItems = [];
+const $ = id => document.getElementById(id);
+const fmt = (x, d = 1) => x.toFixed(d).replace(".", ",");
+
+/* ---------- estado eléctrico ---------- */
+function solve() {
+  const afterIga = S.iga.on, afterId = afterIga && S.id.on;
+  const live = S.pia.map(p => afterId && p.on);
+  const I = CIRC.map((c, i) => !live[i] ? 0 : S.short[i] ? ISC : c.loads.reduce((a, [, P], k) => a + (S.sel[i][k] ? P / U : 0), 0));
+  const leak = CIRC.reduce((a, c, i) => a + (live[i] ? S.fuga[i] : 0), 0);
+  const total = I.reduce((a, b) => a + b, 0);
+  return {afterIga, afterId, live, I, leak, total};
+}
+
+function log(txt) { logItems.unshift(txt); logItems = logItems.slice(0, 6); }
+
+function trip(dev, why) {
+  dev.on = false; dev.trip = true; if ("heat" in dev) dev.heat = 0; log(why);
+}
+
+// Protecciones instantáneas: magnética de los PIA y diferencial
+function instant() {
+  let e = solve();
+  CIRC.forEach((c, i) => {
+    if (e.live[i] && e.I[i] >= 5 * c.In) {
+      trip(S.pia[i], `Cortocircuito en ${c.id}: ha saltado al instante la parte magnética de su PIA de ${c.In} A.`);
+    }
+  });
+  e = solve();
+  if (e.afterId && e.leak >= ID_MA) {
+    trip(S.id, `Fuga a tierra de ${e.leak} mA (≥ 30 mA): ha saltado el diferencial y se han quedado sin tensión todos los circuitos.`);
+  }
+}
+
+// Parte térmica: se calienta con la sobrecarga (tiempo acelerado)
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min((now - last) / 1000, 0.25); last = now;
+  const e = solve();
+  let changed = false;
+  CIRC.forEach((c, i) => {
+    const p = S.pia[i], r = e.I[i] / c.In;
+    const h0 = p.heat;
+    p.heat = r > 1 ? p.heat + dt * (r - 1) * 0.35 : Math.max(0, p.heat - dt * 0.2);
+    if (p.heat >= 1) { trip(p, `Sobrecarga en ${c.id}: ${fmt(e.I[i])} A con un PIA de ${c.In} A. Ha saltado la parte térmica.`); changed = true; }
+    if (Math.abs(p.heat - h0) > 1e-6) changed = true;
+  });
+  const g = S.iga, rg = e.total / IGA_IN, hg = g.heat;
+  g.heat = rg > 1 ? g.heat + dt * (rg - 1) * 0.35 : Math.max(0, g.heat - dt * 0.2);
+  if (g.heat >= 1) { trip(g, `La suma de los circuitos (${fmt(e.total)} A) supera los 25 A del IGA: ha saltado el general. Ningún PIA había saltado porque cada circuito estaba dentro de su calibre.`); changed = true; }
+  if (Math.abs(g.heat - hg) > 1e-6) changed = true;
+  if (changed) render();
+  requestAnimationFrame(tick);
+}
+
+/* ---------- dibujo ---------- */
+const out = [];
+const P = pts => pts.map(p => p.join(",")).join(" ");
+const wire = (pts, cls) => out.push(`<polyline class="w ${cls}" points="${P(pts)}"/>`);
+const txt = (x, y, s, cls = "") => out.push(`<text class="t ${cls}" x="${x}" y="${y}">${s}</text>`);
+const dot = (x, y) => out.push(`<circle class="dot" cx="${x}" cy="${y}" r="2.6"/>`);
+
+function module(key, x, w, name, rating, dev, heat) {
+  const y = 125, h = 90, cx = x + w / 2;
+  const on = dev.on;
+  out.push(`<g class="dev mod ${dev.trip ? "trip" : ""}" data-dev="${key}" tabindex="0" role="button" aria-label="${name} ${rating}: ${on ? "conectado" : dev.trip ? "disparado" : "desconectado"}">`
+    + `<rect class="body" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/>`
+    + `<rect x="${cx - 7}" y="${y + 30}" width="14" height="30" rx="3" fill="#ddd" stroke="#777"/>`
+    + `<rect class="lever" x="${cx - 6}" y="${on ? y + 31 : y + 45}" width="12" height="14" rx="2" fill="${on ? "#2e9a3e" : dev.trip ? "#b00020" : "#888"}"/>`
+    + `<text class="t s" x="${cx}" y="${y + 27}">${on ? "I" : "O"}</text>`
+    + `<text class="t b" x="${cx}" y="${y + 14}">${name}</text>`
+    + `<text class="t s" x="${cx}" y="${y + 74}">${rating}</text>`
+    + (heat !== undefined ? `<rect x="${x + 4}" y="${y + h - 9}" width="${w - 8}" height="4" fill="#eee"/><rect class="heat" x="${x + 4}" y="${y + h - 9}" width="${(w - 8) * Math.min(heat, 1)}" height="4"/>` : "")
+    + `</g>`);
+}
+
+const PIAX = i => 296 + i * 66, PIAW = 46;
+
+function render() {
+  const e = solve();
+  out.length = 0;
+  // Derivación individual
+  txt(8, 72, "Derivación", "s l"); txt(8, 84, "individual", "s l");
+  wire([[0, 92], [114, 92], [114, 125]], "n");
+  wire([[0, 102], [78, 102], [78, 125]], "f");
+  // IGA
+  module("iga", 60, 72, "IGA", "25 A · 2P", S.iga, S.iga.heat);
+  // IGA -> ID
+  const cg = e.afterIga;
+  wire([[78, 215], [78, 240], [155, 240], [155, 108], [188, 108], [188, 125]], cg ? "f" : "");
+  wire([[114, 215], [114, 228], [145, 228], [145, 100], [224, 100], [224, 125]], cg ? "n" : "");
+  module("id", 170, 72, "ID", "40 A · 30 mA", S.id);
+  out.push(`<g class="test" data-dev="test" tabindex="0" role="button" aria-label="Botón de prueba del diferencial"><circle cx="230" cy="${125 + 45}" r="7"/><text class="t s" x="230" y="${125 + 49}">T</text></g>`);
+  // ID -> peine
+  const cd = e.afterId, last = PIAX(4);
+  wire([[188, 215], [188, 245], [262, 245], [262, 110], [last + 12, 110]], cd ? "f" : "");
+  wire([[224, 215], [224, 236], [254, 236], [254, 100], [last + 34, 100]], cd ? "n" : "");
+  txt(278, 92, "peine", "s");
+  CIRC.forEach((c, i) => {
+    const x = PIAX(i), xf = x + 12, xn = x + 34;
+    wire([[xf, 110], [xf, 125]], cd ? "f" : ""); dot(xf, 110);
+    wire([[xn, 100], [xn, 125]], cd ? "n" : ""); dot(xn, 100);
+    module(`p${i}`, x, PIAW, c.id, `${c.In} A`, S.pia[i], S.pia[i].heat);
+    const lv = e.live[i];
+    wire([[xf, 215], [xf, 285]], lv ? "f" : ""); wire([[xn, 215], [xn, 285]], lv ? "n" : "");
+    // receptores del circuito
+    const amps = e.I[i], frac = Math.min(amps / c.In, 1.5);
+    const fill = !lv ? "#f1f1f1" : S.short[i] ? "#ffb3b3" : amps > 0 ? `rgba(255,${Math.round(214 - 90 * Math.min(frac, 1))},60,${0.25 + 0.5 * Math.min(frac, 1)})` : "#fff";
+    out.push(`<g class="load"><rect x="${x - 4}" y="285" width="${PIAW + 8}" height="34" rx="5" fill="${fill}"/></g>`);
+    txt(x + PIAW / 2, 301, lv ? (S.short[i] ? "¡corto!" : `${fmt(amps)} A`) : "—", "b");
+    txt(x + PIAW / 2, 314, `${c.S} mm²`, "s");
+    if (lv && S.fuga[i] > 0) {
+      out.push(`<polyline class="leak" points="${P([[x + PIAW / 2, 319], [x + PIAW / 2, 360]])}"/>`);
+      txt(x + PIAW / 2 + 22, 345, `${S.fuga[i]} mA`, "s");
+    }
+  });
+  // tierra
+  out.push(`<polyline class="pe1" points="${P([[20, 360], [630, 360]])}"/><polyline class="pe2" points="${P([[20, 360], [630, 360]])}"/>`);
+  txt(24, 378, "Tierra (PE): borne de protección", "s l");
+  txt(330, 396, `Corriente total por el IGA: ${fmt(e.total)} A`, "b");
+  $("svg").innerHTML = out.join("");
+
+  // estado
+  let st;
+  if (!S.iga.on) st = ["bad", "IGA abierto: toda la vivienda está sin tensión."];
+  else if (!S.id.on) st = ["bad", "Diferencial abierto: todos los circuitos están sin tensión."];
+  else if (S.pia.some(p => !p.on)) st = ["warn", "Hay circuitos sin tensión: " + CIRC.filter((c, i) => !S.pia[i].on).map(c => c.id).join(", ") + "."];
+  else st = ["ok", "Todos los circuitos tienen tensión."];
+  const hot = CIRC.filter((c, i) => e.live[i] && e.I[i] > c.In && !S.short[i]).map(c => c.id);
+  if (S.iga.on && e.total > IGA_IN) hot.push("IGA");
+  $("estado").innerHTML = `<div class="msg ${st[0]}">${st[1]}</div>`
+    + (hot.length ? `<div class="msg warn">Sobrecarga en ${hot.join(", ")}: la parte térmica se está calentando (barra naranja). Apaga receptores o saltará.</div>` : "");
+
+  // tabla de corrientes
+  $("corr").innerHTML = `<tr><td>IGA</td><td class="r">${fmt(e.total)} A</td><td class="r">${IGA_IN} A</td></tr>`
+    + `<tr><td>ID (fuga)</td><td class="r">${e.leak} mA</td><td class="r">${ID_MA} mA</td></tr>`
+    + CIRC.map((c, i) => `<tr><td>${c.id}</td><td class="r" style="${e.I[i] > c.In ? "color:var(--bad);font-weight:bold" : ""}">${S.short[i] && e.live[i] ? "corto" : fmt(e.I[i]) + " A"}</td><td class="r">${c.In} A</td></tr>`).join("");
+
+  // panel del circuito elegido
+  const c = CIRC[cur];
+  $("cname").textContent = `${c.id} · ${c.nom} (PIA ${c.In} A)`;
+  $("short").setAttribute("aria-pressed", S.short[cur]);
+  $("short").textContent = S.short[cur] ? "Reparar el cortocircuito" : "Provocar cortocircuito";
+  $("fuga").value = S.fuga[cur]; $("fugaV").textContent = S.fuga[cur] + " mA";
+  $("log").innerHTML = (logItems.length ? logItems : ["Todo conectado. Enciende receptores."]).map(t => `<li>${t}</li>`).join("");
+}
+
+function drawLoads() {
+  const c = CIRC[cur];
+  $("loads").innerHTML = c.loads.map(([n, p], k) =>
+    `<label><span><input type="checkbox" data-k="${k}" ${S.sel[cur][k] ? "checked" : ""}>${n}</span><span class="p">${p} W</span></label>`).join("");
+  [...$("tabs").children].forEach((b, i) => b.setAttribute("aria-pressed", i === cur));
+}
+
+/* ---------- unifilar estático ---------- */
+function unifilar() {
+  const o = [];
+  const L = (pts, extra = "") => o.push(`<polyline fill="none" stroke="var(--ink)" stroke-width="2" ${extra} points="${P(pts)}"/>`);
+  const T = (x, y, s, a = "start", cls = "") => o.push(`<text class="t ${cls}" style="text-anchor:${a}" x="${x}" y="${y}">${s}</text>`);
+  // interruptor automático (IEC 60617): contacto fijo con aspa y cuchilla abierta
+  const mt = (x, y, cross = true) => {
+    L([[x, y], [x, y + 14]]); L([[x, y + 50], [x, y + 36], [x - 11, y + 17]]);
+    if (cross) { L([[x - 4, y + 10], [x + 4, y + 18]]); L([[x + 4, y + 10], [x - 4, y + 18]]); }
+  };
+  const slashes = (x, y, n) => { for (let k = 0; k < n; k++) L([[x - 6, y + 5 - k * 5], [x + 6, y - 1 - k * 5]]); };
+  const X = 60;
+  L([[X, 6], [X, 30]]); slashes(X, 22, 3); T(X + 18, 20, "Derivación individual: 3 × 6 mm² (F + N + PE)", "start", "s");
+  mt(X, 30); T(X + 22, 58, "IGA 25 A · 2P", "start", "b");
+  L([[X, 80], [X, 95]]);
+  mt(X, 95, false);
+  o.push(`<ellipse cx="${X}" cy="153" rx="12" ry="5" fill="none" stroke="var(--ink)" stroke-width="2"/>`);
+  L([[X, 145], [X, 175]]);
+  L([[X + 12, 153], [X + 24, 153], [X + 24, 122], [X - 5, 122]], `stroke-dasharray="4 3"`);
+  T(X + 34, 125, "ID 40 A · 30 mA · 2P", "start", "b");
+  T(X + 34, 142, "(interruptor diferencial)", "start", "s");
+  const xs = CIRC.map((_, i) => 220 + i * 92);
+  L([[X, 175], [xs[4], 175]]);
+  CIRC.forEach((c, i) => {
+    const x = xs[i];
+    L([[x, 175], [x, 182]]); mt(x, 182);
+    T(x + 8, 210, `${c.In} A`, "start", "b");
+    L([[x, 232], [x, 252]]); slashes(x, 246, 3);
+    T(x, 268, `${c.id} · ${c.S} mm²`, "middle", "s");
+  });
+  o.push(`<circle cx="${X}" cy="175" r="0"/>`);
+  $("uni").innerHTML = o.join("");
+}
+
+/* ---------- interacción ---------- */
+function toggle(key) {
+  const dev = key === "iga" ? S.iga : key === "id" ? S.id : S.pia[+key.slice(1)];
+  const name = key === "iga" ? "el IGA" : key === "id" ? "el diferencial" : `el PIA de ${CIRC[+key.slice(1)].id}`;
+  if (dev.on) { dev.on = false; log(`Has bajado ${name}.`); }
+  else { dev.on = true; dev.trip = false; log(`Has rearmado ${name}.`); }
+  instant(); render();
+}
+function test() {
+  const e = solve();
+  if (!e.afterId) { log("El botón T no hace nada: el diferencial necesita tensión (y estar conectado) para probarse."); render(); return; }
+  trip(S.id, "Prueba con el botón T: el diferencial ha saltado. Funciona correctamente."); render();
+}
+$("svg").addEventListener("click", ev => {
+  const g = ev.target.closest("[data-dev]"); if (!g) return;
+  g.dataset.dev === "test" ? test() : toggle(g.dataset.dev);
+  const el = $("svg").querySelector(`[data-dev="${g.dataset.dev}"]`); if (el) el.focus();
+});
+$("svg").addEventListener("keydown", ev => {
+  const g = ev.target.closest && ev.target.closest("[data-dev]");
+  if (!g || (ev.key !== "Enter" && ev.key !== " ")) return;
+  ev.preventDefault(); g.dataset.dev === "test" ? test() : toggle(g.dataset.dev);
+  const el = $("svg").querySelector(`[data-dev="${g.dataset.dev}"]`); if (el) el.focus();
+});
+$("loads").addEventListener("change", ev => {
+  const k = ev.target.dataset.k; if (k === undefined) return;
+  S.sel[cur][+k] = ev.target.checked; instant(); render();
+});
+$("short").addEventListener("click", () => {
+  S.short[cur] = !S.short[cur];
+  log(S.short[cur] ? `Has provocado un cortocircuito en ${CIRC[cur].id} (fase y neutro se tocan).` : `Cortocircuito de ${CIRC[cur].id} reparado. Ya puedes rearmar su PIA.`);
+  instant(); render();
+});
+$("fuga").addEventListener("input", ev => { S.fuga[cur] = +ev.target.value; instant(); render(); });
+$("reset").addEventListener("click", () => { initState(); logItems = []; drawLoads(); render(); });
+
+$("tabs").innerHTML = CIRC.map((c, i) => `<button data-i="${i}">${c.id}</button>`).join("");
+$("tabs").addEventListener("click", ev => { const i = ev.target.dataset.i; if (i === undefined) return; cur = +i; drawLoads(); render(); });
+$("tabla").innerHTML = CIRC.map(c => `<tr><td><b>${c.id}</b></td><td>${c.nom}</td><td class="r">${c.In} A</td><td class="r">${c.S} mm²</td></tr>`).join("");
+
+initState(); drawLoads(); unifilar(); render();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
