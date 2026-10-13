@@ -37,15 +37,6 @@
     {t: "Normativa", items: [
       {t: "REBT (RD 842/2002) en el BOE", href: "https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099", ext: true},
     ]},
-    {t: "Mis webs", items: [
-      {h: "Electricidad"},
-      {t: "Esquemas de electricidad", href: "index.html"},
-      {h: "Conexión Europa"},
-      {t: "Conexión Europa", href: "https://bsrtorres.github.io/conexion-europa/", ext: true},
-      {t: "Inscripción a la cola", href: "https://bsrtorres.github.io/inscripcion-europa/", ext: true},
-      {t: "Entrenamiento de capitales", href: "https://bsrtorres.github.io/entrenamiento-europa/", ext: true},
-      {t: "Monitor en directo (MQTT + Node-RED)", href: "https://bsrtorres.github.io/monitor-europa/", ext: true},
-    ]},
   ];
 
   const css = `
