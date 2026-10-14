@@ -1,0 +1,452 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Gastronova · Ecosistema domótico</title>
+<script src="menu.js?v=4" defer></script>
+<style>nav.mnu{display:block;margin:0;gap:0} nav.mnu a{border-bottom:0}</style>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ficha técnica de instalación — columna de lectura con diagramas a ancho completo, tono "acero inoxidable + azulejo" */
+:root{
+  --bg:#f3f5f5; --surface:#ffffff; --ink:#1b2526; --muted:#5b6b6c; --line:#d3dbdb;
+  --accent:#17705f; --accent-soft:#e1f0ec; --warn:#a8650c; --warn-soft:#fbefdc;
+  --phase:#8a4b22; --neutral:#2d63b8; --dcp:#c23b3b; --dcn:#2b2b2b; --ble:#7a4fc0; --eth:#17705f;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131a1b; --surface:#1b2425; --ink:#e4ecec; --muted:#9aabac; --line:#2f3c3d;
+  --accent:#4fc2a8; --accent-soft:#18332d; --warn:#e3a14a; --warn-soft:#3a2a12;
+  --phase:#d4884f; --neutral:#6f9ef0; --dcp:#ee6d6d; --dcn:#c9d2d2; --ble:#b293ec; --eth:#4fc2a8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131a1b; --surface:#1b2425; --ink:#e4ecec; --muted:#9aabac; --line:#2f3c3d;
+  --accent:#4fc2a8; --accent-soft:#18332d; --warn:#e3a14a; --warn-soft:#3a2a12;
+  --phase:#d4884f; --neutral:#6f9ef0; --dcp:#ee6d6d; --dcn:#c9d2d2; --ble:#b293ec; --eth:#4fc2a8; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+header{display:grid;gap:8px;padding-bottom:24px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,6vw,54px);line-height:1;margin:0;text-wrap:balance;letter-spacing:.01em}
+h2{font-family:var(--f-display);font-weight:600;font-size:30px;line-height:1.1;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0}
+p{margin:0;max-width:68ch}
+.lead{color:var(--muted);font-size:16px}
+nav{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-family:var(--f-mono);font-size:13px}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:grid;gap:16px;padding-top:44px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:620px;height:auto}
+.fig svg text{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+.fig svg .lbl{font-family:var(--f-body);font-size:13px;font-weight:600}
+.fig svg .sm{font-size:11px;fill:var(--muted)}
+.box{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
+.box-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.load{fill:var(--bg);stroke:var(--muted);stroke-width:1.5}
+.w-l{stroke:var(--phase);stroke-width:2.5;fill:none}
+.w-n{stroke:var(--neutral);stroke-width:2.5;fill:none}
+.w-p{stroke:var(--dcp);stroke-width:2.2;fill:none}
+.w-m{stroke:var(--dcn);stroke-width:2.2;fill:none}
+.w-s{stroke:var(--ink);stroke-width:1.6;fill:none}
+.w-ble{stroke:var(--ble);stroke-width:2;stroke-dasharray:6 5;fill:none}
+.w-eth{stroke:var(--eth);stroke-width:2.5;fill:none}
+.w-wifi{stroke:var(--muted);stroke-width:1.6;stroke-dasharray:2 4;fill:none}
+.t-l{fill:var(--phase)!important} .t-n{fill:var(--neutral)!important} .t-p{fill:var(--dcp)!important} .t-acc{fill:var(--accent)!important}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px}
+.card{display:grid;gap:10px;align-content:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.card .fig{border:0;padding:0}
+.card .fig svg{min-width:460px}
+.note{font-size:14px;color:var(--muted)}
+.note b{color:var(--ink);font-weight:600}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+code,.mono{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+td code{background:var(--bg);padding:1px 5px;border-radius:3px;word-break:break-all}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.w{background:var(--warn-soft);color:var(--warn)}
+.scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.scene{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:8px;align-content:start}
+.scene h3{font-size:20px}
+.scene .key{font-family:var(--f-mono);font-size:11px;color:var(--accent)}
+.scene ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted)}
+.check{border:1px solid var(--warn);background:var(--warn-soft);border-radius:6px;padding:16px;display:grid;gap:8px}
+.check h3{color:var(--warn)}
+.check ul{margin:0;padding-left:20px;display:grid;gap:4px}
+pre{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;overflow-x:auto;font-family:var(--f-mono);font-size:12.5px;line-height:1.55}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Aula de cocina · Proyecto Gastronova</div>
+  <h1>Ecosistema domótico del aula</h1>
+  <p class="lead">Cómo se conectan los dispositivos Shelly, las cámaras PTZ y el clima, qué controla cada uno, los esquemas de cableado y cómo hablará con todos ellos la web de control.</p>
+  <nav>
+    <a href="#arquitectura">Arquitectura</a><a href="#mapa">Mapa de cargas</a><a href="#esquemas">Esquemas</a><a href="#red">Red e IPs</a><a href="#escenas">Escenas</a><a href="#automatismos">Automatismos</a><a href="#web">API de la web</a><a href="#pendiente">Por confirmar</a>
+  </nav>
+</header>
+
+<!-- ARQUITECTURA -->
+<section id="arquitectura">
+  <div class="sec-head"><h2>Arquitectura general</h2><span class="tag">todo en red local, sin depender de la nube</span></div>
+  <p>La web vive en un pequeño servidor del aula (mini-PC o Raspberry Pi) y habla directamente con cada dispositivo por la red local. La Shelly Wall Display XL hace dos papeles: es el <b>punto único de control</b> en la pared y la <b>pasarela Bluetooth</b> que recibe el sensor de movimiento y el pulsador de 4 botones.</p>
+  <div class="fig">
+  <svg viewBox="0 0 900 470" role="img" aria-label="Diagrama de arquitectura del sistema domótico">
+    <!-- top row -->
+    <rect class="box" x="20" y="20" width="200" height="66" rx="5"/>
+    <text class="lbl" x="120" y="47" text-anchor="middle">Tablet / PC profesor</text>
+    <text class="sm" x="120" y="67" text-anchor="middle">navegador → web de control</text>
+
+    <rect class="box-acc" x="340" y="20" width="220" height="66" rx="5"/>
+    <text class="lbl" x="450" y="47" text-anchor="middle">Servidor web del aula</text>
+    <text class="sm" x="450" y="67" text-anchor="middle">Node.js · mini-PC / Raspberry Pi</text>
+
+    <rect class="box" x="680" y="20" width="200" height="66" rx="5"/>
+    <text class="lbl" x="780" y="44" text-anchor="middle">Sensores Bluetooth</text>
+    <text class="sm" x="780" y="62" text-anchor="middle">BLU Motion (presencia)</text>
+    <text class="sm" x="780" y="77" text-anchor="middle">Pulsador 4 botones + marco</text>
+
+    <!-- middle -->
+    <rect class="box" x="340" y="160" width="220" height="66" rx="5"/>
+    <text class="lbl" x="450" y="187" text-anchor="middle">Router + switch PoE</text>
+    <text class="sm" x="450" y="207" text-anchor="middle">VLAN domótica · Wi-Fi 2,4 GHz</text>
+
+    <rect class="box-acc" x="680" y="160" width="200" height="66" rx="5"/>
+    <text class="lbl" x="780" y="185" text-anchor="middle">Wall Display XL</text>
+    <text class="sm" x="780" y="203" text-anchor="middle">pantalla 10,1" + 4 botones</text>
+    <text class="sm" x="780" y="218" text-anchor="middle">relé 5 A · pasarela BLE</text>
+
+    <!-- links top -->
+    <path class="w-wifi" d="M220 53 H340"/>
+    <text class="sm" x="280" y="45" text-anchor="middle">HTTPS</text>
+    <path class="w-eth" d="M450 86 V160"/>
+    <text class="sm" x="458" y="128">Ethernet</text>
+    <path class="w-ble" d="M780 86 V160"/>
+    <text class="sm" x="790" y="128" style="fill:var(--ble)">BLE</text>
+    <path class="w-wifi" d="M560 193 H680"/>
+    <text class="sm" x="620" y="185" text-anchor="middle">Wi-Fi</text>
+
+    <!-- bus -->
+    <path class="w-s" d="M450 226 V270 M60 270 H840"/>
+    <text class="sm" x="460" y="258">RPC HTTP / WebSocket (Shelly) · VISCA-IP / CGI (cámaras)</text>
+
+    <!-- bottom devices -->
+    <g>
+      <path class="w-wifi" d="M60 270 V320"/><rect class="box" x="10" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="60" y="342" text-anchor="middle">Dimmer Gen3</text><text class="sm" x="60" y="362" text-anchor="middle">luz general</text><text class="sm" x="60" y="377" text-anchor="middle">230 V regulable</text>
+
+      <path class="w-wifi" d="M171 270 V320"/><rect class="box" x="121" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="171" y="342" text-anchor="middle">Plus RGBW PM</text><text class="sm" x="171" y="362" text-anchor="middle">tira LED 24 V</text><text class="sm" x="171" y="377" text-anchor="middle">+ fuente 60 W</text>
+
+      <path class="w-wifi" d="M282 270 V320"/><rect class="box" x="232" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="282" y="342" text-anchor="middle">2PM Gen3 ×2</text><text class="sm" x="282" y="362" text-anchor="middle">persiana 1</text><text class="sm" x="282" y="377" text-anchor="middle">persiana 2</text>
+
+      <path class="w-wifi" d="M393 270 V320"/><rect class="box" x="343" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="393" y="342" text-anchor="middle">1PM Gen3</text><text class="sm" x="393" y="362" text-anchor="middle">campana</text><text class="sm" x="393" y="377" text-anchor="middle">con consumo</text>
+
+      <path class="w-wifi" d="M504 270 V320"/><rect class="box" x="454" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="504" y="342" text-anchor="middle">Brazos TV ×2</text><text class="sm" x="504" y="362" text-anchor="middle">1 Gen3 (contacto)</text><text class="sm" x="504" y="377" text-anchor="middle">o 2PM (motor)</text>
+
+      <path class="w-wifi" d="M615 270 V320"/><rect class="box" x="565" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="615" y="342" text-anchor="middle">Aire acond.</text><text class="sm" x="615" y="362" text-anchor="middle">1 Gen3 ON/OFF</text><text class="sm" x="615" y="377" text-anchor="middle">+ Wi-Fi / IR</text>
+
+      <path class="w-eth" d="M726 270 V320"/><rect class="box" x="676" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="726" y="342" text-anchor="middle">PTZ 1</text><text class="sm" x="726" y="362" text-anchor="middle">encimera</text><text class="sm" x="726" y="377" text-anchor="middle">PoE · presets</text>
+
+      <path class="w-eth" d="M837 270 V320"/><rect class="box" x="787" y="320" width="100" height="78" rx="4"/>
+      <text class="lbl" x="837" y="342" text-anchor="middle">PTZ 2</text><text class="sm" x="837" y="362" text-anchor="middle">fuegos / plano</text><text class="sm" x="837" y="377" text-anchor="middle">PoE · presets</text>
+    </g>
+    <text class="sm" x="10" y="430">Los Shelly también se pueden accionar sin servidor: la Wall Display XL los controla directamente y los botones físicos de cada relé siguen funcionando.</text>
+    <text class="sm" x="10" y="450">La web es una capa más, no un punto único de fallo.</text>
+  </svg>
+  </div>
+  <div class="legend">
+    <span><i style="border-color:var(--eth)"></i>Ethernet / PoE</span>
+    <span><i style="border-color:var(--muted);border-top-style:dotted"></i>Wi-Fi</span>
+    <span><i style="border-color:var(--ble);border-top-style:dashed"></i>Bluetooth (BLU)</span>
+  </div>
+</section>
+
+<!-- MAPA -->
+<section id="mapa">
+  <div class="sec-head"><h2>Mapa de cargas</h2><span class="tag">qué dispositivo controla cada elemento del aula</span></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Elemento del aula</th><th>Dispositivo</th><th>Modo / canal</th><th>Orden desde la web</th></tr></thead>
+    <tbody>
+      <tr><td><b>Iluminación general</b> (downlights 230 V regulables)</td><td>Shelly Dimmer Gen3</td><td>Light id 0</td><td><code>Light.Set?id=0&amp;on=true&amp;brightness=70</code></td></tr>
+      <tr><td><b>Tira LED ambiente / encimera</b> RGBW 24 V</td><td>Shelly Plus RGBW PM + fuente 24 V 60 W</td><td>perfil RGBW</td><td><code>RGBW.Set?id=0&amp;on=true&amp;rgb=[255,200,150]&amp;white=180</code></td></tr>
+      <tr><td><b>Punto único de control</b></td><td>Shelly Wall Display XL</td><td>pantalla + 4 botones; relé 5 A libre</td><td>panel propio (o la web en su navegador)</td></tr>
+      <tr><td><b>Persiana 1</b></td><td>Shelly 2PM Gen3 nº1</td><td>perfil cover, id 0</td><td><code>Cover.GoToPosition?id=0&amp;pos=50</code></td></tr>
+      <tr><td><b>Persiana 2</b></td><td>Shelly 2PM Gen3 nº2 <span class="pill w">2.ª unidad</span></td><td>perfil cover, id 0</td><td><code>Cover.Open?id=0</code> / <code>Close</code> / <code>Stop</code></td></tr>
+      <tr><td><b>Campana extractora</b></td><td>Shelly 1PM Gen3</td><td>Switch id 0 + medida</td><td><code>Switch.Set?id=0&amp;on=true</code></td></tr>
+      <tr><td><b>Brazos TV abatibles</b> ×2</td><td>Shelly 1 Gen3 ×2 (contacto seco) <span class="pill w">según brazo</span></td><td>pulso 1 s</td><td><code>Switch.Set?id=0&amp;on=true&amp;toggle_after=1</code></td></tr>
+      <tr><td><b>Aire acondicionado</b></td><td>Shelly 1 Gen3 al contacto remoto + integración del fabricante</td><td>habilitación ON/OFF</td><td><code>Switch.Set?id=0&amp;on=false</code> · consigna por API del fabricante</td></tr>
+      <tr><td><b>Presencia</b></td><td>Shelly BLU Motion</td><td>BLE → Wall Display</td><td>evento (solo lectura)</td></tr>
+      <tr><td><b>Pulsador de pared</b></td><td>Pulsador BLU 4 botones + marco</td><td>BLE → Wall Display</td><td>evento → lanza escena</td></tr>
+      <tr><td><b>Cámaras PTZ</b> ×2</td><td>cámaras IP (no Shelly)</td><td>presets 1…n</td><td>VISCA-IP o CGI HTTP del fabricante</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Las rutas RPC son de la API local Gen2/Gen3 de Shelly: <code>http://IP/rpc/Método?parámetros</code>. <b>Cover.GoToPosition</b> solo funciona después de calibrar cada persiana (<code>Cover.Calibrate?id=0</code>).</p>
+</section>
+
+<!-- ESQUEMAS -->
+<section id="esquemas">
+  <div class="sec-head"><h2>Esquemas de conexionado</h2><span class="tag">esquemas de principio; la instalación la valida un electricista autorizado</span></div>
+  <div class="legend">
+    <span><i style="border-color:var(--phase)"></i>Fase L 230 V</span>
+    <span><i style="border-color:var(--neutral)"></i>Neutro N</span>
+    <span><i style="border-color:var(--dcp)"></i>+24 V CC</span>
+    <span><i style="border-color:var(--dcn)"></i>0 V / señal</span>
+  </div>
+
+  <div class="grid2">
+    <!-- DIMMER -->
+    <div class="card">
+      <h3>Iluminación general · Dimmer Gen3</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H510"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H510"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box-acc" x="190" y="70" width="150" height="80" rx="4"/>
+        <text class="lbl" x="265" y="105" text-anchor="middle">Dimmer Gen3</text>
+        <text class="sm" x="265" y="122" text-anchor="middle">máx. según carga LED</text>
+        <!-- L, N -->
+        <path class="w-l" d="M230 30 V70"/><text x="236" y="84">L</text>
+        <path class="w-n" d="M230 150 V190"/><text x="236" y="146">N</text>
+        <!-- pulsador -->
+        <path class="w-l" d="M90 30 V78"/>
+        <path class="w-s" d="M80 78 H100 M90 78 V84 M78 92 L102 92 M90 92 V110 H190"/>
+        <text class="sm" x="22" y="74">pulsador</text><text class="sm" x="22" y="88">existente</text>
+        <text x="196" y="106">SW1</text>
+        <!-- salida -->
+        <path class="w-l" d="M340 110 H430 V120"/><text x="320" y="106">O</text>
+        <circle class="load" cx="430" cy="135" r="15"/><path class="w-s" d="M419 124 L441 146 M441 124 L419 146"/>
+        <path class="w-n" d="M430 150 V190"/>
+        <text class="sm" x="452" y="132">downlights</text><text class="sm" x="452" y="146">regulables</text>
+      </svg></div>
+      <p class="note">Usar luminarias LED <b>marcadas como regulables</b> y elegir corte de fase al inicio o al final en la configuración del dimmer si hay parpadeo. El pulsador de pared existente puede seguir funcionando en SW1.</p>
+    </div>
+
+    <!-- RGBW -->
+    <div class="card">
+      <h3>Tira LED RGBW · Plus RGBW PM</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H130"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H130"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box" x="40" y="70" width="110" height="80" rx="4"/>
+        <text class="lbl" x="95" y="102" text-anchor="middle">Fuente 24 V</text>
+        <text class="sm" x="95" y="120" text-anchor="middle">60 W · VC Slim</text>
+        <path class="w-l" d="M70 30 V70"/><path class="w-n" d="M70 150 V190"/>
+        <!-- dc -->
+        <path class="w-p" d="M150 90 H215"/><text class="t-p" x="158" y="84">+24V</text>
+        <path class="w-m" d="M150 130 H215"/><text x="162" y="146">0V</text>
+        <rect class="box-acc" x="215" y="70" width="130" height="80" rx="4"/>
+        <text class="lbl" x="280" y="105" text-anchor="middle">Plus RGBW PM</text>
+        <text class="sm" x="280" y="122" text-anchor="middle">4 canales PWM</text>
+        <!-- outputs -->
+        <path class="w-p" d="M190 90 V48 H470 V70"/><text class="t-p" x="400" y="42">+ común</text>
+        <path class="w-m" d="M345 82 H440 V70"/><text x="350" y="78">R</text>
+        <path class="w-m" d="M345 100 H452 V70"/><text x="350" y="96">G</text>
+        <path class="w-m" d="M345 118 H464 V150"/><text x="350" y="114">B</text>
+        <path class="w-m" d="M345 136 H476 V150"/><text x="350" y="132">W</text>
+        <rect class="load" x="425" y="70" width="70" height="80" rx="3"/>
+        <text class="sm" x="460" y="104" text-anchor="middle">tira</text><text class="sm" x="460" y="118" text-anchor="middle">RGBW</text>
+        <text class="sm" x="410" y="176">24 V · ánodo común</text>
+      </svg></div>
+      <p class="note">Comprobar el consumo de la tira: <b>W/m × metros ≤ 48 W</b> (80 % de 60 W). La tira tiene que ser de 24 V para coincidir con la fuente. Con tramos largos, alimentar por los dos extremos.</p>
+    </div>
+
+    <!-- PERSIANAS -->
+    <div class="card">
+      <h3>Persianas · 2PM Gen3 en modo cortina</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H510"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H510"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box-acc" x="190" y="70" width="150" height="80" rx="4"/>
+        <text class="lbl" x="265" y="105" text-anchor="middle">2PM Gen3</text>
+        <text class="sm" x="265" y="122" text-anchor="middle">perfil "cover"</text>
+        <path class="w-l" d="M230 30 V70"/><text x="236" y="84">L</text>
+        <path class="w-n" d="M230 150 V190"/><text x="236" y="146">N</text>
+        <!-- pulsador doble -->
+        <path class="w-l" d="M80 30 V60 H120 M80 60 V80 M120 60 V80"/>
+        <path class="w-s" d="M70 80 H90 M110 80 H130 M68 90 L92 90 M108 90 L132 90 M80 90 V100 H190 M120 90 V122 H190"/>
+        <text x="196" y="104">S1</text><text x="196" y="126">S2</text>
+        <text class="sm" x="22" y="118">pulsador</text><text class="sm" x="22" y="132">subir/bajar</text>
+        <!-- motor -->
+        <path class="w-l" d="M340 95 H420 V112"/><text x="314" y="99">O1</text><text class="sm" x="360" y="89">subir</text>
+        <path class="w-l" d="M340 125 H400 V130"/><text x="314" y="129">O2</text><text class="sm" x="356" y="142">bajar</text>
+        <circle class="load" cx="420" cy="135" r="20"/><text class="lbl" x="420" y="140" text-anchor="middle">M</text>
+        <path class="w-n" d="M420 155 V190"/>
+        <text class="sm" x="448" y="132">motor</text><text class="sm" x="448" y="146">persiana</text>
+      </svg></div>
+      <p class="note">Un 2PM Gen3 por persiana (el 2PM usa sus <b>dos</b> salidas para un solo motor). Tras cablear: perfil "cover" y calibración. Nunca conectar dos motores en paralelo al mismo 2PM.</p>
+    </div>
+
+    <!-- CAMPANA -->
+    <div class="card">
+      <h3>Campana extractora · 1PM Gen3</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H510"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H510"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box-acc" x="190" y="70" width="150" height="80" rx="4"/>
+        <text class="lbl" x="265" y="105" text-anchor="middle">1PM Gen3</text>
+        <text class="sm" x="265" y="122" text-anchor="middle">16 A · mide W y kWh</text>
+        <path class="w-l" d="M230 30 V70"/><text x="236" y="84">L</text>
+        <path class="w-n" d="M230 150 V190"/><text x="236" y="146">N</text>
+        <path class="w-l" d="M90 30 V78"/>
+        <path class="w-s" d="M80 78 H100 M90 78 V84 M78 92 L102 92 M90 92 V110 H190"/>
+        <text class="sm" x="22" y="80">interruptor</text><text class="sm" x="22" y="94">opcional</text>
+        <text x="196" y="106">SW</text>
+        <path class="w-l" d="M340 110 H420 V115"/><text x="322" y="106">O</text>
+        <rect class="load" x="385" y="115" width="70" height="40" rx="3"/>
+        <text class="sm" x="420" y="139" text-anchor="middle">campana</text>
+        <path class="w-n" d="M420 155 V190"/>
+      </svg></div>
+      <p class="note">El 1PM <b>da o quita alimentación</b> a la campana; las velocidades se siguen eligiendo en su propio mando. La medida de consumo permite saber si está realmente aspirando y en qué velocidad (cada velocidad consume distinto).</p>
+    </div>
+
+    <!-- BRAZOS TV -->
+    <div class="card">
+      <h3>Brazos TV abatibles · Shelly 1 Gen3</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H300"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H300"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box-acc" x="110" y="70" width="150" height="80" rx="4"/>
+        <text class="lbl" x="185" y="102" text-anchor="middle">Shelly 1 Gen3</text>
+        <text class="sm" x="185" y="120" text-anchor="middle">contacto libre</text>
+        <text class="sm" x="185" y="134" text-anchor="middle">de tensión</text>
+        <path class="w-l" d="M150 30 V70"/><text x="156" y="84">L</text>
+        <path class="w-n" d="M150 150 V190"/><text x="156" y="146">N</text>
+        <path class="w-m" d="M260 95 H360"/><text x="240" y="99">I</text>
+        <path class="w-m" d="M260 125 H360"/><text x="240" y="129">O</text>
+        <text class="sm" x="280" y="88">COM</text><text class="sm" x="280" y="118">IN</text>
+        <rect class="box" x="360" y="70" width="140" height="80" rx="4"/>
+        <text class="lbl" x="430" y="102" text-anchor="middle">Controlador</text>
+        <text class="lbl" x="430" y="120" text-anchor="middle">del brazo</text>
+        <text class="sm" x="430" y="138" text-anchor="middle">entrada pulsador</text>
+      </svg></div>
+      <p class="note"><b>Opción A</b> (brazo con entrada de pulsador): un Shelly 1 Gen3 por brazo; un pulso de 1 s abre o cierra. <b>Opción B</b> (motor 230 V de dos sentidos sin centralita): un 2PM Gen3 por brazo en modo cortina, igual que las persianas, y así la web sabe la posición.</p>
+    </div>
+
+    <!-- AIRE -->
+    <div class="card">
+      <h3>Aire acondicionado · habilitación + consigna</h3>
+      <div class="fig"><svg viewBox="0 0 520 210">
+        <path class="w-l" d="M10 30 H300"/><text class="t-l" x="12" y="22">L</text>
+        <path class="w-n" d="M10 190 H300"/><text class="t-n" x="12" y="182">N</text>
+        <rect class="box-acc" x="110" y="70" width="150" height="80" rx="4"/>
+        <text class="lbl" x="185" y="105" text-anchor="middle">Shelly 1 Gen3</text>
+        <text class="sm" x="185" y="122" text-anchor="middle">contacto seco</text>
+        <path class="w-l" d="M150 30 V70"/><path class="w-n" d="M150 150 V190"/>
+        <path class="w-m" d="M260 95 H360"/><path class="w-m" d="M260 125 H360"/>
+        <text x="240" y="99">I</text><text x="240" y="129">O</text>
+        <rect class="box" x="360" y="70" width="140" height="80" rx="4"/>
+        <text class="lbl" x="430" y="98" text-anchor="middle">Unidad interior</text>
+        <text class="sm" x="430" y="116" text-anchor="middle">bornes "ON/OFF remoto"</text>
+        <text class="sm" x="430" y="130" text-anchor="middle">o contacto ventana</text>
+        <path class="w-wifi" d="M430 150 V185"/>
+        <text class="sm" x="330" y="200">consigna y modo: Wi-Fi del fabricante o emisor IR</text>
+      </svg></div>
+      <p class="note">El contacto apaga o habilita el equipo de forma fiable (cierre de aula, persiana abierta). Temperatura y modo no se controlan con un relé: necesitan el módulo Wi-Fi de la marca del aire o un emisor de infrarrojos con API local.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Wall Display XL y sensores Bluetooth</h3>
+    <p class="note">La pantalla se alimenta a 230 V (L y N) en una caja universal empotrada y su <b>relé interno de 5 A</b> queda libre: buena opción para un circuito on/off extra, como la luz de la isla o de la pizarra. El sensor <b>BLU Motion</b> y el <b>pulsador BLU de 4 botones</b> funcionan a pilas y se emparejan con la Wall Display, que reenvía sus eventos a la red. Colocar el sensor con vista a la zona de trabajo y lejos de fuegos y salidas de aire caliente.</p>
+  </div>
+</section>
+
+<!-- RED -->
+<section id="red">
+  <div class="sec-head"><h2>Red y direcciones IP</h2><span class="tag">ejemplo de plan; adaptar a la red del centro</span></div>
+  <div class="tbl"><table>
+    <thead><tr><th>IP</th><th>Equipo</th><th>Conexión</th><th>Nombre en la web</th></tr></thead>
+    <tbody class="mono">
+      <tr><td>192.168.50.10</td><td>Servidor web</td><td>Ethernet</td><td>server</td></tr>
+      <tr><td>192.168.50.20</td><td>Wall Display XL</td><td>Wi-Fi</td><td>panel</td></tr>
+      <tr><td>192.168.50.21</td><td>Dimmer Gen3</td><td>Wi-Fi</td><td>luz_general</td></tr>
+      <tr><td>192.168.50.22</td><td>Plus RGBW PM</td><td>Wi-Fi</td><td>tira_led</td></tr>
+      <tr><td>192.168.50.23</td><td>2PM Gen3 nº1</td><td>Wi-Fi</td><td>persiana_1</td></tr>
+      <tr><td>192.168.50.24</td><td>2PM Gen3 nº2</td><td>Wi-Fi</td><td>persiana_2</td></tr>
+      <tr><td>192.168.50.25</td><td>1PM Gen3</td><td>Wi-Fi</td><td>campana</td></tr>
+      <tr><td>192.168.50.26–27</td><td>1 Gen3 brazos TV</td><td>Wi-Fi</td><td>brazo_tv_1 / brazo_tv_2</td></tr>
+      <tr><td>192.168.50.28</td><td>1 Gen3 clima</td><td>Wi-Fi</td><td>clima</td></tr>
+      <tr><td>192.168.50.31–32</td><td>Cámaras PTZ</td><td>Ethernet PoE</td><td>ptz_1 / ptz_2</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Recomendaciones: IP fija o reserva DHCP para todo; red o VLAN separada de la del alumnado; Wi-Fi de 2,4 GHz con buena cobertura junto a la campana (el acero del mobiliario atenúa la señal); contraseña de acceso activada en cada Shelly y desactivar la nube si no se va a usar.</p>
+</section>
+
+<!-- ESCENAS -->
+<section id="escenas">
+  <div class="sec-head"><h2>Escenas del aula</h2><span class="tag">un toque en la web, en la Wall Display o en el pulsador de 4 botones</span></div>
+  <div class="scenes">
+    <div class="scene"><span class="key">Botón 1</span><h3>Clase teórica</h3><ul><li>Luz general 80 %, tira blanco neutro</li><li>Persianas al 60 %</li><li>Brazos TV abiertos</li><li>PTZ 1 → preset "profesor"</li></ul></div>
+    <div class="scene"><span class="key">Botón 2</span><h3>Demostración</h3><ul><li>Luz general 100 %, tira blanco frío en encimera</li><li>Campana encendida</li><li>PTZ 1 → "encimera", PTZ 2 → "fuegos"</li><li>Brazos TV abiertos</li></ul></div>
+    <div class="scene"><span class="key">Botón 3</span><h3>Proyección</h3><ul><li>Luz general 25 %, tira ámbar suave</li><li>Persianas cerradas</li><li>Brazos TV abiertos</li></ul></div>
+    <div class="scene"><span class="key">Botón 4</span><h3>Fin de clase</h3><ul><li>Luces apagadas</li><li>Campana apagada (con retardo de 10 min)</li><li>Brazos TV recogidos</li><li>Aire apagado, persianas abiertas</li></ul></div>
+  </div>
+</section>
+
+<!-- AUTOMATISMOS -->
+<section id="automatismos">
+  <div class="sec-head"><h2>Automatismos</h2><span class="tag">se ejecutan en el servidor o como script en el propio Shelly</span></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Cuando…</th><th>Entonces…</th><th>Dónde</th></tr></thead>
+    <tbody>
+      <tr><td>BLU Motion detecta presencia y el aula está apagada</td><td>Luz general al 60 %</td><td>Wall Display (escena local)</td></tr>
+      <tr><td>BLU Motion sin movimiento 20 min</td><td>Escena "Fin de clase" salvo la campana si está consumiendo</td><td>Servidor</td></tr>
+      <tr><td>Campana consume &gt; 30 W al encender la cocina</td><td>Registrar uso; aviso en la web si sigue encendida sin presencia</td><td>Servidor</td></tr>
+      <tr><td>Campana apagada desde la web</td><td>Mantenerla 10 min más para ventilar (post-extracción)</td><td>Script en 1PM</td></tr>
+      <tr><td>Aire encendido y persianas totalmente abiertas a mediodía</td><td>Bajar persianas al 30 % en la orientación solar</td><td>Servidor</td></tr>
+      <tr><td>Brazos TV se van a cerrar</td><td>Comprobar que no hay escena "Proyección" activa y pedir confirmación en la web</td><td>Web</td></tr>
+      <tr><td>Fuera del horario lectivo (22:00)</td><td>Todo apagado y aire deshabilitado</td><td>Programación del servidor</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- WEB -->
+<section id="web">
+  <div class="sec-head"><h2>Cómo se comunica la web</h2><span class="tag">el navegador nunca habla con los dispositivos directamente</span></div>
+  <p>El navegador llama a la API del servidor; el servidor traduce cada orden al protocolo del equipo y guarda las IPs y contraseñas. Así la web funciona igual desde la tablet o desde la Wall Display, y las credenciales no salen del servidor.</p>
+  <pre>// Rutas del servidor (Node.js / Express)             → orden al dispositivo
+POST /api/luz         { brillo: 0-100 }             → Dimmer   /rpc/Light.Set?id=0&amp;on=true&amp;brightness=…
+POST /api/tira        { rgb:[r,g,b], blanco, brillo }→ RGBW PM  /rpc/RGBW.Set?id=0&amp;rgb=[…]&amp;white=…
+POST /api/persiana/:n { pos: 0-100 | "abrir"|"parar"}→ 2PM nº n /rpc/Cover.GoToPosition?id=0&amp;pos=…
+POST /api/campana     { on: true|false }             → 1PM      /rpc/Switch.Set?id=0&amp;on=…
+POST /api/brazo/:n    { accion: "pulso" }            → 1 Gen3   /rpc/Switch.Set?id=0&amp;on=true&amp;toggle_after=1
+POST /api/clima       { on, consigna }               → 1 Gen3 + API del fabricante del aire
+POST /api/ptz/:n      { preset: 1-n }                → cámara   VISCA-IP "Memory Recall" o CGI del fabricante
+POST /api/escena/:id                                 → lanza varias órdenes en paralelo
+GET  /api/estado      (WebSocket)                    → Shelly.GetStatus de cada equipo, consumo de la campana</pre>
+  <p class="note">Para estados en tiempo real, el servidor puede abrir un WebSocket con cada Shelly (<code>ws://IP/rpc</code>) y reenviar los cambios a la web, de modo que si alguien pulsa un botón físico la página se actualiza al instante. Alternativa sin programar el servidor: Home Assistant con la integración Shelly, cuyo panel también se puede mostrar en la Wall Display XL.</p>
+</section>
+
+<!-- PENDIENTE -->
+<section id="pendiente">
+  <div class="check">
+    <h3>Datos a confirmar antes de comprar o cablear</h3>
+    <ul>
+      <li><b>Cantidades:</b> la lista no indica unidades. Hacen falta <b>dos 2PM Gen3</b> (una por persiana) y, para los brazos, dos Shelly 1 Gen3 o dos 2PM según el tipo de brazo.</li>
+      <li><b>Brazos TV:</b> marca y modelo; si llevan centralita con entrada de pulsador o un motor de 230 V directo.</li>
+      <li><b>Campana:</b> potencia del motor y si tiene mando electrónico que se reinicia al cortar tensión.</li>
+      <li><b>Aire acondicionado:</b> marca y modelo, si tiene bornes de ON/OFF remoto y módulo Wi-Fi con API local.</li>
+      <li><b>Cámaras PTZ:</b> marca y modelo, y si admiten VISCA sobre IP o comandos HTTP para presets.</li>
+      <li><b>Tira LED:</b> metros totales y consumo por metro, para confirmar que basta una fuente de 60 W.</li>
+      <li><b>Luminarias:</b> que los downlights actuales sean regulables.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Gastronova · aula de cocina · esquemas de principio para planificar la instalación y la web de control. Revisión de octubre de 2026.</footer>
+</div>
+
+</body></html>

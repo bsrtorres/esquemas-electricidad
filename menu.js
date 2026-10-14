@@ -37,6 +37,9 @@
       {t: "012 · Cruzamiento y dos interruptores", href: "pdf/A3/esquema-012-A3.pdf"},
       {t: "007–012 juntas", href: "pdf/esquemas-007-012-A3.pdf"},
     ]},
+    {t: "Domótica", items: [
+      {t: "Ecosistema domótico Shelly (aula de cocina)", href: "ecosistema-domotico.html"},
+    ]},
     {t: "Normativa", href: "normativa.html"},
   ];
 

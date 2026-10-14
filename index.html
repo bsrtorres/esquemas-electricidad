@@ -13,7 +13,8 @@
          display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
   h1 { font-size: clamp(30px, 5vw, 44px); margin: 0; font-weight: 700; letter-spacing: -.01em; text-align: center; }
   p { color: var(--muted); margin: 8px 0 40px; text-align: center; }
-  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); gap: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 220px)); gap: 20px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: repeat(2, minmax(0, 220px)); } }
   @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
   .grid a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
             aspect-ratio: 1; background: var(--panel); color: var(--ink); text-decoration: none;
@@ -41,6 +42,10 @@
     <a href="fichas.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>
       Fichas
+    </a>
+    <a href="ecosistema-domotico.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 3l9 8"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 15a3.5 3.5 0 0 1 5 0M8 12.8a6 6 0 0 1 8 0"/><circle cx="12" cy="17.5" r=".6"/></svg>
+      Domótica
     </a>
     <a href="normativa.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
