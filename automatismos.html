@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatismos · Esquemas de electricidad</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 70px; font-weight: bold; }
+  td.f { width: 70px; }
+  a { color: var(--accent); }
+  .all { margin-top: 12px; }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grid p { margin: 0 0 12px; }
+  td.k { width: 230px; font-weight: bold; }
+  .jump { margin: -12px 0 20px; }
+</style>
+<script src="menu.js?v=6" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Automatismos</h1>
+  <p class="lead">Mando de motores con contactores. En cada ficha: circuito de potencia y circuito de mando con los aparatos colocados y las bornas numeradas, para dibujar los conductores. Cada ficha tiene su solución en colores.</p>
+
+  <section class="card" id="automatismos">
+    <table>
+      <thead><tr><th>N.º</th><th>Formato</th><th>Contenido</th></tr></thead>
+      <tbody>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-014-A4.pdf">014</a></td><td class="f">A4</td><td><b>Marcha-paro de motor (KM1)</b>. Marcha-paro con autoenclavamiento, piloto de marcha y de disparo térmico · <a href="pdf/automatismos/esquema-014-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-015-A4.pdf">015</a></td><td class="f">A4</td><td><b>Marcha-paro desde dos puntos</b>. Dos pulsadores de paro en serie y dos de marcha en paralelo · <a href="pdf/automatismos/esquema-015-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-016-A4.pdf">016</a></td><td class="f">A4</td><td><b>Marcha continua y por impulsos</b>. Pulsador de doble cámara para marcha a impulsos · <a href="pdf/automatismos/esquema-016-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-017-A4.pdf">017</a></td><td class="f">A4</td><td><b>Inversión de giro con paro previo</b>. KM1 y KM2 con enclavamiento eléctrico · <a href="pdf/automatismos/esquema-017-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-018-A4.pdf">018</a></td><td class="f">A4</td><td><b>Inversión de giro sin paro previo</b>. Doble enclavamiento: por contactos y por pulsadores · <a href="pdf/automatismos/esquema-018-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-019-A4.pdf">019</a></td><td class="f">A4</td><td><b>Arranque estrella-triángulo</b>. KM1 línea, KM2 estrella, KM3 triángulo y temporizador KT1 · <a href="pdf/automatismos/esquema-019-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-020-A4.pdf">020</a></td><td class="f">A4</td><td><b>Arranque secuencial de dos motores</b>. M2 solo arranca si M1 está en marcha · <a href="pdf/automatismos/esquema-020-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-021-A4.pdf">021</a></td><td class="f">A4</td><td><b>Marcha con paro temporizado</b>. El motor se para solo al cumplirse el tiempo de KT1 · <a href="pdf/automatismos/esquema-021-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-022-A4.pdf">022</a></td><td class="f">A4</td><td><b>Inversión de giro con finales de carrera</b>. Puerta motorizada con SQ1 (abierta) y SQ2 (cerrada) · <a href="pdf/automatismos/esquema-022-A4-solucion.pdf">solución</a></td></tr>
+        <tr><td class="n"><a href="pdf/automatismos/esquema-023-A4.pdf">023</a></td><td class="f">A4</td><td><b>Arranque por resistencias estatóricas</b>. KM2 puentea las resistencias tras el tiempo de KT1 · <a href="pdf/automatismos/esquema-023-A4-solucion.pdf">solución</a></td></tr>
+      </tbody>
+    </table>
+    <p class="all">Todas juntas: <a href="pdf/automatismos-014-023-A4.pdf">014–023 (A4)</a> · <a href="pdf/automatismos-014-023-A4-soluciones.pdf">soluciones 014–023</a></p>
+  </section>
+</div>
+</body>
+</html>

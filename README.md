@@ -16,6 +16,7 @@ Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares
 - `calculos/`: calculadoras de circuitos de vivienda (ITC-BT-25 e ITC-BT-19), ejemplo de una toma del C2 y teoría en PDF.
 - `pdf/A4/`: esquemas 001–006 y 013 (telerruptor, con su solución) en A4 apaisado.
 - `pdf/A3/`: esquemas 007–012 en A3 apaisado, con marco y cajetín.
+- `automatismos.html` y `pdf/automatismos/`: automatismos 014–023 (mando de motores con contactores), circuito de potencia y de mando para completar, cada uno con su solución. Juntos en `pdf/automatismos-014-023-A4.pdf` y `pdf/automatismos-014-023-A4-soluciones.pdf`.
 - `pdf/esquemas-001-006-A4.pdf` y `pdf/esquemas-007-012-A3.pdf`: todas las fichas de cada formato en un solo PDF.
 
 Cada ficha incluye el esquema funcional, el unifilar (planta) y el multifilar de montaje con las cajas de derivación vacías para que el alumnado haga las conexiones.
