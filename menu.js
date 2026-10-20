@@ -124,6 +124,7 @@
   .mnu-drop .mnu-h { font-size: 14px; font-weight: bold; color: #5d5d63; padding: 8px 10px 2px; text-transform: uppercase; letter-spacing: .05em; }
   .mnu-drop .pdf { font-size: 13px; color: #5d5d63; margin-left: 6px; }
   @media (max-width: 760px) {
+    .mnu-brand { white-space: normal; flex: 1; min-width: 0; }
     .mnu-toggle { display: block; }
     .mnu-list { display: none; flex-direction: column; width: 100%; padding: 0 0 10px; }
     .mnu.open .mnu-list { display: flex; }
@@ -137,7 +138,7 @@
   const isCur = h => abs(h) === here || (h === "index.html" && here === BASE.href);
   const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-  let html = `<div class="mnu-in"><a class="mnu-brand" href="${abs("index.html")}">Esquemas de electricidad</a>`
+  let html = `<div class="mnu-in"><a class="mnu-brand" href="${abs("index.html")}">Taller de Electricidad y Electrónica</a>`
     + `<button class="mnu-toggle" aria-expanded="false" aria-controls="mnu-list">Menú</button><ul class="mnu-list" id="mnu-list">`;
   MENU.forEach((g, i) => {
     if (g.href) {

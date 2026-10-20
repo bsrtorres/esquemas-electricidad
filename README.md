@@ -1,6 +1,6 @@
-# Esquemas de electricidad
+# Taller de Electricidad y Electrónica
 
-Simuladores, cálculo de circuitos de vivienda y fichas de esquemas multifilares para completar.
+Simuladores, esquemas para completar, cálculos de vivienda, automatismos, electrónica, domótica y normativa.
 
 **Web:** https://bsrtorres.github.io/esquemas-electricidad/
 
