@@ -1,0 +1,472 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vivienda 3D·2B · Instalación eléctrica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: hoja de proyecto técnico — plano a sangre con cajetín, después memoria de cálculo en tablas */
+:root{
+  --paper:#f5f6f3; --sheet:#ffffff; --ink:#1b2430; --muted:#5d6876; --line:#cfd5d0; --wall:#1b2430;
+  --floor:#ffffff; --wet:#eef3f6; --terr:#eef0e8; --accent:#1d5fa8; --warn:#a15c00; --ok:#1f7a4d;
+  --c1:#c48700; --c2:#2563c9; --c3:#c2410c; --c4:#7c3aed; --c5:#d02a76; --c7:#0f8fa3; --c9:#16865c; --c10:#8a5a2b; --cg:#1b2430;
+  --f-disp:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#12161b; --sheet:#181d24; --ink:#e3e8ee; --muted:#9aa5b2; --line:#2d3540; --wall:#dfe5ec;
+  --floor:#1b2129; --wet:#1c2630; --terr:#1d2320; --accent:#7fb2ee; --warn:#e2a54f; --ok:#5fc795;
+  --c1:#f0b429; --c2:#6d9ef0; --c3:#f0804c; --c4:#ad8bfa; --c5:#f06aa6; --c7:#3fc6d8; --c9:#4ccf95; --c10:#c99a6b; --cg:#dfe5ec; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12161b; --sheet:#181d24; --ink:#e3e8ee; --muted:#9aa5b2; --line:#2d3540; --wall:#dfe5ec;
+  --floor:#1b2129; --wet:#1c2630; --terr:#1d2320; --accent:#7fb2ee; --warn:#e2a54f; --ok:#5fc795;
+  --c1:#f0b429; --c2:#6d9ef0; --c3:#f0804c; --c4:#ad8bfa; --c5:#f06aa6; --c7:#3fc6d8; --c9:#4ccf95; --c10:#c99a6b; --cg:#dfe5ec; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--f-body)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--f-disp);text-wrap:balance;margin:0;letter-spacing:.01em}
+h1{font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.1}
+h2{font-size:24px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+p{margin:0;max-width:68ch}
+.eyebrow{font:500 12px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+header{display:grid;gap:14px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:500}
+section{display:grid;gap:16px;min-width:0}
+.sec-head{display:grid;gap:6px}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:4px;min-width:0}
+.plan-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:0}
+@media (max-width:860px){.plan-grid{grid-template-columns:1fr}}
+.plan-box{overflow-x:auto;padding:12px;border-right:1px solid var(--line)}
+@media (max-width:860px){.plan-box{border-right:0;border-bottom:1px solid var(--line)}}
+#plano{display:block;width:100%;min-width:560px;height:auto}
+aside.legend{padding:16px;display:grid;gap:14px;align-content:start}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--f-mono);border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:20px;padding:7px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--cc,var(--ink));display:inline-block}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sym-list{display:grid;gap:8px;font-size:13px;margin:0;padding:0;list-style:none}
+.sym-list li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center}
+.sym-list svg{width:28px;height:20px}
+.cajetin{border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));font-size:12px}
+@media (max-width:640px){.cajetin{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cajetin div{padding:10px 14px;border-right:1px solid var(--line);display:grid;gap:2px}
+.cajetin div:last-child{border-right:0}
+.cajetin span{font:500 10px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.cajetin b{font-family:var(--f-disp);font-size:15px;font-weight:600}
+/* svg plan */
+.floor{fill:var(--floor)} .wet{fill:var(--wet)} .terr{fill:var(--terr)}
+.rail{fill:none;stroke:var(--wall);stroke-width:2;stroke-dasharray:6 4}
+.wi{stroke:var(--wall);stroke-width:4} .we{fill:none;stroke:var(--wall);stroke-width:8}
+.gap{fill:var(--floor)} .win{stroke:var(--wall);stroke-width:1.2} .door{fill:none;stroke:var(--muted);stroke-width:1.2}
+.slide{stroke:var(--wall);stroke-width:2.4}
+.rn{font:600 11px var(--f-disp);letter-spacing:.08em;fill:var(--muted);text-anchor:middle}
+.ra{font:400 10px var(--f-mono);fill:var(--muted);text-anchor:middle}
+.note,.sc{font:400 10px var(--f-mono);fill:var(--muted);text-anchor:middle}
+.nrt path{fill:var(--ink)} .sb1{fill:var(--ink)} .sb2{fill:var(--sheet);stroke:var(--ink)}
+.s{stroke:var(--sc);fill:none;stroke-width:1.6;transition:opacity .2s}
+.s .sf{fill:var(--sheet)} .s .sfill{fill:var(--sc)}
+.s text{stroke:none;fill:var(--sc)}
+.sl{font:600 8px var(--f-mono);text-anchor:middle}
+.sa{font:600 8px var(--f-mono);text-anchor:middle}
+.cg{fill:var(--cg)} .cgt{font:600 9px var(--f-mono);text-anchor:end}
+.c-C1{--sc:var(--c1)} .c-C2{--sc:var(--c2)} .c-C3{--sc:var(--c3)} .c-C4{--sc:var(--c4)} .c-C5{--sc:var(--c5)} .c-C7{--sc:var(--c7)} .c-C9{--sc:var(--c9)} .c-C10{--sc:var(--c10)} .c-CG{--sc:var(--cg)}
+.filtering .s{opacity:.12} .filtering .s.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.s{transition:none}}
+/* unifilar */
+.uni-box{overflow-x:auto;padding:12px}
+#unifilar{display:block;width:100%;min-width:700px;height:auto}
+.ul{stroke:var(--ink);stroke-width:1.6} .ub{fill:var(--sheet);stroke:var(--ink);stroke-width:1.4}
+.ut1{font:600 12px var(--f-mono);fill:var(--ink);text-anchor:middle} .ut2{font:400 10px var(--f-mono);fill:var(--muted);text-anchor:middle}
+#unifilar .s .ul{stroke:var(--sc)} #unifilar .s .ub{stroke:var(--sc)} #unifilar .s .ut1{fill:var(--sc)}
+/* tables */
+.tbl{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font:500 11px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sheet);position:sticky;top:0}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-size:13px}
+td.w{white-space:normal;min-width:180px}
+tbody tr:hover{background:var(--wet)}
+tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
+.cid{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--f-mono)}
+.cid i{width:10px;height:10px;border-radius:2px;background:var(--cc);display:inline-block}
+.pill{display:inline-block;font:500 11px/1 var(--f-mono);padding:4px 7px;border-radius:3px;border:1px solid currentColor}
+.ok{color:var(--ok)} .warn{color:var(--warn)}
+.formula{font-family:var(--f-mono);font-size:14px;background:var(--sheet);border:1px solid var(--line);border-left:3px solid var(--accent);padding:12px 14px;border-radius:3px;overflow-x:auto}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+.card ul{margin:0;padding-left:18px;display:grid;gap:6px}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:14px}
+dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-family:var(--f-mono);font-size:13.5px}
+.small{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Proyecto tipo · Instalación de enlace e interior · REBT (RD 842/2002)</div>
+  <h1>Vivienda de 3 dormitorios y 2 baños</h1>
+  <p>Distribución propuesta, situación de mecanismos y memoria de cálculo de la instalación eléctrica interior. Superficie útil 103,5 m² más terraza de 12 m². Se proyecta con electrificación <b>elevada</b> por incluir aire acondicionado y secadora.</p>
+  <div class="facts">
+    <span>Potencia prevista <b>9.200 W</b></span><span>Tensión <b>230 V · monofásica</b></span><span>IGA <b>40 A</b></span><span>Circuitos <b>8</b></span><span>Diferenciales <b>2 × 40 A / 30 mA</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Plano 01</div><h2>Planta con situación de puntos eléctricos</h2>
+  <p class="small">Pulsa un circuito para resaltar sus puntos en el plano y en el esquema unifilar. Pasa el cursor sobre un símbolo para ver su uso.</p></div>
+  <div class="sheet">
+    <div class="plan-grid">
+      <div class="plan-box"><svg id="plano" viewBox="0 0 840 800" role="img" aria-label="Plano de planta con instalación eléctrica">
+<rect x="40" y="598" width="372" height="124" class="terr"/>
+<path d="M40 598 V722 H412 V598" class="rail"/>
+<rect x="40" y="40" width="248" height="217.0" class="floor"/>
+<rect x="288" y="40" width="124" height="217.0" class="floor wet"/>
+<rect x="412" y="40" width="186" height="217.0" class="floor"/>
+<rect x="598" y="40" width="155.0" height="217.0" class="floor"/>
+<rect x="40" y="257.0" width="558" height="74.39999999999999" class="floor"/>
+<rect x="598" y="257.0" width="155.0" height="155.0" class="floor"/>
+<rect x="40" y="331.40000000000003" width="372" height="266.59999999999997" class="floor"/>
+<rect x="412" y="331.40000000000003" width="186" height="266.59999999999997" class="floor wet"/>
+<rect x="598" y="412" width="155.0" height="186" class="floor wet"/>
+<line x1="40" y1="257.0" x2="753.0" y2="257.0" class="wi"/>
+<line x1="288" y1="40" x2="288" y2="257.0" class="wi"/>
+<line x1="412" y1="40" x2="412" y2="257.0" class="wi"/>
+<line x1="598" y1="40" x2="598" y2="257.0" class="wi"/>
+<line x1="40" y1="331.40000000000003" x2="598" y2="331.40000000000003" class="wi"/>
+<line x1="412" y1="331.40000000000003" x2="412" y2="598" class="wi"/>
+<line x1="598" y1="331.40000000000003" x2="598" y2="598" class="wi"/>
+<line x1="598" y1="412" x2="753.0" y2="412" class="wi"/>
+<rect x="40" y="40" width="713.0" height="558" class="we"/>
+<rect x="114.4" y="34.4" width="99.2" height="11.2" class="gap"/>
+<line x1="114.39999999999999" x2="213.6" y1="36.3" y2="36.3" class="win"/>
+<line x1="114.39999999999999" x2="213.6" y1="40.0" y2="40.0" class="win"/>
+<line x1="114.39999999999999" x2="213.6" y1="43.7" y2="43.7" class="win"/>
+<rect x="325.2" y="34.4" width="49.6" height="11.2" class="gap"/>
+<line x1="325.2" x2="374.8" y1="36.3" y2="36.3" class="win"/>
+<line x1="325.2" x2="374.8" y1="40.0" y2="40.0" class="win"/>
+<line x1="325.2" x2="374.8" y1="43.7" y2="43.7" class="win"/>
+<rect x="461.6" y="34.4" width="86.8" height="11.2" class="gap"/>
+<line x1="461.59999999999997" x2="548.4" y1="36.3" y2="36.3" class="win"/>
+<line x1="461.59999999999997" x2="548.4" y1="40.0" y2="40.0" class="win"/>
+<line x1="461.59999999999997" x2="548.4" y1="43.7" y2="43.7" class="win"/>
+<rect x="641.4" y="34.4" width="68.2" height="11.2" class="gap"/>
+<line x1="641.4" x2="709.6" y1="36.3" y2="36.3" class="win"/>
+<line x1="641.4" x2="709.6" y1="40.0" y2="40.0" class="win"/>
+<line x1="641.4" x2="709.6" y1="43.7" y2="43.7" class="win"/>
+<rect x="34.4" y="387.2" width="11.2" height="148.8" class="gap"/>
+<line y1="387.2" y2="536.0" x1="36.3" x2="36.3" class="win"/>
+<line y1="387.2" y2="536.0" x1="40.0" x2="40.0" class="win"/>
+<line y1="387.2" y2="536.0" x1="43.7" x2="43.7" class="win"/>
+<rect x="449.2" y="592.4" width="99.2" height="11.2" class="gap"/>
+<line x1="449.2" x2="548.4" y1="594.3" y2="594.3" class="win"/>
+<line x1="449.2" x2="548.4" y1="598.0" y2="598.0" class="win"/>
+<line x1="449.2" x2="548.4" y1="601.7" y2="601.7" class="win"/>
+<rect x="747.4" y="474.0" width="11.2" height="62.0" class="gap"/>
+<line y1="474.0" y2="536.0" x1="749.3" x2="749.3" class="win"/>
+<line y1="474.0" y2="536.0" x1="753.0" x2="753.0" class="win"/>
+<line y1="474.0" y2="536.0" x1="756.7" x2="756.7" class="win"/>
+<rect x="195.0" y="249.6" width="49.6" height="14.9" class="gap"/>
+<path d="M195.0 257.0 V207.4 A49.6 49.6 0 0 1 244.6 257.0" class="door"/>
+<rect x="280.6" y="188.8" width="14.9" height="43.4" class="gap"/>
+<path d="M288.0 188.8 H331.4 A43.4 43.4 0 0 1 288.0 232.2" class="door"/>
+<rect x="430.6" y="249.6" width="49.6" height="14.9" class="gap"/>
+<path d="M430.6 257.0 V207.4 A49.6 49.6 0 0 1 480.2 257.0" class="door"/>
+<rect x="622.8" y="249.6" width="49.6" height="14.9" class="gap"/>
+<path d="M622.8 257.0 V207.4 A49.6 49.6 0 0 1 672.4 257.0" class="door"/>
+<rect x="102.0" y="324.0" width="86.8" height="14.9" class="gap"/>
+<rect x="498.8" y="324.0" width="49.6" height="14.9" class="gap"/>
+<path d="M498.8 331.4 V381.0 A49.6 49.6 0 0 0 548.4 331.4" class="door"/>
+<rect x="622.8" y="404.6" width="49.6" height="14.9" class="gap"/>
+<path d="M622.8 412.0 V461.6 A49.6 49.6 0 0 0 672.4 412.0" class="door"/>
+<rect x="746.8" y="300.4" width="12.4" height="55.8" class="gap"/>
+<path d="M753.0 300.4 H697.2 A55.8 55.8 0 0 0 753.0 356.2" class="door"/>
+<rect x="133.0" y="591.8" width="155.0" height="12.4" class="gap"/>
+<line x1="133.0" x2="219.79999999999998" y1="595.5200000000001" y2="595.5200000000001" class="slide"/><line x1="201.20000000000002" x2="288.0" y1="600.4799999999999" y2="600.4799999999999" class="slide"/>
+<text x="164" y="86.5" class="rn">DORMITORIO 1</text><text x="164" y="99.5" class="ra">14,00 m²</text>
+<text x="350" y="207.4" class="rn">BAÑO 1</text><text x="350" y="220.4" class="ra">7,00 m²</text>
+<text x="505.0" y="219.79999999999998" class="rn">DORMITORIO 2</text><text x="505.0" y="232.79999999999998" class="ra">10,50 m²</text>
+<text x="675.5" y="219.79999999999998" class="rn">DORMITORIO 3</text><text x="675.5" y="232.79999999999998" class="ra">8,75 m²</text>
+<text x="319.0" y="315.90000000000003" class="rn">PASILLO</text><text x="319.0" y="328.90000000000003" class="ra">10,80 m²</text>
+<text x="675.5" y="384.09999999999997" class="rn">VESTÍBULO</text><text x="675.5" y="397.09999999999997" class="ra">6,25 m²</text>
+<text x="226" y="517.4000000000001" class="rn">SALÓN-COMEDOR</text><text x="226" y="530.4000000000001" class="ra">25,80 m²</text>
+<text x="492.59999999999997" y="467.8" class="rn">COCINA</text><text x="492.59999999999997" y="480.8" class="ra">12,90 m²</text>
+<text x="675.5" y="449.2" class="rn">BAÑO 2</text><text x="675.5" y="462.2" class="ra">7,50 m²</text>
+<text x="226" y="694.1" class="rn">TERRAZA</text><text x="226" y="707.1" class="ra">12,00 m²</text>
+<text x="763.0" y="332.64" class="note">Acceso</text>
+<g class="s c-C1"><title>Punto de luz vestíbulo</title><circle cx="675.5" cy="334.5" r="8" class="sf"/><path d="M669.9 328.9 L681.1 340.1 M681.1 328.9 L669.9 340.1"/></g>
+<g class="s c-C1"><title>Punto de luz salón</title><circle cx="151.6" cy="464.7" r="8" class="sf"/><path d="M146.0 459.1 L157.2 470.3 M157.2 459.1 L146.0 470.3"/></g>
+<g class="s c-C1"><title>Punto de luz comedor</title><circle cx="300.4" cy="464.7" r="8" class="sf"/><path d="M294.8 459.1 L306.0 470.3 M306.0 459.1 L294.8 470.3"/></g>
+<g class="s c-C1"><title>Punto de luz cocina</title><circle cx="505.0" cy="387.2" r="8" class="sf"/><path d="M499.4 381.6 L510.6 392.8 M510.6 381.6 L499.4 392.8"/></g>
+<g class="s c-C1"><title>Punto de luz cocina</title><circle cx="505.0" cy="542.2" r="8" class="sf"/><path d="M499.4 536.6 L510.6 547.8 M510.6 536.6 L499.4 547.8"/></g>
+<g class="s c-C1"><title>Punto de luz dormitorio 1</title><circle cx="120.6" cy="148.5" r="8" class="sf"/><path d="M115.0 142.9 L126.2 154.1 M126.2 142.9 L115.0 154.1"/></g>
+<g class="s c-C1"><title>Punto de luz dormitorio 1</title><circle cx="207.4" cy="148.5" r="8" class="sf"/><path d="M201.8 142.9 L213.0 154.1 M213.0 142.9 L201.8 154.1"/></g>
+<g class="s c-C1"><title>Punto de luz dormitorio 2</title><circle cx="467.8" cy="139.2" r="8" class="sf"/><path d="M462.2 133.6 L473.4 144.8 M473.4 133.6 L462.2 144.8"/></g>
+<g class="s c-C1"><title>Punto de luz dormitorio 2</title><circle cx="542.2" cy="139.2" r="8" class="sf"/><path d="M536.6 133.6 L547.8 144.8 M547.8 133.6 L536.6 144.8"/></g>
+<g class="s c-C1"><title>Punto de luz dormitorio 3</title><circle cx="675.5" cy="139.2" r="8" class="sf"/><path d="M669.9 133.6 L681.1 144.8 M681.1 133.6 L669.9 144.8"/></g>
+<g class="s c-C1"><title>Punto de luz baño 1</title><circle cx="350.0" cy="139.2" r="8" class="sf"/><path d="M344.4 133.6 L355.6 144.8 M355.6 133.6 L344.4 144.8"/></g>
+<g class="s c-C1"><title>Punto de luz baño 2</title><circle cx="675.5" cy="511.2" r="8" class="sf"/><path d="M669.9 505.6 L681.1 516.8 M681.1 505.6 L669.9 516.8"/></g>
+<g class="s c-C1"><title>Punto de luz pasillo</title><circle cx="195.0" cy="294.2" r="8" class="sf"/><path d="M189.4 288.6 L200.6 299.8 M200.6 288.6 L189.4 299.8"/></g>
+<g class="s c-C1"><title>Punto de luz pasillo</title><circle cx="443.0" cy="294.2" r="8" class="sf"/><path d="M437.4 288.6 L448.6 299.8 M448.6 288.6 L437.4 299.8"/></g>
+<g class="s c-C1"><title>Punto de luz terraza</title><circle cx="133.0" cy="660.0" r="8" class="sf"/><path d="M127.4 654.4 L138.6 665.6 M138.6 654.4 L127.4 665.6"/></g>
+<g class="s c-C1"><title>Punto de luz terraza</title><circle cx="319.0" cy="660.0" r="8" class="sf"/><path d="M313.4 654.4 L324.6 665.6 M324.6 654.4 L313.4 665.6"/></g>
+<g class="s c-C1"><title>Interruptor vestíbulo</title><circle cx="737.5" cy="374.8" r="3.6" class="sf"/><path d="M740.1 372.2 L746.5 365.8"/></g>
+<g class="s c-C1"><title>Interruptor dormitorio 1</title><circle cx="182.6" cy="241.5" r="3.6" class="sf"/><path d="M185.2 238.9 L191.6 232.5 M179.6 244.5 L173.6 250.5"/></g>
+<g class="s c-C1"><title>Interruptor dormitorio 2</title><circle cx="418.2" cy="241.5" r="3.6" class="sf"/><path d="M420.8 238.9 L427.2 232.5 M415.2 244.5 L409.2 250.5"/></g>
+<g class="s c-C1"><title>Interruptor dormitorio 3</title><circle cx="684.8" cy="241.5" r="3.6" class="sf"/><path d="M687.4 238.9 L693.8 232.5"/></g>
+<g class="s c-C1"><title>Interruptor baño 1</title><circle cx="303.5" cy="244.6" r="3.6" class="sf"/><path d="M306.1 242.0 L312.5 235.6"/></g>
+<g class="s c-C1"><title>Interruptor baño 2</title><circle cx="684.8" cy="427.5" r="3.6" class="sf"/><path d="M687.4 424.9 L693.8 418.5"/></g>
+<g class="s c-C1"><title>Interruptor salón</title><circle cx="201.2" cy="346.9" r="3.6" class="sf"/><path d="M203.8 344.3 L210.2 337.9 M198.2 349.9 L192.2 355.9"/></g>
+<g class="s c-C1"><title>Interruptor cocina</title><circle cx="560.8" cy="346.9" r="3.6" class="sf"/><path d="M563.4 344.3 L569.8 337.9"/></g>
+<g class="s c-C1"><title>Conmutador pasillo</title><circle cx="55.5" cy="294.2" r="3.6" class="sf"/><path d="M58.1 291.6 L64.5 285.2 M52.5 297.2 L46.5 303.2"/></g>
+<g class="s c-C1"><title>Conmutador pasillo</title><circle cx="582.5" cy="288.0" r="3.6" class="sf"/><path d="M585.1 285.4 L591.5 279.0 M579.5 291.0 L573.5 297.0"/></g>
+<g class="s c-C1"><title>Interruptor terraza</title><circle cx="303.5" cy="582.5" r="3.6" class="sf"/><path d="M306.1 579.9 L312.5 573.5"/></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 1 (C2)</title><path d="M48.5 94.8 A7 7 0 0 0 62.5 94.8 Z" class="sf"/><path d="M47.5 91.8 H63.5"/><text x="55.5" y="110.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 1 (C2)</title><path d="M48.5 200.2 A7 7 0 0 0 62.5 200.2 Z" class="sf"/><path d="M47.5 197.2 H63.5"/><text x="55.5" y="216.2" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 1 (C2)</title><path d="M262.4 94.8 A7 7 0 0 0 276.4 94.8 Z" class="sf"/><path d="M261.4 91.8 H277.4"/><text x="269.4" y="110.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 2 (C2)</title><path d="M423.6 94.8 A7 7 0 0 0 437.6 94.8 Z" class="sf"/><path d="M422.6 91.8 H438.6"/><text x="430.6" y="110.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 2 (C2)</title><path d="M572.4 94.8 A7 7 0 0 0 586.4 94.8 Z" class="sf"/><path d="M571.4 91.8 H587.4"/><text x="579.4" y="110.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 2 (C2)</title><path d="M572.4 200.2 A7 7 0 0 0 586.4 200.2 Z" class="sf"/><path d="M571.4 197.2 H587.4"/><text x="579.4" y="216.2" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 3 (C2)</title><path d="M609.6 113.4 A7 7 0 0 0 623.6 113.4 Z" class="sf"/><path d="M608.6 110.4 H624.6"/><text x="616.6" y="129.4" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 3 (C2)</title><path d="M727.4 94.8 A7 7 0 0 0 741.4 94.8 Z" class="sf"/><path d="M726.4 91.8 H742.4"/><text x="734.4" y="110.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A dormitorio 3 (C2)</title><path d="M727.4 187.8 A7 7 0 0 0 741.4 187.8 Z" class="sf"/><path d="M726.4 184.8 H742.4"/><text x="734.4" y="203.8" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A pasillo (C2)</title><path d="M256.2 314.9 A7 7 0 0 0 270.2 314.9 Z" class="sf"/><path d="M255.2 311.9 H271.2"/><text x="263.2" y="330.9" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A pasillo (C2)</title><path d="M380.2 314.9 A7 7 0 0 0 394.2 314.9 Z" class="sf"/><path d="M379.2 311.9 H395.2"/><text x="387.2" y="330.9" class="sl">C2</text></g>
+<g class="s c-C2"><title>Base 16 A vestíbulo (C2)</title><path d="M609.6 383.1 A7 7 0 0 0 623.6 383.1 Z" class="sf"/><path d="M608.6 380.1 H624.6"/><text x="616.6" y="399.1" class="sl">C2</text></g>
+<g class="s c-C7"><title>Base 16 A salón (C7)</title><path d="M48.5 373.8 A7 7 0 0 0 62.5 373.8 Z" class="sf"/><path d="M47.5 370.8 H63.5"/><text x="55.5" y="389.8" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A salón (TV, base múltiple) (C7)</title><path d="M48.5 553.6 A7 7 0 0 0 62.5 553.6 Z" class="sf"/><path d="M47.5 550.6 H63.5"/><text x="55.5" y="569.6" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A salón (C7)</title><path d="M219.0 581.5 A7 7 0 0 0 233.0 581.5 Z" class="sf"/><path d="M218.0 578.5 H234.0"/><text x="226.0" y="597.5" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A salón (C7)</title><path d="M389.5 386.2 A7 7 0 0 0 403.5 386.2 Z" class="sf"/><path d="M388.5 383.2 H404.5"/><text x="396.5" y="402.2" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A comedor (C7)</title><path d="M389.5 535.0 A7 7 0 0 0 403.5 535.0 Z" class="sf"/><path d="M388.5 532.0 H404.5"/><text x="396.5" y="551.0" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A frigorífico (C7)</title><path d="M572.4 358.3 A7 7 0 0 0 586.4 358.3 Z" class="sf"/><path d="M571.4 355.3 H587.4"/><text x="579.4" y="374.3" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A extractor (alta) (C7)</title><path d="M572.4 445.1 A7 7 0 0 0 586.4 445.1 Z" class="sf"/><path d="M571.4 442.1 H587.4"/><text x="579.4" y="461.1" class="sl">C7</text></g>
+<g class="s c-C7"><title>Base 16 A terraza IP44 (C7)</title><path d="M380.2 631.1 A7 7 0 0 0 394.2 631.1 Z" class="sf"/><path d="M379.2 628.1 H395.2"/><text x="387.2" y="647.1" class="sl">C7</text></g>
+<g class="s c-C3"><title>Base 25 A cocina/horno (C3)</title><path d="M572.4 494.7 A7 7 0 0 0 586.4 494.7 Z" class="sfill"/><path d="M571.4 491.7 H587.4"/><text x="579.4" y="510.7" class="sl">C3</text></g>
+<g class="s c-C4"><title>Base 16 A lavadora (C4)</title><path d="M442.2 562.9 A7 7 0 0 0 456.2 562.9 Z" class="sf"/><path d="M441.2 559.9 H457.2"/><text x="449.2" y="578.9" class="sl">C4</text></g>
+<g class="s c-C4"><title>Base 16 A lavavajillas (C4)</title><path d="M485.6 562.9 A7 7 0 0 0 499.6 562.9 Z" class="sf"/><path d="M484.6 559.9 H500.6"/><text x="492.6" y="578.9" class="sl">C4</text></g>
+<g class="s c-C4"><title>Base 16 A termo eléctrico (C4)</title><path d="M420.5 386.2 A7 7 0 0 0 434.5 386.2 Z" class="sf"/><path d="M419.5 383.2 H435.5"/><text x="427.5" y="402.2" class="sl">C4</text></g>
+<g class="s c-C5"><title>Base 16 A encimera (C5)</title><path d="M572.4 411.0 A7 7 0 0 0 586.4 411.0 Z" class="sf"/><path d="M571.4 408.0 H587.4"/><text x="579.4" y="427.0" class="sl">C5</text></g>
+<g class="s c-C5"><title>Base 16 A encimera (C5)</title><path d="M572.4 550.5 A7 7 0 0 0 586.4 550.5 Z" class="sf"/><path d="M571.4 547.5 H587.4"/><text x="579.4" y="566.5" class="sl">C5</text></g>
+<g class="s c-C5"><title>Base 16 A encimera (C5)</title><path d="M529.0 562.9 A7 7 0 0 0 543.0 562.9 Z" class="sf"/><path d="M528.0 559.9 H544.0"/><text x="536.0" y="578.9" class="sl">C5</text></g>
+<g class="s c-C5"><title>Base 16 A baño 1 (volumen 3) (C5)</title><path d="M386.4 88.6 A7 7 0 0 0 400.4 88.6 Z" class="sf"/><path d="M385.4 85.6 H401.4"/><text x="393.4" y="104.6" class="sl">C5</text></g>
+<g class="s c-C5"><title>Base 16 A baño 2 (volumen 3) (C5)</title><path d="M727.4 566.0 A7 7 0 0 0 741.4 566.0 Z" class="sf"/><path d="M726.4 563.0 H742.4"/><text x="734.4" y="582.0" class="sl">C5</text></g>
+<g class="s c-C10"><title>Base 16 A secadora (C10)</title><path d="M420.5 528.8 A7 7 0 0 0 434.5 528.8 Z" class="sf"/><path d="M419.5 525.8 H435.5"/><text x="427.5" y="544.8" class="sl">C10</text></g>
+<g class="s c-C9"><title>Toma aire acondicionado salón (C9)</title><rect x="309.0" y="340.9" width="20" height="12" class="sf"/><text x="319.0" y="350.1" class="sa">AA</text></g>
+<g class="s c-C9"><title>Toma aire acondicionado salón (C9)</title><rect x="51.7" y="461.8" width="20" height="12" class="sf"/><text x="61.7" y="471.0" class="sa">AA</text></g>
+<g class="s c-C9"><title>Toma aire acondicionado dormitorio 1 (C9)</title><rect x="154.0" y="49.5" width="20" height="12" class="sf"/><text x="164.0" y="58.7" class="sa">AA</text></g>
+<g class="s c-C9"><title>Toma aire acondicionado dormitorio 2 (C9)</title><rect x="495.0" y="49.5" width="20" height="12" class="sf"/><text x="505.0" y="58.7" class="sa">AA</text></g>
+<g class="s c-C9"><title>Toma aire acondicionado dormitorio 3 (C9)</title><rect x="665.5" y="49.5" width="20" height="12" class="sf"/><text x="675.5" y="58.7" class="sa">AA</text></g>
+<g class="s c-CG"><title>Cuadro general de mando y protección</title><rect x="728.6" y="270.9" width="20" height="28" class="cg"/><text x="714.6" y="288.9" class="cgt">CGMP</text></g>
+<g class="s c-C1"><title>Pulsador de timbre</title><circle cx="760.4" cy="371.7" r="3.4" class="sfill"/><circle cx="760.4" cy="371.7" r="6"/></g>
+<g class="nrt"><path d="M798.0 44 L805.0 70 L798.0 64 L791.0 70 Z"/><text x="798.0" y="86" class="sc">N</text></g>
+<rect x="449.2" y="672.4" width="62" height="6" class="sb1"/>
+<rect x="511.2" y="672.4" width="62" height="6" class="sb2"/>
+<rect x="573.2" y="672.4" width="62" height="6" class="sb1"/>
+<rect x="635.2" y="672.4" width="62" height="6" class="sb2"/>
+<rect x="697.2" y="672.4" width="62" height="6" class="sb1"/>
+<text x="449.2" y="692.4" class="sc">0</text>
+<text x="511.2" y="692.4" class="sc">1</text>
+<text x="573.2" y="692.4" class="sc">2</text>
+<text x="635.2" y="692.4" class="sc">3</text>
+<text x="697.2" y="692.4" class="sc">4</text>
+<text x="759.2" y="692.4" class="sc">5</text>
+<text x="771.2" y="679.4" class="sc" style="text-anchor:start">m</text>
+<text x="449.2" y="664.4" class="note" style="text-anchor:start">Escala gráfica · 1:100 aprox.</text>
+</svg></div>
+      <aside class="legend">
+        <div class="chips" id="chips" role="group" aria-label="Filtrar por circuito"></div>
+        <div style="display:grid;gap:8px"><h3>Simbología</h3>
+        <ul class="sym-list">
+          <li><svg viewBox="0 0 28 20"><g class="s c-C1"><circle cx="14" cy="10" r="7" class="sf"/><path d="M9 5 L19 15 M19 5 L9 15"/></g></svg>Punto de luz</li>
+          <li><svg viewBox="0 0 28 20"><g class="s c-C1"><circle cx="11" cy="12" r="3.5" class="sf"/><path d="M13.5 9.5 L20 3"/></g></svg>Interruptor</li>
+          <li><svg viewBox="0 0 28 20"><g class="s c-C1"><circle cx="14" cy="10" r="3.5" class="sf"/><path d="M16.5 7.5 L22 2 M11.5 12.5 L6 18"/></g></svg>Conmutador</li>
+          <li><svg viewBox="0 0 28 20"><g class="s c-C2"><path d="M7 9 A7 7 0 0 0 21 9 Z" class="sf"/><path d="M6 6 H22"/></g></svg>Base 16 A 2P+T</li>
+          <li><svg viewBox="0 0 28 20"><g class="s c-C3"><path d="M7 9 A7 7 0 0 0 21 9 Z" class="sfill"/><path d="M6 6 H22"/></g></svg>Base 25 A 2P+T (cocina)</li>
+          <li><svg viewBox="0 0 28 20"><g class="s c-C9"><rect x="4" y="4" width="20" height="12" class="sf"/><text x="14" y="13" class="sa">AA</text></g></svg>Toma aire acondicionado</li>
+          <li><svg viewBox="0 0 28 20"><rect x="9" y="2" width="10" height="16" fill="var(--cg)"/></svg>Cuadro general (CGMP)</li>
+        </ul></div>
+        <p class="small">CGMP junto a la puerta de entrada, a 1,40–2,00 m del suelo (ITC-BT-17). Tomas de baño fuera de los volúmenes 0, 1 y 2.</p>
+      </aside>
+    </div>
+    <div class="cajetin">
+      <div><span>Plano</span><b>Planta · Electricidad</b></div>
+      <div><span>Escala</span><b>1:100 (gráfica)</b></div>
+      <div><span>Sup. útil</span><b>103,50 m²</b></div>
+      <div><span>Grado</span><b>Elevada · 9.200 W</b></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Memoria 1</div><h2>Puntos de utilización por estancia</h2>
+  <p class="small">Mínimos de la ITC-BT-25, tabla 2, frente a lo proyectado. Las tomas de uso general (C2) se reparten en dos circuitos, C2 y C7.</p></div>
+  <div class="sheet tbl"><table>
+    <thead><tr><th>Estancia</th><th class="n">Superficie</th><th class="n">Luz (mín/proy.)</th><th class="n">Tomas 16 A uso gral.</th><th>Otros puntos</th></tr></thead>
+    <tbody>
+      <tr><td>Vestíbulo</td><td class="n">6,25 m²</td><td class="n">1 / 1</td><td class="n">1 / 1 (C2)</td><td>CGMP, pulsador de timbre</td></tr>
+      <tr><td>Salón-comedor</td><td class="n">25,80 m²</td><td class="n">2 / 2</td><td class="n">5 / 5 (C7)</td><td>2 tomas AA (C9)</td></tr>
+      <tr><td>Cocina</td><td class="n">12,90 m²</td><td class="n">2 / 2</td><td class="n">2 / 2 (C7)</td><td>1×25 A (C3), 3 (C4), 3 encimera (C5), secadora (C10)</td></tr>
+      <tr><td>Dormitorio 1</td><td class="n">14,00 m²</td><td class="n">2 / 2</td><td class="n">3 / 3 (C2)</td><td>1 toma AA (C9)</td></tr>
+      <tr><td>Dormitorio 2</td><td class="n">10,50 m²</td><td class="n">2 / 2</td><td class="n">3 / 3 (C2)</td><td>1 toma AA (C9)</td></tr>
+      <tr><td>Dormitorio 3</td><td class="n">8,75 m²</td><td class="n">1 / 1</td><td class="n">3 / 3 (C2)</td><td>1 toma AA (C9)</td></tr>
+      <tr><td>Baño 1</td><td class="n">7,00 m²</td><td class="n">1 / 1</td><td class="n">—</td><td>1 base 16 A (C5)</td></tr>
+      <tr><td>Baño 2</td><td class="n">7,50 m²</td><td class="n">1 / 1</td><td class="n">—</td><td>1 base 16 A (C5)</td></tr>
+      <tr><td>Pasillo (9 m)</td><td class="n">10,80 m²</td><td class="n">2 / 2</td><td class="n">2 / 2 (C2)</td><td>Conmutadores en ambos extremos</td></tr>
+      <tr><td>Terraza</td><td class="n">12,00 m²</td><td class="n">2 / 2</td><td class="n">0 / 1 (C7)</td><td>Base exterior IP44, adicional</td></tr>
+      <tr class="tot"><td>Total</td><td class="n">115,50 m²</td><td class="n">16</td><td class="n">20</td><td>5 tomas C5 · 5 tomas C9</td></tr>
+    </tbody></table></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Memoria 2</div><h2>Grado de electrificación y previsión de potencia</h2></div>
+  <div class="two">
+    <div class="card"><h3>Por qué electrificación elevada</h3>
+      <p>La ITC-BT-10 exige grado elevado si se cumple cualquiera de estas condiciones. Esta vivienda cumple dos.</p>
+      <ul>
+        <li>Superficie útil mayor de 160 m²: <span class="pill ok">No · 103,5 m²</span></li>
+        <li>Previsión de aire acondicionado: <span class="pill warn">Sí · C9</span></li>
+        <li>Previsión de secadora: <span class="pill warn">Sí · C10</span></li>
+        <li>Calefacción eléctrica: <span class="pill ok">No</span></li>
+        <li>Más de 30 puntos de luz: <span class="pill ok">No · 16</span></li>
+        <li>Más de 20 tomas de uso general: <span class="pill ok">No · 20</span></li>
+        <li>Más de 6 tomas de baño y cocina (C5): <span class="pill ok">No · 5</span></li>
+      </ul></div>
+    <div class="card"><h3>Previsión de potencia</h3>
+      <dl class="kv">
+        <dt>Grado</dt><dd>Elevada</dd>
+        <dt>Potencia mínima</dt><dd>9.200 W (ITC-BT-10)</dd>
+        <dt>Intensidad</dt><dd>I = P / U = 9.200 / 230 = 40 A</dd>
+        <dt>IGA</dt><dd>40 A, 2 polos</dd>
+        <dt>Potencia a contratar</dt><dd>≤ 9,2 kW (se recomienda 5,75–6,9 kW según uso real)</dd>
+      </dl>
+      <p class="small">La potencia contratada puede ser inferior a la prevista. El dimensionado de la instalación se hace siempre con los 9.200 W.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Memoria 3</div><h2>Cálculo de circuitos interiores</h2>
+  <p class="small">Método de la ITC-BT-25. Cada circuito se calcula con su factor de simultaneidad (Fs) y de utilización (Fu). Conductor de cobre 450/750 V con aislamiento de 70 °C, bajo tubo empotrado.</p></div>
+  <div class="formula">I = n × Ia × Fs × Fu &nbsp;&nbsp;·&nbsp;&nbsp; Ia = P<sub>toma</sub> / 230 V &nbsp;&nbsp;·&nbsp;&nbsp; ΔU = 2 · L · I / (γ · S), γ = 48 m/(Ω·mm²)</div>
+  <div class="sheet tbl"><table id="tcirc">
+    <thead><tr><th>Circuito</th><th>Uso</th><th class="n">n</th><th class="n">P/toma</th><th class="n">Fs</th><th class="n">Fu</th><th class="n">I calc.</th><th class="n">PIA</th><th class="n">Sección</th><th class="n">Iz</th><th class="n">Tubo</th><th class="n">L</th><th class="n">ΔU</th><th class="n">ΔU %</th></tr></thead>
+    <tbody>
+      <tr data-c="C1"><td><span class="cid" style="--cc:var(--c1)"><i></i>C1</span></td><td>Alumbrado</td><td class="n">16</td><td class="n">200 W</td><td class="n">0,75</td><td class="n">0,50</td><td class="n">5,22 A</td><td class="n">10 A</td><td class="n">1,5 mm²</td><td class="n">17,5 A</td><td class="n">Ø16</td><td class="n">18 m</td><td class="n">2,61 V</td><td class="n"><span class="pill ok">1,13 %</span></td></tr>
+      <tr data-c="C2"><td><span class="cid" style="--cc:var(--c2)"><i></i>C2</span></td><td>Tomas dormitorios, pasillo y vestíbulo</td><td class="n">12</td><td class="n">3.450 W</td><td class="n">0,20</td><td class="n">0,25</td><td class="n">9,00 A</td><td class="n">16 A</td><td class="n">2,5 mm²</td><td class="n">24 A</td><td class="n">Ø20</td><td class="n">16 m</td><td class="n">2,40 V</td><td class="n"><span class="pill ok">1,04 %</span></td></tr>
+      <tr data-c="C3"><td><span class="cid" style="--cc:var(--c3)"><i></i>C3</span></td><td>Cocina y horno</td><td class="n">1</td><td class="n">5.400 W</td><td class="n">0,50</td><td class="n">0,75</td><td class="n">8,80 A</td><td class="n">25 A</td><td class="n">6 mm²</td><td class="n">41 A</td><td class="n">Ø25</td><td class="n">11 m</td><td class="n">0,67 V</td><td class="n"><span class="pill ok">0,29 %</span></td></tr>
+      <tr data-c="C4"><td><span class="cid" style="--cc:var(--c4)"><i></i>C4</span></td><td>Lavadora, lavavajillas, termo</td><td class="n">3</td><td class="n">3.450 W</td><td class="n">0,66</td><td class="n">0,75</td><td class="n">22,28 A <sup>(1)</sup></td><td class="n">20 A</td><td class="n">4 mm²</td><td class="n">32 A</td><td class="n">Ø20</td><td class="n">12 m</td><td class="n">2,78 V</td><td class="n"><span class="pill ok">1,21 %</span></td></tr>
+      <tr data-c="C5"><td><span class="cid" style="--cc:var(--c5)"><i></i>C5</span></td><td>Baños y encimera de cocina</td><td class="n">5</td><td class="n">3.450 W</td><td class="n">0,40</td><td class="n">0,50</td><td class="n">15,00 A</td><td class="n">16 A</td><td class="n">2,5 mm²</td><td class="n">24 A</td><td class="n">Ø20</td><td class="n">13 m</td><td class="n">3,25 V</td><td class="n"><span class="pill ok">1,41 %</span></td></tr>
+      <tr data-c="C7"><td><span class="cid" style="--cc:var(--c7)"><i></i>C7</span></td><td>Tomas salón, cocina y terraza</td><td class="n">8</td><td class="n">3.450 W</td><td class="n">0,20</td><td class="n">0,25</td><td class="n">6,00 A</td><td class="n">16 A</td><td class="n">2,5 mm²</td><td class="n">24 A</td><td class="n">Ø20</td><td class="n">19 m</td><td class="n">1,90 V</td><td class="n"><span class="pill ok">0,83 %</span></td></tr>
+      <tr data-c="C9"><td><span class="cid" style="--cc:var(--c9)"><i></i>C9</span></td><td>Aire acondicionado (5 splits)</td><td class="n">5</td><td class="n">4.400 W tot.</td><td class="n">—</td><td class="n">—</td><td class="n">19,13 A <sup>(2)</sup></td><td class="n">25 A</td><td class="n">6 mm²</td><td class="n">41 A</td><td class="n">Ø25</td><td class="n">18 m</td><td class="n">2,39 V</td><td class="n"><span class="pill ok">1,04 %</span></td></tr>
+      <tr data-c="C10"><td><span class="cid" style="--cc:var(--c10)"><i></i>C10</span></td><td>Secadora</td><td class="n">1</td><td class="n">3.450 W</td><td class="n">1,00</td><td class="n">0,75</td><td class="n">11,25 A</td><td class="n">16 A</td><td class="n">2,5 mm²</td><td class="n">24 A</td><td class="n">Ø20</td><td class="n">12 m</td><td class="n">2,25 V</td><td class="n"><span class="pill ok">0,98 %</span></td></tr>
+    </tbody></table></div>
+  <div class="small" style="display:grid;gap:6px;max-width:90ch">
+    <p>Límite de caída de tensión en la instalación interior: 3 % de 230 V = 6,9 V (ITC-BT-19). Todos los circuitos cumplen. Iz según UNE-HD 60364-5-52, método B1, dos conductores cargados.</p>
+    <p>L es la longitud estimada sobre el plano hasta el punto más alejado, incluidas bajadas a mecanismos. Hay que rehacerla con el trazado real.</p>
+    <p>(1) C4: el cálculo da algo más que el PIA de 20 A, pero la ITC-BT-25 fija para este circuito PIA de 20 A y 4 mm², porque los tres aparatos rara vez calientan a la vez. Es habitual desdoblarlo en circuitos independientes de 16 A y 2,5 mm² por aparato.</p>
+    <p>(2) C9: potencia eléctrica estimada de equipos inverter (salón 2 × 1,0 kW, dormitorios 3 × 0,8 kW). El circuito admite hasta 5.750 W.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Plano 02</div><h2>Esquema unifilar del cuadro general</h2>
+  <p class="small">La ITC-BT-25 exige un diferencial adicional por cada cinco circuitos en electrificación elevada. Con 8 circuitos se instalan dos, cuatro circuitos en cada uno.</p></div>
+  <div class="sheet uni-box"><svg id="unifilar" viewBox="0 0 900 430" role="img" aria-label="Esquema unifilar del cuadro">
+<text x="20" y="22" class="ut2" style="text-anchor:start">Derivación individual</text><text x="20" y="36" class="ut2" style="text-anchor:start">2×10 + T10 mm² Cu · Ø32</text>
+<line x1="20" y1="60" x2="70" y2="60" class="ul"/>
+<rect x="70" y="40" width="120" height="40" class="ub "/><text x="130.0" y="57.0" class="ut1">IGA 40 A</text><text x="130.0" y="71.0" class="ut2">2P · 6 kA</text>
+<line x1="190" y1="60" x2="230" y2="60" class="ul"/>
+<rect x="230" y="40" width="140" height="40" class="ub "/><text x="300.0" y="57.0" class="ut1">Sobretensiones</text><text x="300.0" y="71.0" class="ut2">transit. + perm.</text>
+<line x1="370" y1="60" x2="450" y2="60" class="ul"/><line x1="450" y1="60" x2="450" y2="100" class="ul"/>
+<line x1="220" y1="100" x2="680" y2="100" class="ul"/>
+<line x1="220" y1="100" x2="220" y2="130" class="ul"/>
+<rect x="140" y="130" width="160" height="40" class="ub "/><text x="220.0" y="147.0" class="ut1">ID1 40 A · 30 mA</text><text x="220.0" y="161.0" class="ut2">Tipo A recomendado</text>
+<line x1="220" y1="170" x2="220" y2="200" class="ul"/>
+<line x1="55" y1="200" x2="385" y2="200" class="ul"/>
+<g class="s c-C1"><line x1="55" y1="200" x2="55" y2="230" class="ul uc"/><rect x="17" y="230" width="76" height="40" class="ub uc2"/><text x="55" y="247" class="ut1">C1</text><text x="55" y="261" class="ut2">PIA 10 A</text><line x1="55" y1="270" x2="55" y2="320" class="ul uc"/><text x="55" y="338" class="ut2">1,5 mm²</text><text x="55" y="353" class="ut2">Alumbrado</text></g>
+<g class="s c-C2"><line x1="165" y1="200" x2="165" y2="230" class="ul uc"/><rect x="127" y="230" width="76" height="40" class="ub uc2"/><text x="165" y="247" class="ut1">C2</text><text x="165" y="261" class="ut2">PIA 16 A</text><line x1="165" y1="270" x2="165" y2="320" class="ul uc"/><text x="165" y="338" class="ut2">2,5 mm²</text><text x="165" y="353" class="ut2">Tomas dorm.</text></g>
+<g class="s c-C3"><line x1="275" y1="200" x2="275" y2="230" class="ul uc"/><rect x="237" y="230" width="76" height="40" class="ub uc2"/><text x="275" y="247" class="ut1">C3</text><text x="275" y="261" class="ut2">PIA 25 A</text><line x1="275" y1="270" x2="275" y2="320" class="ul uc"/><text x="275" y="338" class="ut2">6 mm²</text><text x="275" y="353" class="ut2">Cocina/horno</text></g>
+<g class="s c-C7"><line x1="385" y1="200" x2="385" y2="230" class="ul uc"/><rect x="347" y="230" width="76" height="40" class="ub uc2"/><text x="385" y="247" class="ut1">C7</text><text x="385" y="261" class="ut2">PIA 16 A</text><line x1="385" y1="270" x2="385" y2="320" class="ul uc"/><text x="385" y="338" class="ut2">2,5 mm²</text><text x="385" y="353" class="ut2">Tomas salón</text></g>
+<line x1="680" y1="100" x2="680" y2="130" class="ul"/>
+<rect x="600" y="130" width="160" height="40" class="ub "/><text x="680.0" y="147.0" class="ut1">ID2 40 A · 30 mA</text><text x="680.0" y="161.0" class="ut2">Tipo A</text>
+<line x1="680" y1="170" x2="680" y2="200" class="ul"/>
+<line x1="515" y1="200" x2="845" y2="200" class="ul"/>
+<g class="s c-C4"><line x1="515" y1="200" x2="515" y2="230" class="ul uc"/><rect x="477" y="230" width="76" height="40" class="ub uc2"/><text x="515" y="247" class="ut1">C4</text><text x="515" y="261" class="ut2">PIA 20 A</text><line x1="515" y1="270" x2="515" y2="320" class="ul uc"/><text x="515" y="338" class="ut2">4 mm²</text><text x="515" y="353" class="ut2">Lav./lavav./termo</text></g>
+<g class="s c-C5"><line x1="625" y1="200" x2="625" y2="230" class="ul uc"/><rect x="587" y="230" width="76" height="40" class="ub uc2"/><text x="625" y="247" class="ut1">C5</text><text x="625" y="261" class="ut2">PIA 16 A</text><line x1="625" y1="270" x2="625" y2="320" class="ul uc"/><text x="625" y="338" class="ut2">2,5 mm²</text><text x="625" y="353" class="ut2">Baños/encimera</text></g>
+<g class="s c-C9"><line x1="735" y1="200" x2="735" y2="230" class="ul uc"/><rect x="697" y="230" width="76" height="40" class="ub uc2"/><text x="735" y="247" class="ut1">C9</text><text x="735" y="261" class="ut2">PIA 25 A</text><line x1="735" y1="270" x2="735" y2="320" class="ul uc"/><text x="735" y="338" class="ut2">6 mm²</text><text x="735" y="353" class="ut2">Aire acond.</text></g>
+<g class="s c-C10"><line x1="845" y1="200" x2="845" y2="230" class="ul uc"/><rect x="807" y="230" width="76" height="40" class="ub uc2"/><text x="845" y="247" class="ut1">C10</text><text x="845" y="261" class="ut2">PIA 16 A</text><line x1="845" y1="270" x2="845" y2="320" class="ul uc"/><text x="845" y="338" class="ut2">2,5 mm²</text><text x="845" y="353" class="ut2">Secadora</text></g>
+<text x="450" y="400" class="ut2">Todos los circuitos: fase + neutro + protección, Cu 450/750 V bajo tubo empotrado. PIA con poder de corte ≥ 4,5 kA.</text>
+</svg></div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Memoria 4</div><h2>Derivación individual, tierra y baños</h2></div>
+  <div class="two">
+    <div class="card"><h3>Derivación individual (ITC-BT-15)</h3>
+      <dl class="kv">
+        <dt>Origen</dt><dd>Centralización de contadores</dd>
+        <dt>Longitud</dt><dd>12 m (supuesta)</dd>
+        <dt>Intensidad</dt><dd>40 A</dd>
+        <dt>Conductor</dt><dd>2×10 + T10 mm² Cu, ES07Z1-K (AS)</dd>
+        <dt>Hilo de mando</dt><dd>1,5 mm², color rojo</dd>
+        <dt>Tubo</dt><dd>Ø32 mm</dd>
+        <dt>Iz</dt><dd>57 A ≥ 40 A <span class="pill ok">Cumple</span></dd>
+        <dt>ΔU</dt><dd>2·12·40 / (48·10) = 2,00 V</dd>
+        <dt>ΔU %</dt><dd>0,87 % ≤ 1 % <span class="pill ok">Cumple</span></dd>
+      </dl>
+      <p class="small">Límite de 1 % para contadores totalmente centralizados. Sección mínima reglamentaria 6 mm²: con 6 mm² la caída sería 1,45 %, así que se adopta 10 mm².</p>
+    </div>
+    <div class="card"><h3>Protecciones, tierra y baños</h3>
+      <ul>
+        <li>Dos diferenciales de 40 A y 30 mA. Tipo A en ID2, por la electrónica de lavadora y equipos inverter.</li>
+        <li>Protector contra sobretensiones a la entrada del cuadro, según ITC-BT-23.</li>
+        <li>Conductor de protección en todos los circuitos, de la misma sección que la fase.</li>
+        <li>Resistencia de tierra del edificio: con 30 mA, R ≤ 50 V / 0,03 A ≈ 1.667 Ω en teoría. En la práctica se buscan valores bajos, del orden de 37 Ω o menos sin pararrayos (Guía técnica BT-26).</li>
+        <li>Baños (ITC-BT-27): ninguna toma en volúmenes 0, 1 y 2. Bases a más de 0,60 m del borde de la ducha o bañera.</li>
+        <li>Conexión equipotencial suplementaria en baños: 2,5 mm² con protección mecánica, o 4 mm² sin ella.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="eyebrow">Hipótesis</div><h2>Datos supuestos que conviene revisar</h2></div>
+  <div class="card"><ul>
+    <li>Distribución y superficies propuestas como ejemplo. Con la planta real hay que recontar puntos y longitudes.</li>
+    <li>Factor de potencia unidad y tensión 230 V, como en el método de la ITC-BT-25.</li>
+    <li>Conductividad del cobre a 70 °C tomada como 48 m/(Ω·mm²).</li>
+    <li>Agua caliente con termo eléctrico. Con aerotermia o gas, C4 cambia y puede aparecer un circuito propio para la bomba de calor.</li>
+    <li>Sin calefacción eléctrica (C8). La climatización se resuelve con bomba de calor en C9.</li>
+    <li>Este documento es un ejercicio de cálculo. Una instalación real necesita memoria técnica de diseño o proyecto firmada por instalador o técnico habilitado.</li>
+  </ul></div>
+</section>
+</div>
+
+<script>
+(function(){
+  var circs=[["C1","Alumbrado","--c1"],["C2","Tomas dorm.","--c2"],["C3","Cocina/horno","--c3"],["C4","Lav./lavav./termo","--c4"],["C5","Baños/encimera","--c5"],["C7","Tomas salón","--c7"],["C9","Aire acond.","--c9"],["C10","Secadora","--c10"]];
+  var chips=document.getElementById('chips'), active=null;
+  var roots=[document.getElementById('plano'),document.getElementById('unifilar')];
+  function apply(){
+    roots.forEach(function(r){
+      r.classList.toggle('filtering',!!active);
+      r.querySelectorAll('.s').forEach(function(g){g.classList.toggle('on',!!active&&g.classList.contains('c-'+active));});
+    });
+    chips.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.c===active||(!active&&b.dataset.c==="ALL")));});
+    document.querySelectorAll('#tcirc tbody tr').forEach(function(tr){tr.style.opacity=(!active||tr.dataset.c===active)?'1':'.4';});
+  }
+  function mk(id,label,col){
+    var b=document.createElement('button');b.type='button';b.className='chip';b.dataset.c=id;b.id='chip-'+id;
+    if(col)b.style.setProperty('--cc','var('+col+')');
+    b.innerHTML=(col?'<i></i>':'')+label;
+    b.addEventListener('click',function(){active=(id==="ALL"||active===id)?null:id;apply();});
+    chips.appendChild(b);
+  }
+  mk("ALL","Todos");
+  circs.forEach(function(c){mk(c[0],c[0]+' · '+c[1],c[2]);});
+  document.querySelectorAll('#tcirc tbody tr').forEach(function(tr){tr.style.cursor='pointer';tr.addEventListener('click',function(){active=active===tr.dataset.c?null:tr.dataset.c;apply();});});
+  apply();
+})();
+</script>
+
+</body></html>
