@@ -21,7 +21,7 @@
       {t: "Teoría del cálculo de secciones (PDF)", href: "calculos/teoria_calculo_secciones_vivienda.pdf"},
       {t: "Vivienda 3D·2B: plano y memoria de cálculo", href: "vivienda-3d2b-instalacion-electrica.html"},
     ]},
-    {t: "Fichas", items: [
+    {t: "Fichas vivienda", items: [
       {t: "Todas las fichas", href: "fichas.html"},
       {h: "A4"},
       {t: "001 · Interruptor, conmutador, pulsador y timbre", href: "pdf/A4/esquema-001-A4.pdf"},
