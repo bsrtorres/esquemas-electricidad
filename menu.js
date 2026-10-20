@@ -38,7 +38,8 @@
       {t: "012 · Cruzamiento y dos interruptores", href: "pdf/A3/esquema-012-A3.pdf"},
       {t: "007–012 juntas", href: "pdf/esquemas-007-012-A3.pdf"},
       {t: "Plano de vivienda · instalación eléctrica", href: "pdf/A3/plano-vivienda-instalacion-electrica-A3.pdf"},
-      {h: "Automatismos"},
+    ]},
+    {t: "Automatismos", items: [
       {t: "Todos los automatismos (con soluciones)", href: "automatismos.html"},
       {t: "014 · Marcha-paro de motor (KM1)", href: "pdf/automatismos/esquema-014-A4.pdf"},
       {t: "015 · Marcha-paro desde dos puntos", href: "pdf/automatismos/esquema-015-A4.pdf"},
