@@ -6,8 +6,11 @@
     {t: "Inicio", href: "index.html"},
     {t: "Simuladores", items: [
       {t: "Todos los simuladores", href: "simuladores.html"},
+      {h: "Simulador vivienda"},
       {t: "Conmutadas, cruzamiento y telerruptor", href: "simulador.html"},
       {t: "Cuadro general de mando y protección", href: "cuadro.html"},
+      {h: "Simulador automatismos"},
+      {t: "Automatismos con contactores (014–023)", href: "simulador-automatismos.html"},
     ]},
     {t: "Cálculos", items: [
       {t: "Todos los cálculos", href: "calculos.html"},
@@ -41,6 +44,7 @@
     ]},
     {t: "Automatismos", items: [
       {t: "Todos los automatismos (con soluciones)", href: "automatismos.html"},
+      {t: "Simulador de automatismos", href: "simulador-automatismos.html"},
       {t: "014 · Marcha-paro de motor (KM1)", href: "pdf/automatismos/esquema-014-A4.pdf"},
       {t: "015 · Marcha-paro desde dos puntos", href: "pdf/automatismos/esquema-015-A4.pdf"},
       {t: "016 · Marcha continua y por impulsos", href: "pdf/automatismos/esquema-016-A4.pdf"},

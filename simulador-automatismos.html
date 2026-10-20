@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de automatismos</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d63;
+    --off: #c4c4ca; --mando: #c00000; --neutro: #1f5fbf; --accent: #b4471a;
+    --l1: #8b4513; --l2: #1d1d1f; --l3: #77777d;
+    --ok: #1e7a3c; --ok-bg: #e3f3e8; --bad: #b00020; --bad-bg: #fde7ea; --warn: #9a6700; --warn-bg: #fff4d6;
+    --btn: #e9e6dd;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 18px; line-height: 1.5; }
+  header { padding: 16px 24px 8px; }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  header p { margin: 0; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; padding: 8px 24px 24px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; padding: 8px 16px 24px; } header { padding: 16px 16px 8px; } }
+  .card { background: var(--panel); border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card h2 { margin: 0 0 8px; font-size: 22px; }
+  .card h3 { margin: 14px 0 6px; font-size: 19px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 24px 8px; }
+  @media (max-width: 1100px) { .tabs { padding: 0 16px 8px; } }
+  .tabs button, .btn {
+    font: inherit; font-size: 16px; padding: 6px 12px; border-radius: 8px;
+    border: 2px solid var(--ink); background: var(--btn); color: var(--ink); cursor: pointer;
+  }
+  .tabs button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .scroll { overflow-x: auto; }
+  svg#sim { width: 100%; min-width: 760px; height: auto; display: block; touch-action: manipulation; user-select: none; }
+  .sym { fill: none; stroke: var(--ink); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+  .sym.d { stroke-dasharray: 2 2; }
+  .sep { stroke: #bbb; stroke-width: .6; }
+  .w { fill: none; stroke: var(--off); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .w.on { stroke: var(--mando); stroke-width: 2.6; }
+  .w.ph1 { stroke: var(--l1); stroke-width: 3; }
+  .w.ph2 { stroke: var(--l2); stroke-width: 3; }
+  .w.ph3 { stroke: var(--l3); stroke-width: 3; }
+  .w.n { stroke: var(--neutro); stroke-width: 2.4; }
+  .w.bus { stroke: var(--ink); stroke-width: 1.6; }
+  .pe1 { stroke: #2e9a3e; stroke-width: 2; fill: none; }
+  .pe2 { stroke: #f2c200; stroke-width: 2; fill: none; stroke-dasharray: 5 5; }
+  .dot { fill: var(--ink); }
+  .term { fill: #fff; stroke: var(--ink); stroke-width: .8; }
+  .t { font-family: Calibri, Arial, sans-serif; font-size: 7px; fill: var(--ink); }
+  .t.tag { font-size: 10px; }
+  .t.h { font-size: 13px; font-weight: bold; }
+  .t.b { font-weight: bold; font-size: 10px; }
+  .t.ds { font-size: 7.5px; font-style: italic; fill: var(--muted); }
+  .t.m { font-size: 13px; font-weight: bold; text-anchor: middle; }
+  .t.m2 { font-size: 10px; text-anchor: middle; }
+  .t.tm { font-size: 9px; font-weight: bold; fill: var(--accent); }
+  .t.ms { font-size: 9.5px; font-weight: bold; fill: var(--ok); text-anchor: middle; }
+  .blade { stroke: var(--ink); stroke-width: 1.5; stroke-linecap: round; transition: all .08s; }
+  rect.coil { fill: #fff; stroke: var(--ink); stroke-width: 1.1; }
+  rect.coil.on { fill: #ffcfb8; stroke: var(--accent); stroke-width: 2; }
+  circle.lamp { fill: #fff; stroke: var(--ink); stroke-width: 1.1; }
+  circle.motor { fill: #fff; stroke: var(--ink); stroke-width: 1.3; }
+  circle.motor.on { fill: var(--ok-bg); stroke: var(--ok); stroke-width: 2; }
+  .rot { fill: none; stroke: var(--ok); stroke-width: 2.5; stroke-dasharray: 5 6; opacity: 0; }
+  .rot.on { opacity: 1; animation: spin var(--sp, 1s) linear infinite; animation-direction: var(--dir, normal); }
+  @keyframes spin { to { stroke-dashoffset: -66; } }
+  .pb { cursor: pointer; }
+  .pb .hit { fill: transparent; }
+  .pb:hover .hit { fill: rgba(180,71,26,.12); }
+  .pb.down .hit { fill: rgba(180,71,26,.25); }
+  .panel .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .push { font: inherit; font-size: 17px; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--ink);
+          background: #fff; cursor: pointer; touch-action: none; user-select: none; min-width: 120px; text-align: left; }
+  .push b { display: inline-block; width: 22px; height: 22px; border-radius: 50%; vertical-align: -5px; margin-right: 8px;
+            border: 2px solid var(--ink); background: var(--c, #2e9a3e); }
+  .push.down { background: #f1ece3; transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.2); }
+  .btn.danger { border-color: var(--bad); color: var(--bad); background: #fff; }
+  .btn.danger[aria-pressed="true"] { background: var(--bad); color: #fff; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 17px; }
+  td { padding: 4px 4px; border-bottom: 1px solid #eee; }
+  td.r { text-align: right; font-weight: bold; }
+  .yes { color: var(--ok); } .no { color: var(--muted); }
+  .msg { padding: 8px 12px; border-radius: 8px; margin: 6px 0 0; font-weight: bold; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.off { background: #eee; color: var(--muted); }
+  .msg.bad { background: var(--bad-bg); color: var(--bad); }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 15px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: 22px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; background: var(--c); }
+  .door { position: relative; height: 34px; border: 2px solid var(--ink); border-radius: 6px; background: #eee; overflow: hidden; }
+  .door i { position: absolute; top: 0; bottom: 0; left: 0; background: #c9b79a; border-right: 3px solid var(--ink); }
+  .door span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+  .tip { font-size: 16px; color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+<script src="menu.js?v=9" defer></script>
+</head>
+<body>
+<header>
+  <h1>Simulador de automatismos</h1>
+  <p>Elige un esquema, <b>mantén pulsados</b> los pulsadores (en el panel o sobre el propio esquema) y observa los contactos, las bobinas y el motor. Son los mismos esquemas que las <a href="automatismos.html">fichas 014–023</a>.</p>
+</header>
+<nav class="tabs" id="tabs" aria-label="Esquemas"></nav>
+<main>
+  <div>
+    <section class="card">
+      <h2 id="titulo"></h2>
+      <div class="scroll"><svg id="sim" viewBox="28 58 790 444" role="img" aria-label="Circuito de potencia y circuito de mando"></svg></div>
+      <div class="legend">
+        <span style="--c: var(--l1)">L1</span><span style="--c: var(--l2)">L2</span><span style="--c: var(--l3)">L3</span>
+        <span style="--c: var(--mando)">Mando con tensión</span><span style="--c: var(--neutro)">Neutro</span>
+        <span style="--c: var(--off)">Sin tensión</span>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Funcionamiento</h2>
+      <p id="func" style="margin:0"></p>
+    </section>
+  </div>
+  <aside class="panel">
+    <section class="card">
+      <h2>Pulsadores</h2>
+      <div class="btns" id="pulsadores"></div>
+      <p class="tip" style="margin:8px 0 0">Mantén pulsado: al soltar, el pulsador vuelve a su posición.</p>
+      <div id="extra"></div>
+    </section>
+    <section class="card">
+      <h2>Estado</h2>
+      <div id="motor"></div>
+      <table id="estado"></table>
+      <div class="row"><button class="btn" id="reset">Reiniciar el esquema</button></div>
+    </section>
+  </aside>
+</main>
+<script>
+(() => {
+"use strict";
+const P = 42, RT = 128, RN = 492, BUSY = [92, 100, 108, 116], W = 842;
+const L = 1, N = 2, PH = [3, 4, 5];
+
+// ------------------------------------------------------------ constructor del esquema
+let B;   // esquema en construcción
+function newB() { return { s: [], n: 5, el: [], wires: [], pel: [], motors: [], push: new Map(), therm: [], timers: [], lamps: [] }; }
+const nn = () => ++B.n;
+const pts = a => a.map(p => p[0] + "," + p[1]).join(" ");
+const ln = (a, c = "sym") => B.s.push(`<polyline class="${c}" points="${pts(a)}"/>`);
+const tx = (x, y, s, c = "", anchor) => B.s.push(`<text class="t ${c}" x="${x}" y="${y}"${anchor ? ` text-anchor="${anchor}"` : ""}>${s}</text>`);
+const dot = (x, y) => B.s.push(`<circle class="dot" cx="${x}" cy="${y}" r="2.3"/>`);
+const terms = [];
+const term = (x, y) => terms.push(`<circle class="term" cx="${x}" cy="${y}" r="1.6"/>`);
+function wire(a, node, kind = "m") {
+  const id = "w" + B.wires.length;
+  B.wires.push({ id, node, kind });
+  B.s.push(`<polyline id="${id}" class="w${kind === "n" ? " n" : ""}" points="${pts(a)}"/>`);
+}
+const nwire = a => B.s.push(`<polyline class="w n" points="${pts(a)}"/>`);
+function pew(a) { B.s.push(`<polyline class="pe1" points="${pts(a)}"/><polyline class="pe2" points="${pts(a)}"/>`); }
+function rect(x0, y0, x1, y1, c = "sym") { B.s.push(`<rect class="${c}" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}"/>`); }
+function arc(cx, cy, r, a0, a1) {   // ángulos en grados, sentido horario en pantalla
+  const p = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  B.s.push(`<path class="sym" d="M${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1}"/>`);
+}
+
+function actuator(mx, my, x, act) {
+  const xa = x - 18;
+  if (act === "timer") {
+    ln([[mx, my - 2.5], [xa + 5, my - 2.5]]); ln([[mx, my + 2.5], [xa + 5, my + 2.5]]); arc(xa + 5, my, 5, 90, 270); return;
+  }
+  ln([[mx, my], [xa, my]], "sym d");
+  if (act === "push") ln([[xa + 3, my - 4], [xa, my - 4], [xa, my + 4], [xa + 3, my + 4]]);
+  else if (act === "thermal") ln([[xa, my], [xa - 3, my], [xa - 3, my - 4], [xa - 7, my - 4], [xa - 7, my + 4], [xa - 10, my + 4]]);
+  else if (act === "limit") ln([[xa, my], [xa - 8, my - 5], [xa - 8, my + 5], [xa, my]]);
+}
+
+// contacto entre los nudos a (arriba) y b (abajo)
+function contact(x, y, kind, tag, t1, t2, act, desc, a, b, power = false) {
+  const push = act === "push";
+  if (push) B.s.push(`<g class="pb" data-dev="${tag}"><rect class="hit" x="${x - 26}" y="${y + 6}" width="${tag.length * 6 + 42}" height="24" rx="4"/>`);
+  ln([[x, y], [x, y + 12]]); ln([[x, y + 24], [x, y + 36]]);
+  if (kind === "nc") ln([[x, y + 12], [x + 7, y + 12]]);
+  if (power) arc(x, y + 12, 3, 0, 180);
+  const id = "b" + (B.el.length + B.pel.length);
+  B.s.push(`<line id="${id}" class="blade" x1="${x}" y1="${y + 24}" x2="${x}" y2="${y + 12}"/>`);
+  actuator(kind === "no" ? x - 4.5 : x + 4.5, y + 17, x, act);
+  if (t1) tx(x + 3, y + 7, t1); if (t2) tx(x + 3, y + 34, t2);
+  if (tag) tx(x + 12, y + 21, tag, "tag");
+  if (desc) tx(x + 12, y + 29, desc, "ds");
+  if (push) { B.s.push("</g>"); if (!B.push.has(tag)) B.push.set(tag, desc || ""); }
+  if (act === "thermal" && !B.therm.includes(tag)) B.therm.push(tag);
+  term(x, y); term(x, y + 36);
+  const e = { k: kind, dev: tag, timed: act === "timer", a, b, id, x, y };
+  (power ? B.pel : B.el).push(e);
+  return [kind === "no" ? x - 4.5 : x + 4.5, y + 17];
+}
+function coil(x, y, tag, a, timer = false, desc) {
+  ln([[x, y], [x, y + 12]]); ln([[x, y + 24], [x, y + 36]]);
+  const id = "k" + B.el.length;
+  B.s.push(`<rect id="${id}" class="coil" x="${x - 12}" y="${y + 12}" width="24" height="12"/>`);
+  if (timer) {
+    rect(x - 24, y + 12, x - 12, y + 24); ln([[x - 24, y + 12], [x - 12, y + 24]]); ln([[x - 24, y + 24], [x - 12, y + 12]]);
+    B.s.push(`<text id="tm-${tag}" class="t tm" x="${x + 15}" y="${y + 39}"></text>`);
+    if (!B.timers.includes(tag)) B.timers.push(tag);
+  }
+  tx(x - 3, y + 9, "A1", "", "end"); tx(x - 3, y + 34, "A2", "", "end");
+  tx(x + 15, y + 21, tag, "tag"); if (desc) tx(x + 15, y + 29, desc, "ds");
+  term(x, y); term(x, y + 36);
+  B.el.push({ k: "coil", dev: tag, a, id });
+}
+function lamp(x, y, tag, a, desc) {
+  ln([[x, y], [x, y + 10]]); ln([[x, y + 26], [x, y + 36]]);
+  const id = "h" + B.el.length;
+  B.s.push(`<circle id="${id}" class="lamp" cx="${x}" cy="${y + 18}" r="8"/>`);
+  ln([[x - 5.6, y + 12.4], [x + 5.6, y + 23.6]]); ln([[x - 5.6, y + 23.6], [x + 5.6, y + 12.4]]);
+  tx(x - 3, y + 8, "X1", "", "end"); tx(x - 3, y + 34, "X2", "", "end");
+  tx(x + 12, y + 21, tag, "tag"); if (desc) tx(x + 12, y + 29, desc, "ds");
+  term(x, y); term(x, y + 36);
+  B.el.push({ k: "lamp", dev: tag, a, id });
+  B.lamps.push(tag);
+}
+function fuse(x, y, tag) {
+  ln([[x, y], [x, y + 36]]); rect(x - 4, y + 8, x + 4, y + 28);
+  if (tag) tx(x + 9, y + 21, tag, "tag");
+  term(x, y); term(x, y + 36);
+}
+
+// especificaciones de mando
+const NO = (tag, t1, t2, act, desc) => ["c", "no", tag, t1, t2, act, desc];
+const NC = (tag, t1, t2, act, desc) => ["c", "nc", tag, t1, t2, act, desc];
+const COIL = (tag, timer, desc) => ["k", tag, timer, desc];
+const LAMP = (tag, desc) => ["h", tag, desc];
+function draw(s, x, y, a, b) {
+  if (s[0] === "c") contact(x, y, s[1], s[2], s[3], s[4], s[5], s[6], a, b);
+  else if (s[0] === "k") coil(x, y, s[1], a, s[2], s[3]);
+  else lamp(x, y, s[1], a, s[2]);
+}
+function stack(x, y, specs, nIn, nOut) {
+  let a = nIn;
+  specs.forEach((s, i) => {
+    const yy = y + i * P, last = i === specs.length - 1;
+    const b = s[0] !== "c" ? N : (last && nOut ? nOut : nn());
+    if (i) wire([[x, yy - 6], [x, yy]], a);
+    draw(s, x, yy, a, b); a = b;
+  });
+  return { y: y + specs.length * P - 6, n: a };
+}
+function par(xs, y0, branches, nIn) {
+  const nOut = nn(), ends = [];
+  xs.forEach((x, i) => { wire([[x, y0], [x, y0 + 8]], nIn); ends.push(stack(x, y0 + 8, branches[i], nIn, nOut).y); });
+  const y1 = Math.max(...ends) + 8, x0 = Math.min(...xs), x1 = Math.max(...xs);
+  xs.forEach((x, i) => wire([[x, ends[i]], [x, y1]], nOut));
+  wire([[x0, y0], [x1, y0]], nIn); wire([[x0, y1], [x1, y1]], nOut);
+  xs.slice(0, -1).forEach(x => { dot(x, y0); dot(x, y1); });
+  return { y: y1, n: nOut };
+}
+const fromRail = (x, y) => { wire([[x, RT], [x, y]], L); dot(x, RT); };
+const toN = (x, y) => { nwire([[x, y], [x, RN]]); dot(x, RN); };
+const vw = (x, y0, y1, n) => wire([[x, y0], [x, y1]], n);
+const hw = (y, x0, x1, n) => wire([[x0, y], [x1, y]], n);
+
+function mandoBase(x0, x1, ftag) {
+  tx(x0 - 6, 92, "L1", "b", "end");
+  fuse(x0, 86, ftag);
+  wire([[x0, 122], [x0, RT], [x1, RT]], L);
+  nwire([[x0, RN], [x1, RN]]);
+  tx(x0 - 6, RN + 3, "N", "b", "end");
+}
+function commonStop(x, extra = []) {
+  fromRail(x, 136);
+  const r = stack(x, 136, [NC("F2", "95", "96", "thermal"), NC("S0", "11", "12", "push", "paro"), ...extra], L);
+  vw(x, r.y, r.y + 8, r.n);
+  return { y: r.y + 8, n: r.n };
+}
+
+// ------------------------------------------------------------ potencia
+function bus(x0, x1) {
+  ["L1", "L2", "L3"].forEach((l, i) => { wire([[x0, BUSY[i]], [x1, BUSY[i]]], PH[i], "p"); tx(x0 - 4, BUSY[i] + 3, l, "b", "end"); });
+  ln([[x0, BUSY[3]], [x1, BUSY[3]]]); tx(x0 - 4, BUSY[3] + 3, "PE", "b", "end");
+}
+const pw = (a, n) => wire(a, n, "p");
+function fuses3(xs, y, tag, nin) {
+  xs.forEach(x => fuse(x, y)); tx(xs[2] + 10, y + 21, tag, "tag");
+  const out = xs.map(() => nn());
+  xs.forEach((x, i) => B.pel.push({ k: "fix", a: nin[i], b: out[i] }));
+  return out;
+}
+function contactor3(xs, y, tag, nin, nout, desc) {
+  nout = nout || xs.map(() => nn());
+  const m = xs.map((x, i) => contact(x, y, "no", null, String(2 * i + 1), String(2 * i + 2), null, null, nin[i], nout[i], true));
+  B.pel.slice(-3).forEach(e => e.dev = tag);
+  ln([m[0], m[2]], "sym d");
+  tx(xs[2] + 12, y + 21, tag, "tag"); if (desc) tx(xs[2] + 12, y + 29, desc, "ds");
+  return nout;
+}
+function thermal3(xs, y, tag, nin) {
+  xs.forEach((x, i) => {
+    ln([[x, y], [x, y + 13], [x + 5, y + 13], [x + 5, y + 23], [x, y + 23], [x, y + 36]]);
+    tx(x - 2, y + 6, String(2 * i + 1), "", "end"); tx(x - 2, y + 35, String(2 * i + 2), "", "end");
+    term(x, y); term(x, y + 36);
+  });
+  B.s.push(`<rect class="sym d" x="${xs[0] - 6}" y="${y + 9}" width="${xs[2] - xs[0] + 16}" height="18"/>`);
+  tx(xs[2] + 14, y + 21, tag, "tag");
+  const out = xs.map(() => nn());
+  xs.forEach((x, i) => B.pel.push({ k: "fix", a: nin[i], b: out[i] }));
+  return out;
+}
+function res3(xs, y, tag, nin, nout) {
+  xs.forEach(x => { ln([[x, y], [x, y + 8]]); rect(x - 4, y + 8, x + 4, y + 28); ln([[x, y + 28], [x, y + 36]]); term(x, y); term(x, y + 36); });
+  tx(xs[0] - 8, y + 21, tag, "tag", "end");
+  xs.forEach((x, i) => B.pel.push({ k: "fix", a: nin[i], b: nout[i] }));
+}
+const edge = (cx, cy, r, x, top) => { const d = Math.sqrt(r * r - (x - cx) ** 2); return top ? cy - d : cy + d; };
+function motor(xs, ytop, tag, nodes, opt = {}) {
+  const six = !!opt.six, r = six ? 28 : 24, cx = xs[1], cy = ytop + (six ? 36 : 30);
+  const id = "m" + B.motors.length;
+  B.s.push(`<circle id="${id}" class="motor" cx="${cx}" cy="${cy}" r="${r}"/>`);
+  B.s.push(`<circle id="${id}r" class="rot" cx="${cx}" cy="${cy}" r="${r - 5}"/>`);
+  tx(cx, cy - 1, "M", "m"); tx(cx, cy + 10, "3~", "m2");
+  B.s.push(`<text id="${id}t" class="t ms" x="${cx}" y="${cy + r + 13}"></text>`);
+  (six ? ["U1", "V1", "W1"] : ["U", "V", "W"]).forEach((n, i) => { ln([[xs[i], ytop], [xs[i], edge(cx, cy, r, xs[i], true)]]); tx(xs[i] + 3, ytop + 9, n); term(xs[i], ytop); });
+  let bot = null;
+  if (six) {
+    bot = ytop + 72;
+    ["U2", "V2", "W2"].forEach((n, i) => { ln([[xs[i], edge(cx, cy, r, xs[i], false)], [xs[i], bot]]); tx(xs[i] + 3, bot - 3, n); term(xs[i], bot); });
+  }
+  const left = opt.pe === "l", pe = [left ? cx - r - 8 : cx + r + 8, cy];
+  ln([[left ? cx - r : cx + r, cy], pe]); tx(pe[0] + (left ? -2 : 2), cy + 10, "PE", "", left ? "end" : null);
+  tx(cx + r + 4, cy - 12, tag, "tag"); term(pe[0], pe[1]);
+  B.motors.push({ id, tag, nodes, ...opt });
+  return { pe, bot };
+}
+function drop(xs, y) { return xs.map((x, i) => { pw([[x, BUSY[i]], [x, y]], PH[i]); dot(x, BUSY[i]); return PH[i]; }); }
+const peWire = (xb, pe) => { pew([[xb, BUSY[3]], [xb, pe[1]], pe]); dot(xb, BUSY[3]); };
+const chain = (xs, y0, y1, ns) => xs.forEach((x, i) => pw([[x, y0], [x, y1]], ns[i]));
+
+function powerStd(split) {
+  const fx = [90, 112, 134]; bus(55, split - 25);
+  let n = drop(fx, 128);
+  n = fuses3(fx, 128, "F1", n); chain(fx, 164, 180, n);
+  n = contactor3(fx, 180, "KM1", n); chain(fx, 216, 236, n);
+  n = thermal3(fx, 236, "F2", n); chain(fx, 272, 300, n);
+  const m = motor(fx, 300, "M1", n); peWire(175, m.pe);
+}
+function powerRev(split, desc) {
+  const fx = [90, 112, 134], kx = [190, 212, 234]; bus(55, split - 25);
+  let f = fuses3(fx, 128, "F1", drop(fx, 128)); chain(fx, 164, 190, f);
+  f.forEach((n, i) => { const y = 172 + 6 * i; pw([[fx[i], y], [kx[i], y], [kx[i], 190]], n); dot(fx[i], y); });
+  const o = contactor3(fx, 190, "KM1", f, null, desc[0]);
+  const tg = [2, 1, 0];
+  contactor3(kx, 190, "KM2", f, tg.map(t => o[t]), desc[1]);
+  chain(fx, 226, 266, o);
+  tg.forEach((t, i) => { const y = 236 + 6 * i; pw([[kx[i], 226], [kx[i], y], [fx[t], y]], o[t]); dot(fx[t], y); });
+  const t = thermal3(fx, 266, "F2", o); chain(fx, 302, 326, t);
+  const m = motor(fx, 326, "M1", t, { dirs: desc }); peWire(280, m.pe);
+}
+function powerStarDelta(split) {
+  const fx = [80, 102, 124], kx = [190, 212, 234], sx = [260, 282, 304]; bus(55, split - 25);
+  let f = fuses3(fx, 128, "F1", drop(fx, 128)); chain(fx, 164, 174, f);
+  const a = contactor3(fx, 174, "KM1", f, null, "línea"); chain(fx, 210, 222, a);
+  const t = thermal3(fx, 222, "F2", a); chain(fx, 258, 290, t);
+  t.forEach((n, i) => { const y = 266 + 6 * i; pw([[fx[i], y], [kx[i], y], [kx[i], 290]], n); dot(fx[i], y); });
+  const w = [nn(), nn(), nn()], tg = [2, 0, 1];
+  contactor3(kx, 290, "KM3", t, tg.map(j => w[j]), "triángulo");
+  const m = motor(fx, 290, "M1", t, { six: true, pe: "l", bot: w });
+  tg.forEach((j, i) => { const y = 376 + 6 * i; pw([[kx[i], 326], [kx[i], y], [fx[j], y]], w[j]); dot(fx[j], y); });
+  w.forEach((n, j) => { const y = 404 + 6 * j; pw([[fx[j], m.bot], [fx[j], y], [sx[j], y], [sx[j], 424]], n); });
+  const s = nn();
+  contactor3(sx, 424, "KM2", w, [s, s, s], "estrella");
+  pw([[sx[0], 460], [sx[0], 468], [sx[2], 468], [sx[2], 460]], s); pw([[sx[1], 460], [sx[1], 468]], s); dot(sx[1], 468);
+  peWire(62, m.pe);
+}
+function powerTwo(split) {
+  bus(55, split - 25);
+  [[[70, 92, 114], "F1", "KM1", "F2", "M1"], [[190, 212, 234], "F3", "KM2", "F4", "M2"]].forEach(([xs, f, k, t, mt]) => {
+    let n = fuses3(xs, 128, f, drop(xs, 128)); chain(xs, 164, 180, n);
+    n = contactor3(xs, 180, k, n); chain(xs, 216, 236, n);
+    n = thermal3(xs, 236, t, n); chain(xs, 272, 300, n);
+    const m = motor(xs, 300, mt, n); peWire(xs[2] + 40, m.pe);
+  });
+}
+function powerRes(split) {
+  const fx = [90, 112, 134], kx = [190, 212, 234]; bus(55, split - 25);
+  let f = fuses3(fx, 128, "F1", drop(fx, 128)); chain(fx, 164, 174, f);
+  const a = contactor3(fx, 174, "KM1", f, null, "línea"); chain(fx, 210, 236, a);
+  const r = [nn(), nn(), nn()];
+  a.forEach((n, i) => { const y = 216 + 6 * i; pw([[fx[i], y], [kx[i], y], [kx[i], 236]], n); dot(fx[i], y); });
+  res3(fx, 236, "R", a, r);
+  contactor3(kx, 236, "KM2", a, r, "puentea R");
+  r.forEach((n, i) => { const y = 278 + 6 * i; pw([[kx[i], 272], [kx[i], y], [fx[i], y]], n); dot(fx[i], y); });
+  chain(fx, 272, 300, r);
+  const t = thermal3(fx, 300, "F2", r); chain(fx, 336, 360, t);
+  const m = motor(fx, 360, "M1", t, { res: true }); peWire(280, m.pe);
+}
+
+// ------------------------------------------------------------ mandos
+function revBranch(xa, xb, r0, start, hold, series, coilTag, pre) {
+  let r = r0;
+  if (pre) { vw(xa, r.y, r.y + 8, r.n); const e = stack(xa, r.y + 8, [pre], r.n); vw(xa, e.y, e.y + 8, e.n); r = { y: e.y + 8, n: e.n }; }
+  r = par([xa, xb], r.y, [[start], [hold]], r.n);
+  vw(xa, r.y, r.y + 8, r.n); const e = stack(xa, r.y + 8, [...series, COIL(coilTag)], r.n); toN(xa, e.y);
+}
+const M = {
+  "014"() {
+    const c1 = 420, c2 = 480, c3 = 590, c4 = 670;
+    let r = commonStop(c1);
+    r = par([c1, c2], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("KM1", "13", "14")]], r.n);
+    vw(c1, r.y, r.y + 8, r.n); coil(c1, r.y + 8, "KM1", r.n); toN(c1, r.y + 44);
+    fromRail(c3, 230); let e = stack(c3, 230, [NO("KM1", "23", "24"), LAMP("H1", "marcha")], L); toN(c3, e.y);
+    fromRail(c4, 230); e = stack(c4, 230, [NO("F2", "97", "98", "thermal"), LAMP("H2", "disparo F2")], L); toN(c4, e.y);
+  },
+  "015"() {
+    const c1 = 420, c2 = 480, c3 = 540, c4 = 660;
+    let r = commonStop(c1, [NC("S01", "11", "12", "push", "paro 2")]);
+    r = par([c1, c2, c3], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("S11", "13", "14", "push", "marcha 2")], [NO("KM1", "13", "14")]], r.n);
+    vw(c1, r.y, r.y + 8, r.n); coil(c1, r.y + 8, "KM1", r.n); toN(c1, r.y + 44);
+    fromRail(c4, 272); const e = stack(c4, 272, [NO("KM1", "23", "24"), LAMP("H1", "marcha")], L); toN(c4, e.y);
+  },
+  "016"() {
+    const c1 = 420, c2 = 490, c3 = 560;
+    let r = commonStop(c1);
+    r = par([c1, c2, c3], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("S2", "13", "14", "push", "impulsos")],
+      [NC("S2", "21", "22", "push", "impulsos"), NO("KM1", "13", "14")]], r.n);
+    vw(c1, r.y, r.y + 8, r.n); coil(c1, r.y + 8, "KM1", r.n); toN(c1, r.y + 44);
+  },
+  "017"() {
+    const c1 = 420, c2 = 480, c3 = 590, c4 = 650;
+    const r = commonStop(c1); hw(r.y, c1, c3, r.n); dot(c1, r.y); dot(c2, r.y);
+    revBranch(c1, c2, r, NO("S1", "13", "14", "push", "derecha"), NO("KM1", "13", "14"), [NC("KM2", "21", "22")], "KM1");
+    revBranch(c3, c4, r, NO("S2", "13", "14", "push", "izquierda"), NO("KM2", "13", "14"), [NC("KM1", "21", "22")], "KM2");
+  },
+  "018"() {
+    const c1 = 420, c2 = 480, c3 = 590, c4 = 650;
+    const r = commonStop(c1); hw(r.y, c1, c3, r.n); dot(c1, r.y);
+    revBranch(c1, c2, r, NO("S1", "13", "14", "push", "derecha"), NO("KM1", "13", "14"), [NC("KM2", "21", "22")], "KM1", NC("S2", "21", "22", "push", "izquierda"));
+    revBranch(c3, c4, r, NO("S2", "13", "14", "push", "izquierda"), NO("KM2", "13", "14"), [NC("KM1", "21", "22")], "KM2", NC("S1", "21", "22", "push", "derecha"));
+  },
+  "019"() {
+    const c1 = 440, c2 = 500, c3 = 585, c4 = 660, c5 = 740;
+    let r = commonStop(c1);
+    r = par([c1, c2], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("KM1", "13", "14")]], r.n);
+    hw(r.y, c2, c5, r.n); dot(c3, r.y); dot(c4, r.y);
+    const yc = r.y + 8 + 2 * P;
+    vw(c1, r.y, yc, r.n); coil(c1, yc, "KM1", r.n, false, "línea"); toN(c1, yc + 36);
+    vw(c3, r.y, yc, r.n); coil(c3, yc, "KT1", r.n, true); toN(c3, yc + 36);
+    vw(c4, r.y, r.y + 8, r.n);
+    let e = stack(c4, r.y + 8, [NC("KT1", "55", "56", "timer"), NC("KM3", "21", "22"), COIL("KM2", false, "estrella")], r.n); toN(c4, e.y);
+    vw(c5, r.y, r.y + 8, r.n);
+    e = stack(c5, r.y + 8, [NO("KT1", "67", "68", "timer"), NC("KM2", "21", "22"), COIL("KM3", false, "triángulo")], r.n); toN(c5, e.y);
+  },
+  "020"() {
+    const c1 = 420, c2 = 480, c3 = 590, c4 = 650;
+    const r = commonStop(c1); hw(r.y, c1, c3, r.n); dot(c1, r.y); dot(c2, r.y);
+    const r1 = par([c1, c2], r.y, [[NO("S1", "13", "14", "push", "marcha M1")], [NO("KM1", "13", "14")]], r.n);
+    vw(c1, r1.y, r1.y + 8, r1.n); coil(c1, r1.y + 8, "KM1", r1.n); toN(c1, r1.y + 44);
+    vw(c3, r.y, r.y + 8, r.n);
+    let e = stack(c3, r.y + 8, [NC("F4", "95", "96", "thermal"), NC("S3", "11", "12", "push", "paro M2")], r.n);
+    vw(c3, e.y, e.y + 8, e.n);
+    const r2 = par([c3, c4], e.y + 8, [[NO("S2", "13", "14", "push", "marcha M2")], [NO("KM2", "13", "14")]], e.n);
+    vw(c3, r2.y, r2.y + 8, r2.n);
+    e = stack(c3, r2.y + 8, [NO("KM1", "23", "24"), COIL("KM2")], r2.n); toN(c3, e.y);
+  },
+  "021"() {
+    const c1 = 420, c2 = 480, c3 = 570, c4 = 670;
+    let r = commonStop(c1);
+    r = par([c1, c2], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("KM1", "13", "14")]], r.n);
+    hw(r.y, c2, c3, r.n); dot(c2, r.y);
+    vw(c1, r.y, r.y + 8, r.n); let e = stack(c1, r.y + 8, [NC("KT1", "55", "56", "timer"), COIL("KM1")], r.n); toN(c1, e.y);
+    vw(c3, r.y, r.y + 8 + P, r.n); coil(c3, r.y + 8 + P, "KT1", r.n, true); toN(c3, r.y + 8 + P + 36);
+    fromRail(c4, 230); e = stack(c4, 230, [NO("KM1", "23", "24"), LAMP("H1", "marcha")], L); toN(c4, e.y);
+  },
+  "022"() {
+    const c1 = 420, c2 = 480, c3 = 590, c4 = 650;
+    const r = commonStop(c1); hw(r.y, c1, c3, r.n); dot(c1, r.y); dot(c2, r.y);
+    revBranch(c1, c2, r, NO("S1", "13", "14", "push", "abrir"), NO("KM1", "13", "14"), [NC("SQ1", "11", "12", "limit", "fin apertura"), NC("KM2", "21", "22")], "KM1");
+    revBranch(c3, c4, r, NO("S2", "13", "14", "push", "cerrar"), NO("KM2", "13", "14"), [NC("SQ2", "11", "12", "limit", "fin cierre"), NC("KM1", "21", "22")], "KM2");
+  },
+  "023"() {
+    const c1 = 420, c2 = 480, c3 = 570, c4 = 660;
+    let r = commonStop(c1);
+    r = par([c1, c2], r.y, [[NO("S1", "13", "14", "push", "marcha")], [NO("KM1", "13", "14")]], r.n);
+    hw(r.y, c2, c4, r.n); dot(c3, r.y);
+    const yc = r.y + 8 + P;
+    vw(c1, r.y, yc, r.n); coil(c1, yc, "KM1", r.n, false, "línea"); toN(c1, yc + 36);
+    vw(c3, r.y, yc, r.n); coil(c3, yc, "KT1", r.n, true); toN(c3, yc + 36);
+    vw(c4, r.y, r.y + 8, r.n); const e = stack(c4, r.y + 8, [NO("KT1", "67", "68", "timer"), COIL("KM2", false, "puentea R")], r.n); toN(c4, e.y);
+  },
+};
+
+const SCH = [
+  ["014", "Marcha-paro de motor (KM1)", powerStd, 330, "F3", "Al pulsar S1 se excita la bobina de KM1, que cierra sus contactos principales y el motor arranca. El contacto auxiliar KM1 (13-14), en paralelo con S1, realimenta la bobina: al soltar S1 el motor sigue en marcha (autoenclavamiento). S0 o el disparo del relé térmico F2 (95-96) cortan la bobina y paran el motor. H1 señaliza motor en marcha y H2 el disparo por sobrecarga (F2 97-98).",
+    "Prueba: pulsa S1 y suéltalo; después provoca una sobrecarga con el motor en marcha."],
+  ["015", "Marcha-paro desde dos puntos", powerStd, 330, "F3", "El motor se pone en marcha desde dos puntos (S1 o S11) y se para desde cualquiera de ellos (S0 o S01). Los pulsadores de marcha van en paralelo entre sí y con el contacto de realimentación KM1 (13-14); los de paro van en serie. F2 protege el motor contra sobrecargas. H1 señaliza motor en marcha.",
+    "Prueba: arranca con S11 y para con S01. ¿Qué pasa si mantienes S0 y pulsas S1?"],
+  ["016", "Marcha continua y por impulsos", powerStd, 330, "F3", "S1 pone el motor en marcha continua: KM1 se realimenta con su contacto 13-14. S2 es un pulsador de doble cámara para marcha por impulsos: su contacto NA (13-14) alimenta la bobina y su contacto NC (21-22) abre la realimentación, así que el motor solo gira mientras se mantiene pulsado S2. S0 o F2 paran el motor.",
+    "Prueba: mantén S2 y suéltalo; compáralo con S1. Fíjate en que los dos contactos de S2 se mueven a la vez."],
+  ["017", "Inversión de giro con paro previo", (s) => powerRev(s, ["derecha", "izquierda"]), 330, "F3", "S1 pone en marcha el motor en un sentido (KM1) y S2 en el contrario (KM2); cada contactor se realimenta con su contacto 13-14. KM2 intercambia las fases L1 y L3. El contacto NC (21-22) de cada contactor va en serie con la bobina del otro (enclavamiento eléctrico): para cambiar de sentido hay que pulsar antes S0. F2 protege contra sobrecargas.",
+    "Prueba: con el motor girando a derechas pulsa S2: no pasa nada hasta que pulses S0."],
+  ["018", "Inversión de giro sin paro previo", (s) => powerRev(s, ["derecha", "izquierda"]), 330, "F3", "Además del enclavamiento por contactos (KM1 21-22 y KM2 21-22), S1 y S2 son pulsadores de doble cámara: el NC de S2 va en serie con la rama de KM1 y el NC de S1 con la de KM2. Al pulsar el sentido contrario se desconecta primero el contactor que funcionaba y después entra el otro, sin pasar por S0. S0 o F2 paran el motor en cualquier momento.",
+    "Prueba: cambia de sentido directamente con S1 y S2."],
+  ["019", "Arranque estrella-triángulo", powerStarDelta, 360, "F3", "Al pulsar S1 se excitan KM1 (línea), KT1 y KM2 (estrella): el motor arranca en estrella. KM1 se realimenta con su contacto 13-14. Pasado el tiempo ajustado en KT1, su contacto 55-56 abre y desconecta KM2, y su contacto 67-68 cierra y conecta KM3 (triángulo). KM2 y KM3 están enclavados entre sí (21-22) para que nunca entren a la vez. S0 o F2 paran el motor.",
+    "Prueba: pulsa S1 y observa el paso de estrella a triángulo en el motor y en los contactores."],
+  ["020", "Arranque secuencial de dos motores", powerTwo, 330, "F5", "S1 pone en marcha M1 (KM1) y S2 pone en marcha M2 (KM2), pero M2 solo puede arrancar si M1 está funcionando, porque el contacto KM1 (23-24) va en serie con la bobina de KM2. S3 para solo M2; S0 o el térmico F2 paran los dos motores. Si dispara F4 se para solo M2.",
+    "Prueba: pulsa S2 con M1 parado. Después arranca los dos y provoca la sobrecarga en F2 y en F4."],
+  ["021", "Marcha con paro temporizado", powerStd, 330, "F3", "Al pulsar S1 se excitan KM1 y el temporizador KT1 (retardo a la conexión); KM1 se realimenta con su contacto 13-14. Al cumplirse el tiempo ajustado, el contacto KT1 (55-56) abre, KM1 cae y el motor para solo. Al caer KM1 se abre la realimentación y KT1 también se desconecta. S0 permite parar antes de tiempo. H1 señaliza motor en marcha.",
+    "Prueba: cambia el tiempo de KT1 y pon el motor en marcha."],
+  ["022", "Inversión de giro con finales de carrera", (s) => powerRev(s, ["abrir", "cerrar"]), 330, "F3", "Puerta motorizada: S1 abre (KM1) y S2 cierra (KM2); cada contactor se realimenta con su contacto 13-14. El final de carrera SQ1 desconecta KM1 cuando la puerta está totalmente abierta y SQ2 desconecta KM2 cuando está cerrada. KM1 y KM2 están enclavados eléctricamente (21-22). S0 para la puerta en cualquier posición; F2 protege contra sobrecargas.",
+    "Prueba: abre la puerta, párala a mitad con S0 y ciérrala. Observa SQ1 y SQ2."],
+  ["023", "Arranque por resistencias estatóricas", powerRes, 330, "F3", "Al pulsar S1 se excitan KM1 y KT1: el motor arranca con las resistencias R en serie con el estátor, lo que reduce la tensión y la intensidad de arranque. KM1 se realimenta con su contacto 13-14. Pasado el tiempo de KT1, su contacto 67-68 cierra y excita KM2, que puentea las resistencias: el motor queda a plena tensión. S0 o F2 paran el motor.",
+    "Prueba: pulsa S1 y observa cuándo entra KM2 y cómo cambia la velocidad del motor."],
+];
+
+// ------------------------------------------------------------ simulación
+const $ = id => document.getElementById(id);
+const svg = $("sim");
+let cur, st, T = 3, door = 0, last = 0;
+
+function build(i) {
+  const [num, title, power, split, ftag] = SCH[i];
+  B = newB(); terms.length = 0;
+  tx(40, 75, "Circuito de potencia", "h"); tx(split + 15, 75, "Circuito de mando", "h");
+  B.s.push(`<line class="sep" x1="${split}" y1="64" x2="${split}" y2="498"/>`);
+  power(split);
+  mandoBase(split + 25, W - 40, ftag);
+  M[num]();
+  svg.innerHTML = B.s.join("") + terms.join("");
+  cur = { ...B, num, i };
+  cur.wireEls = cur.wires.map(w => ({ ...w, el: $(w.id) }));
+  cur.elEls = [...cur.el, ...cur.pel].filter(e => e.id).map(e => ({ e, el: $(e.id) }));
+  cur.motEls = cur.motors.map(m => ({ m, c: $(m.id), r: $(m.id + "r"), t: $(m.id + "t") }));
+  st = { press: {}, rel: {}, trip: {}, coil: {}, tim: {} };
+  door = 0;
+  cur.timers.forEach(t => st.tim[t] = 0);
+  location.hash = num;
+  $("titulo").textContent = `Esquema ${num} · ${title}`;
+  $("func").innerHTML = SCH[i][5] + `<br><span class="tip">${SCH[i][6]}</span>`;
+  document.querySelectorAll("#tabs button").forEach((b, j) => b.setAttribute("aria-pressed", j === i));
+  panel();
+}
+
+function panel() {
+  const pb = $("pulsadores"); pb.innerHTML = "";
+  [...cur.push.entries()].sort((a, b) => a[0].localeCompare(b[0], "es", { numeric: true })).forEach(([dev, desc]) => {
+    const b = document.createElement("button");
+    b.className = "push"; b.dataset.dev = dev;
+    b.style.setProperty("--c", /^S0|^S01|^S3/.test(dev) ? "#c62828" : "#2e9a3e");
+    b.innerHTML = `<b></b>${dev}${desc ? ` · ${desc}` : ""}`;
+    holdable(b, dev); pb.appendChild(b);
+  });
+  let h = "";
+  if (cur.therm.length) {
+    h += `<h3>Averías</h3><div class="btns">` + cur.therm.map(f => `<button class="btn danger" data-trip="${f}" aria-pressed="false">Sobrecarga en ${f}</button>`).join("") + `</div>`;
+  }
+  if (cur.timers.length) {
+    h += `<h3>Temporizador KT1</h3><div class="row"><input type="range" id="tset" min="1" max="10" step="1" value="${T}" aria-label="Tiempo de KT1"><span id="tval" style="font-weight:bold">${T} s</span></div>`;
+  }
+  if (cur.num === "022") {
+    h += `<h3>Puerta</h3><div class="door"><i id="doorbar"></i><span id="doortxt"></span></div><p class="tip" style="margin:4px 0 0">SQ2 actúa con la puerta cerrada (0 %) y SQ1 con la puerta abierta (100 %).</p>`;
+  }
+  $("extra").innerHTML = h;
+  document.querySelectorAll("[data-trip]").forEach(b => b.onclick = () => {
+    const f = b.dataset.trip; st.trip[f] = !st.trip[f];
+    b.setAttribute("aria-pressed", st.trip[f]); b.textContent = st.trip[f] ? `Rearmar ${f}` : `Sobrecarga en ${f}`;
+  });
+  const ts = $("tset"); if (ts) ts.oninput = () => { T = +ts.value; $("tval").textContent = T + " s"; };
+  svg.querySelectorAll(".pb").forEach(g => holdable(g, g.dataset.dev));
+}
+
+function holdable(el, dev) {
+  const down = e => { e.preventDefault(); st.press[dev] = true; mark(); };
+  const up = () => { if (st.press[dev]) { st.press[dev] = false; st.rel[dev] = performance.now(); mark(); } };
+  el.addEventListener("pointerdown", e => { down(e); try { el.setPointerCapture(e.pointerId); } catch (_) {} });
+  el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up); el.addEventListener("lostpointercapture", up);
+  el.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) down(e); });
+  el.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") up(); });
+  el.addEventListener("blur", up);
+  el.addEventListener("contextmenu", e => e.preventDefault());
+}
+function mark() {
+  document.querySelectorAll("[data-dev]").forEach(el => el.classList.toggle("down", !!st.press[el.dataset.dev]));
+}
+
+function actuated(dev, timed) {
+  if (/^KT/.test(dev)) return timed ? st.tim[dev] >= T : !!st.coil[dev];
+  if (/^K/.test(dev)) return !!st.coil[dev];
+  if (/^F/.test(dev)) return !!st.trip[dev];
+  if (dev === "SQ1") return door >= 100;
+  if (dev === "SQ2") return door <= 0;
+  return !!st.press[dev];
+}
+// Al soltar un pulsador, su NC tarda un instante en volver a cerrar (primero abre el NA).
+const RETORNO_NC = 150;
+const closed = e => {
+  if (e.k === "fix") return true;
+  if (e.k === "no") return actuated(e.dev, e.timed);
+  if (/^S\d/.test(e.dev) && performance.now() - (st.rel[e.dev] ?? -1e9) < RETORNO_NC) return false;
+  return !actuated(e.dev, e.timed);
+};
+
+function liveMando() {
+  const live = new Set([L]); let ch = true;
+  const cs = cur.el.filter(e => (e.k === "no" || e.k === "nc") && closed(e));
+  while (ch) { ch = false; for (const e of cs) { if (live.has(e.a) !== live.has(e.b)) { live.add(e.a); live.add(e.b); ch = true; } } }
+  return live;
+}
+function solve() {
+  let live;
+  for (let it = 0; it < 30; it++) {
+    live = liveMando();
+    const nc = {}; cur.el.filter(e => e.k === "coil").forEach(e => nc[e.dev] = nc[e.dev] || live.has(e.a));
+    let ch = false; for (const k in nc) if (!!st.coil[k] !== nc[k]) ch = true;
+    st.coil = nc; if (!ch) break;
+  }
+  // potencia: propagación de fases
+  const ph = { [PH[0]]: 1, [PH[1]]: 2, [PH[2]]: 3 }; let short = false, ch = true;
+  const cs = cur.pel.filter(closed);
+  while (ch) {
+    ch = false;
+    for (const e of cs) {
+      const a = ph[e.a], b = ph[e.b];
+      if (a && !b) { ph[e.b] = a; ch = true; } else if (b && !a) { ph[e.a] = b; ch = true; } else if (a && b && a !== b) short = true;
+    }
+  }
+  return { live, ph, short };
+}
+
+function motorState(m, ph) {
+  const p = m.nodes.map(n => ph[n]);
+  if (!p.every(Boolean) || new Set(p).size < 3) return null;
+  const right = ["1,2,3", "2,3,1", "3,1,2"].includes(p.join(","));
+  let mode = "", speed = 0.9;
+  if (m.six) {
+    const b = m.bot.map(n => ph[n]);
+    if (b.every(Boolean)) mode = "triángulo";
+    else if (st.coil.KM2) { mode = "estrella"; speed = 1.8; }
+    else return null;
+  }
+  if (m.res) { if (st.coil.KM2) mode = "plena tensión"; else { mode = "con resistencias"; speed = 1.8; } }
+  let dir = m.dirs ? (right ? m.dirs[0] : m.dirs[1]) : "";
+  return { right, mode, speed, dir };
+}
+
+function render(s) {
+  const { live, ph } = s;
+  for (const w of cur.wireEls) {
+    let c = "w";
+    if (w.kind === "m") c += live.has(w.node) ? " on" : "";
+    else if (w.kind === "p") c += ph[w.node] ? " ph" + ph[w.node] : "";
+    if (w.el.getAttribute("class") !== c) w.el.setAttribute("class", c);
+  }
+  for (const { e, el } of cur.elEls) {
+    if (e.k === "coil") el.classList.toggle("on", !!st.coil[e.dev]);
+    else if (e.k === "lamp") {
+      const on = live.has(e.a);
+      el.style.fill = on ? (e.dev === "H2" ? "#ff6b5e" : "#7ee08a") : "#fff";
+    } else {
+      const c = closed(e), x = e.x, y = e.y;
+      let x2, y2;
+      if (e.k === "no") { [x2, y2] = c ? [x + 1.5, y + 11] : [x - 9, y + 10]; }
+      else { [x2, y2] = c ? [x + 9, y + 9] : [x - 9, y + 10]; }
+      el.setAttribute("x2", x2); el.setAttribute("y2", y2);
+    }
+  }
+  cur.timers.forEach(t => {
+    const el = $("tm-" + t); if (!el) return;
+    el.textContent = st.coil[t] ? `${Math.min(st.tim[t], T).toFixed(1)} / ${T} s` : "";
+  });
+  const out = [];
+  for (const { m, c, r, t } of cur.motEls) {
+    const ms = motorState(m, ph);
+    c.classList.toggle("on", !!ms); r.classList.toggle("on", !!ms);
+    if (ms) { r.style.setProperty("--sp", ms.speed + "s"); r.style.setProperty("--dir", ms.right ? "normal" : "reverse"); }
+    t.textContent = ms ? [ms.dir, ms.mode].filter(Boolean).join(" · ") : "";
+    out.push([m.tag, ms]);
+  }
+  return out;
+}
+
+function status(s, mots) {
+  let h = "";
+  if (s.short) h += `<div class="msg bad">¡Cortocircuito en potencia! Dos contactores unen fases distintas.</div>`;
+  mots.forEach(([tag, ms]) => {
+    h += ms ? `<div class="msg ok">${tag} en marcha${ms.dir ? " · " + ms.dir : ""}${ms.mode ? " · " + ms.mode : ""}</div>`
+            : `<div class="msg off">${tag} parado</div>`;
+  });
+  Object.keys(st.trip).filter(f => st.trip[f]).forEach(f => h += `<div class="msg warn">${f} disparado por sobrecarga</div>`);
+  if (h !== status.m) { $("motor").innerHTML = h; status.m = h; }
+  let rows = "";
+  const coils = [...new Set(cur.el.filter(e => e.k === "coil").map(e => e.dev))];
+  coils.forEach(k => {
+    const on = !!st.coil[k];
+    let v = on ? "excitada" : "sin tensión";
+    if (/^KT/.test(k) && on) v = st.tim[k] >= T ? "tiempo cumplido" : `contando ${Math.min(st.tim[k], T).toFixed(1)} s`;
+    rows += `<tr><td>Bobina ${k}</td><td class="r ${on ? "yes" : "no"}">${v}</td></tr>`;
+  });
+  cur.lamps.forEach(l => {
+    const on = cur.el.some(e => e.k === "lamp" && e.dev === l && s.live.has(e.a));
+    rows += `<tr><td>Piloto ${l}</td><td class="r ${on ? "yes" : "no"}">${on ? "encendido" : "apagado"}</td></tr>`;
+  });
+  if (cur.num === "022") {
+    rows += `<tr><td>SQ1 (abierta)</td><td class="r ${door >= 100 ? "yes" : "no"}">${door >= 100 ? "accionado" : "en reposo"}</td></tr>`;
+    rows += `<tr><td>SQ2 (cerrada)</td><td class="r ${door <= 0 ? "yes" : "no"}">${door <= 0 ? "accionado" : "en reposo"}</td></tr>`;
+  }
+  if (rows !== status.r) { $("estado").innerHTML = rows; status.r = rows; }
+  if (cur.num === "022") {
+    $("doorbar").style.width = door + "%";
+    $("doortxt").textContent = door <= 0 ? "Cerrada" : door >= 100 ? "Abierta" : `${Math.round(door)} %`;
+  }
+}
+
+function tick() {
+  const now = performance.now();
+  const dt = Math.min(0.1, (now - (last || now)) / 1000); last = now;
+  cur.timers.forEach(t => st.tim[t] = st.coil[t] ? st.tim[t] + dt : 0);
+  let s = solve();
+  if (cur.num === "022") {
+    const ms = motorState(cur.motors[0], s.ph);
+    if (ms) { door = Math.max(0, Math.min(100, door + (ms.right ? 1 : -1) * 20 * dt)); s = solve(); }
+  }
+  const mots = render(s);
+  status(s, mots);
+}
+
+// pestañas
+const tabs = $("tabs");
+SCH.forEach((sc, i) => {
+  const b = document.createElement("button");
+  b.textContent = `${sc[0]} · ${sc[1].replace(/ \(KM1\)/, "")}`;
+  b.onclick = () => build(i);
+  tabs.appendChild(b);
+});
+$("reset").onclick = () => build(cur.i);
+const h = location.hash.slice(1), start = Math.max(0, SCH.findIndex(s => s[0] === h));
+build(start);
+window.addEventListener("hashchange", () => { const j = SCH.findIndex(s => s[0] === location.hash.slice(1)); if (j >= 0 && j !== cur.i) build(j); });
+setInterval(tick, 40);
+})();
+</script>
+</body>
+</html>
