@@ -15,6 +15,7 @@
       {t: "Tomas de uso general (C2)", href: "calculos/calculo_tomas_C2.html"},
       {t: "Ejemplo: toma del C2 a 12 m", href: "calculos/ejemplo_toma_C2_12m.html"},
       {t: "Teoría del cálculo de secciones (PDF)", href: "calculos/teoria_calculo_secciones_vivienda.pdf"},
+      {t: "Vivienda 3D·2B: plano y memoria de cálculo", href: "vivienda-3d2b-instalacion-electrica.html"},
     ]},
     {t: "Fichas", items: [
       {t: "Todas las fichas", href: "fichas.html"},
@@ -36,6 +37,7 @@
       {t: "011 · Timbre con dos pulsadores, interruptor y conmutada", href: "pdf/A3/esquema-011-A3.pdf"},
       {t: "012 · Cruzamiento y dos interruptores", href: "pdf/A3/esquema-012-A3.pdf"},
       {t: "007–012 juntas", href: "pdf/esquemas-007-012-A3.pdf"},
+      {t: "Plano de vivienda · instalación eléctrica", href: "pdf/A3/plano-vivienda-instalacion-electrica-A3.pdf"},
     ]},
     {t: "Domótica", items: [
       {t: "Ecosistema domótico Shelly (aula de cocina)", href: "ecosistema-domotico.html"},
