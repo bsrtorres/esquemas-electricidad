@@ -83,9 +83,6 @@
       {t: "4 · Montacargas de 3 plantas", href: "grafcet/ejercicio4-montacargas.html"},
       {t: "5 · Túnel de lavado", href: "grafcet/ejercicio5-tunel-lavado.html"},
       {t: "Solucionario GRAFCET con bloques RS", href: "grafcet/solucionario-grafcet-rs-logosoft.pdf"},
-      {h: "Iniciación"},
-      {t: "Simulador GRAFCET básico", href: "grafcet/simulador-grafcet-basico.html"},
-      {t: "Simulador GRAFCET con diagrama", href: "grafcet/simulador-grafcet-diagrama.html"},
     ]},
     {t: "Domótica", items: [
       {t: "Ecosistema domótico Shelly (aula de cocina)", href: "ecosistema-domotico.html"},
