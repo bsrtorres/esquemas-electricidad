@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIC16F84 y Proteus · Taller de Electricidad y Electrónica</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; --in: #0b7a43; --out: #c2410c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  h3 { font-size: 20px; margin: 22px 0 8px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); scroll-margin-top: 70px; }
+  .card p { margin: 0 0 12px; }
+  .big { display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; margin: 0 6px 6px 0; }
+  .big.alt { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+  .tw { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 60px; font-weight: bold; white-space: nowrap; }
+  a { color: var(--accent); }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 17px; background: #f1ece3; padding: 1px 5px; border-radius: 4px; }
+  .mut { color: var(--muted); }
+  .ov { text-decoration: overline; }
+  .note { background: #fff8e6; border-left: 4px solid #ffc83d; padding: 8px 12px; border-radius: 6px; }
+  .tags span { display: inline-block; font-size: 15px; background: #eef2f7; color: #17335e; border-radius: 99px; padding: 2px 10px; margin: 0 6px 6px 0; }
+  ol.steps li { margin-bottom: 10px; }
+  .svgw { overflow-x: auto; }
+  svg.pin { width: 100%; min-width: 720px; height: auto; display: block; font-family: Calibri, "Segoe UI", Arial, sans-serif; }
+  svg .chip { fill: #2b2d33; }
+  svg .notch { fill: #555a63; }
+  svg .chipt { fill: #fff; font-size: 20px; font-weight: bold; text-anchor: middle; }
+  svg .leg { stroke: #9aa0a6; stroke-width: 3; }
+  svg .pn { fill: #fff; font-size: 15px; }
+  svg .cn { font-size: 15px; fill: var(--muted); }
+  svg .cn.in { fill: var(--in); font-weight: bold; }
+  svg .cn.out { fill: var(--out); font-weight: bold; }
+  svg .cn.free { fill: #b0b0b5; font-style: italic; }
+  @media print { .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; } }
+</style>
+<script src="menu.js?v=17" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>PIC16F84 y Proteus</h1>
+  <p class="lead">Los GRAFCET de la sección GRAFCET, programados en un microcontrolador PIC16F84A en lugar del LOGO!. Cada ejercicio tiene su programa listo para cargar (.hex), el código comentado (.asm), las conexiones del PIC y los componentes para simularlo en Proteus antes de montarlo.</p>
+
+  <section class="card">
+    <h2>Los siete ejercicios</h2>
+    <p>El PIC16F84A tiene 13 patillas de entrada y salida. Cada ejercicio va en su propio PIC. Los cuatro que necesitan más patillas usan un decodificador 74HC138 para las salidas.</p>
+    <div class="tw"><table>
+      <thead><tr><th>N.º</th><th>Ejercicio</th><th>Entradas</th><th>Salidas</th><th>Cómo salen</th><th>Patillas usadas</th></tr></thead>
+      <tbody>
+        <tr><td class='n'><a href='#ej1'>1</a></td><td><b>Clasificadora de piezas</b></td><td>9</td><td>7</td><td>74HC138</td><td>13 de 13</td></tr><tr><td class='n'><a href='#ej2'>2</a></td><td><b>Mezcladora y dosificadora</b></td><td>7</td><td>8</td><td>74HC138</td><td>11 de 13</td></tr><tr><td class='n'><a href='#ej3'>3</a></td><td><b>Taladradora automática</b></td><td>9</td><td>6</td><td>74HC138</td><td>13 de 13</td></tr><tr><td class='n'><a href='#ej4'>4</a></td><td><b>Montacargas de 3 plantas</b></td><td>8</td><td>6</td><td>74HC138</td><td>12 de 13</td></tr><tr><td class='n'><a href='#ej5'>5</a></td><td><b>Túnel de lavado</b></td><td>4</td><td>7</td><td>Directas</td><td>11 de 13</td></tr><tr><td class='n'><a href='#ej6'>6</a></td><td><b>Prensa neumática</b></td><td>3</td><td>2</td><td>Directas</td><td>8 de 13</td></tr><tr><td class='n'><a href='#ej7'>7</a></td><td><b>Puerta de garaje</b></td><td>3</td><td>2</td><td>Directas</td><td>9 de 13</td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-top:14px"><a class="big" href="pic16f84/pic16f84-grafcet.zip" download>Descargar los 7 programas (.zip)</a></p>
+  </section>
+
+  <section class="card">
+    <h2>Del LOGO! al PIC</h2>
+    <p>El programa sigue la misma idea que los bloques RS: en cada momento hay una sola etapa activa y solo se pasa a la siguiente cuando se cumple su receptividad.</p>
+    <div class="tw"><table>
+      <thead><tr><th>En LOGO!Soft</th><th>En el PIC</th></tr></thead>
+      <tbody>
+        <tr><td>Un bloque RS por etapa</td><td>La variable <code>ETAPA</code> guarda el número de la etapa activa</td></tr>
+        <tr><td>Set de la etapa siguiente y Reset de la actual</td><td><code>movlw</code> con el número de la etapa siguiente y <code>call CambiaEtapa</code></td></tr>
+        <tr><td>Salidas Q unidas a las etapas</td><td><code>TablaSalidas</code>: una línea <code>retlw</code> por etapa con el valor de PORTB</td></tr>
+        <tr><td>Temporizador con retardo a la conexión</td><td><code>TablaTiempos</code> y el TMR0: cada desbordamiento dura 65,536 ms (5 s = 76 desbordamientos)</td></tr>
+        <tr><td>Contador y RS auxiliares</td><td>Una variable (<code>C1</code>) o un bit de memoria (<code>MEM</code>)</td></tr>
+        <tr><td>Entrada de RESET (I4, I9, I10)</td><td>La patilla MCLR: al pulsar, el PIC se reinicia y vuelve a X0</td></tr>
+        <tr><td>Lectura de entradas en cada ciclo</td><td>Al principio de cada vuelta se copian PORTA y PORTB en <code>ENT_A</code> y <code>ENT_B</code></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Para cambiar un tiempo, edita su línea en <code>TablaTiempos</code>: desbordamientos = segundos ÷ 0,065536 (máximo 255, unos 16,7 s).</p>
+  </section>
+
+  <section class="card">
+    <h2>Simularlo en Proteus</h2>
+    <ol class="steps">
+      <li><b>Coloca el PIC.</b> En <i>Pick Devices</i> busca <code>PIC16F84A</code>. Sus patillas de alimentación (VDD y VSS) están ocultas y Proteus las conecta solas a +5 V y masa.</li>
+      <li><b>Carga el programa.</b> Doble clic en el PIC: en <i>Program File</i> elige el archivo <code>.hex</code> del ejercicio y en <i>Processor Clock Frequency</i> pon <code>4MHz</code>. En la simulación no hace falta dibujar el cristal ni sus condensadores.</li>
+      <li><b>Conecta MCLR.</b> Resistencia de 10 kΩ de MCLR a +5 V (terminal <i>POWER</i>) y un <code>BUTTON</code> de MCLR a masa (<i>GROUND</i>). Si MCLR queda al aire, el PIC no arranca.</li>
+      <li><b>Pon las entradas.</b> Cada entrada: un <code>BUTTON</code> o un <code>SWITCH</code> de +5 V a la patilla, y una resistencia de 10 kΩ de la patilla a masa. El pulsador de marcha es un BUTTON. Los finales de carrera y selectores van mejor con SWITCH, porque se quedan en la posición en que los dejas. Para ir más rápido puedes usar <code>LOGICSTATE</code>, que da 0 o 1 sin resistencias.</li>
+      <li><b>Pon las salidas.</b> Patilla → resistencia de 330 Ω → LED → masa. En los ejercicios con 74HC138, al revés: +5 V → 330 Ω → LED → patilla Y.</li>
+      <li><b>Simula el proceso a mano.</b> Pulsa ▶ y actúa como la máquina: pulsa M, y cuando se encienda una salida activa el final de carrera que la para. Antes de empezar, pon los sensores de la posición inicial (por ejemplo Fc0 o Fc_C). Deja cada final de carrera como estaría en la máquina: cuando el actuador sale de una posición, desactívalo; si se queda activado, una etapa posterior que lo espere pasará sin esperar.</li>
+      <li><b>Mira la etapa activa.</b> Con la simulación en pausa: <i>Debug → Watch Window</i>, clic derecho, <i>Add Items (By Address)</i>, dirección <code>0x0C</code>, nombre <code>ETAPA</code>. Verás el número de la etapa en cada momento.</li>
+    </ol>
+    <p class="note">Para modificar el código hace falta un ensamblador MPASM: MPLAB X hasta la versión 5.35 o el antiguo MPLAB IDE 8.92. Las versiones nuevas de MPLAB X ya no lo traen. Para solo simular basta con el .hex.</p>
+  </section>
+
+  <section class="card">
+    <h2>Del simulador al montaje real</h2>
+    <ul>
+      <li><b>Cristal:</b> 4 MHz entre las patillas 15 y 16, con dos condensadores de 22 pF a masa. Alimentación: patilla 14 a +5 V y patilla 5 a masa, con un condensador de 100 nF cerca del PIC.</li>
+      <li><b>Sensores sin tensión</b> (finales de carrera, reed, pulsadores, relé del receptor de un mando): contacto a +5 V y 10 kΩ a masa, como en Proteus.</li>
+      <li><b>Sensores de 12 o 24 V</b> (inductivos, fotocélulas): nunca directos al PIC. Pasa cada uno por un optoacoplador PC817.</li>
+      <li><b>Salidas:</b> una patilla del PIC da unos 20 mA. Para relés o motores, usa un transistor o un ULN2803. Con el 74HC138 las salidas son activas a nivel bajo: el 74HC238, versión con salidas a nivel alto, se conecta directamente a un ULN2803.</li>
+      <li><b>Programar el PIC:</b> con un programador tipo PICkit y el mismo archivo .hex.</li>
+    </ul>
+  </section>
+
+<section class="card" id="ej1">
+<h2>Ejercicio 1 · Clasificadora de piezas</h2>
+<p>Al pulsar M con el carro en Fc0 avanza la cinta (Q1). Una pieza metálica (S_Metal) va por el desviador izquierdo (Q2 hasta Fc1) y su empujador (Q3 hasta Fc2); una de plástico (S_Plast) por el derecho (Q4 hasta Fc3, Q5 hasta Fc4). Después se sella la caja (Q6 hasta Fc5) y el carro vuelve (Q7 hasta Fc0).</p>
+<p class="tags"><span>9 entradas</span><span>7 salidas</span><span>salidas por 74HC138</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej1_clasificadora.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej1_clasificadora.asm" download>Código .asm</a> <a href="grafcet/ejercicio1-clasificadora.html">Ejercicio con bloques RS de LOGO!</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · Fc0</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Cinta principal</span></td><td></td><td>X2 si S_Metal<br>X3 si S_Plast</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2</b> <span class='mut'>Desviador izquierdo</span></td><td></td><td>X4 si Fc1</td></tr>
+<tr><td class='n'>X3</td><td><b>Q4</b> <span class='mut'>Desviador derecho</span></td><td></td><td>X5 si Fc3</td></tr>
+<tr><td class='n'>X4</td><td><b>Q3</b> <span class='mut'>Empujador izquierdo</span></td><td></td><td>X6 si Fc2</td></tr>
+<tr><td class='n'>X5</td><td><b>Q5</b> <span class='mut'>Empujador derecho</span></td><td></td><td>X6 si Fc4</td></tr>
+<tr><td class='n'>X6</td><td><b>Q6</b> <span class='mut'>Sellado</span></td><td></td><td>X7 si Fc5</td></tr>
+<tr><td class='n'>X7</td><td><b>Q7</b> <span class='mut'>Retorno del carro</span></td><td></td><td>X0 si Fc0</td></tr>
+</tbody></table></div>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 9 de las 13 patillas como entradas y 4 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 1"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">S_Metal · Sensor de pieza metálica</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn in" text-anchor="end">S_Plast · Sensor de pieza de plástico</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn in" text-anchor="end">Fc1 · Desviador izquierdo abierto</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">74HC138 · A (pin 1)</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">74HC138 · B (pin 2)</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn out" text-anchor="end">74HC138 · C (pin 3)</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn out" text-anchor="end">74HC138 · G1 (pin 6) + 10k a masa</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">Fc0 · Carro en origen</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Pulsador de marcha</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn in">Fc5 · Fin de sellado</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn in">Fc4 · Fin empujador derecho</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn in">Fc3 · Desviador derecho abierto</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn in">Fc2 · Fin empujador izquierdo</text></svg></div>
+<h3>Salidas a través del 74HC138</h3>
+<p>En cada etapa solo hay una salida activa. El PIC envía su número en binario por RB0, RB1 y RB2 y pone RB3 (G1) a 1; el 74HC138 activa esa salida poniéndola a <b>0 V</b>. En reposo, RB3 = 0 y todas quedan apagadas.</p>
+<div class="tw"><table><thead><tr><th>Salida</th><th>Función</th><th>RB2 RB1 RB0</th><th>Patilla del 74HC138</th></tr></thead><tbody>
+<tr><td class='n'>Q1</td><td>Cinta principal</td><td><code>000</code></td><td>Y0 · pin 15</td></tr>
+<tr><td class='n'>Q2</td><td>Desviador izquierdo</td><td><code>001</code></td><td>Y1 · pin 14</td></tr>
+<tr><td class='n'>Q3</td><td>Empujador izquierdo</td><td><code>010</code></td><td>Y2 · pin 13</td></tr>
+<tr><td class='n'>Q4</td><td>Desviador derecho</td><td><code>011</code></td><td>Y3 · pin 12</td></tr>
+<tr><td class='n'>Q5</td><td>Empujador derecho</td><td><code>100</code></td><td>Y4 · pin 11</td></tr>
+<tr><td class='n'>Q6</td><td>Sellado de caja</td><td><code>101</code></td><td>Y5 · pin 10</td></tr>
+<tr><td class='n'>Q7</td><td>Retorno del carro</td><td><code>110</code></td><td>Y6 · pin 9</td></tr>
+</tbody></table></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej1_clasificadora.hex</code></td></tr>
+<tr><td><code>74HC138</code></td><td>1</td><td>Decodificador de 3 a 8 líneas</td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>8</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>11</td><td>Resistencias a masa de las entradas, pull-up de MCLR y la de G1</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>7</td><td>Una por salida</td></tr>
+<tr><td><code>RES 330</code></td><td>7</td><td>Una por LED</td></tr>
+</tbody></table></div>
+<p class='note'>Los LED de salida del 74HC138 se conectan al revés que los del PIC: +5 V → 330 Ω → LED → patilla Y. El LED luce cuando la Y está a 0 V. G2A y G2B van a masa; VCC (16) a +5 V y GND (8) a masa.</p>
+</section><section class="card" id="ej2">
+<h2>Ejercicio 2 · Mezcladora y dosificadora</h2>
+<p>Con el depósito vacío (B0) al pulsar M se llena con producto A (Q1 hasta B1) y B (Q2 hasta B2). Con S_Lav = 0 (producción) agita 5 s (Q3), calienta hasta S_Temp (Q4) y dosifica hasta Fc_Env (Q5). Con S_Lav = 1 (limpieza CIP) inyecta vapor 4 s (Q6) y aclara 3 s (Q7). En ambos casos vacía (Q8) hasta B0.</p>
+<p class="tags"><span>7 entradas</span><span>8 salidas</span><span>salidas por 74HC138</span><span>temporizadores</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej2_mezcladora.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej2_mezcladora.asm" download>Código .asm</a> <a href="grafcet/ejercicio2-mezcladora.html">Ejercicio con bloques RS de LOGO!</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · B0</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Llenado producto A</span></td><td></td><td>X2 si B1</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2</b> <span class='mut'>Llenado producto B</span></td><td></td><td>X3 si B2 · <span class="ov">S_Lav</span><br>X6 si B2 · S_Lav</td></tr>
+<tr><td class='n'>X3</td><td><b>Q3</b> <span class='mut'>Agitado (T1 = 5 s)</span></td><td>5 s → 76 × 65,5 ms</td><td>X4 si T cumplido</td></tr>
+<tr><td class='n'>X4</td><td><b>Q4</b> <span class='mut'>Calentamiento</span></td><td></td><td>X5 si S_Temp</td></tr>
+<tr><td class='n'>X5</td><td><b>Q5</b> <span class='mut'>Dosificado</span></td><td></td><td>X8 si Fc_Env</td></tr>
+<tr><td class='n'>X6</td><td><b>Q6</b> <span class='mut'>Vapor (T2 = 4 s)</span></td><td>4 s → 61 × 65,5 ms</td><td>X7 si T cumplido</td></tr>
+<tr><td class='n'>X7</td><td><b>Q7</b> <span class='mut'>Aclarado (T3 = 3 s)</span></td><td>3 s → 46 × 65,5 ms</td><td>X8 si T cumplido</td></tr>
+<tr><td class='n'>X8</td><td><b>Q8</b> <span class='mut'>Vaciado</span></td><td></td><td>X0 si B0</td></tr>
+</tbody></table></div>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 7 de las 13 patillas como entradas y 4 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 2"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">B1 · Nivel 1</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn in" text-anchor="end">B2 · Nivel 2</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn in" text-anchor="end">S_Lav · Selector producción (0) / limpieza (1)</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">74HC138 · A (pin 1)</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">74HC138 · B (pin 2)</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn out" text-anchor="end">74HC138 · C (pin 3)</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn out" text-anchor="end">74HC138 · G1 (pin 6) + 10k a masa</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">B0 · Nivel: depósito vacío</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Pulsador de marcha</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn free">libre</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn free">libre</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn in">Fc_Env · Envase lleno</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn in">S_Temp · Termostato: temperatura alcanzada</text></svg></div>
+<h3>Salidas a través del 74HC138</h3>
+<p>En cada etapa solo hay una salida activa. El PIC envía su número en binario por RB0, RB1 y RB2 y pone RB3 (G1) a 1; el 74HC138 activa esa salida poniéndola a <b>0 V</b>. En reposo, RB3 = 0 y todas quedan apagadas.</p>
+<div class="tw"><table><thead><tr><th>Salida</th><th>Función</th><th>RB2 RB1 RB0</th><th>Patilla del 74HC138</th></tr></thead><tbody>
+<tr><td class='n'>Q1</td><td>Válvula producto A</td><td><code>000</code></td><td>Y0 · pin 15</td></tr>
+<tr><td class='n'>Q2</td><td>Válvula producto B</td><td><code>001</code></td><td>Y1 · pin 14</td></tr>
+<tr><td class='n'>Q3</td><td>Agitador</td><td><code>010</code></td><td>Y2 · pin 13</td></tr>
+<tr><td class='n'>Q4</td><td>Calefacción</td><td><code>011</code></td><td>Y3 · pin 12</td></tr>
+<tr><td class='n'>Q5</td><td>Dosificador de envase</td><td><code>100</code></td><td>Y4 · pin 11</td></tr>
+<tr><td class='n'>Q6</td><td>Vapor (CIP)</td><td><code>101</code></td><td>Y5 · pin 10</td></tr>
+<tr><td class='n'>Q7</td><td>Aclarado</td><td><code>110</code></td><td>Y6 · pin 9</td></tr>
+<tr><td class='n'>Q8</td><td>Vaciado</td><td><code>111</code></td><td>Y7 · pin 7</td></tr>
+</tbody></table></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej2_mezcladora.hex</code></td></tr>
+<tr><td><code>74HC138</code></td><td>1</td><td>Decodificador de 3 a 8 líneas</td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>6</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>9</td><td>Resistencias a masa de las entradas, pull-up de MCLR y la de G1</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>8</td><td>Una por salida</td></tr>
+<tr><td><code>RES 330</code></td><td>8</td><td>Una por LED</td></tr>
+</tbody></table></div>
+<p class='note'>Los LED de salida del 74HC138 se conectan al revés que los del PIC: +5 V → 330 Ω → LED → patilla Y. El LED luce cuando la Y está a 0 V. G2A y G2B van a masa; VCC (16) a +5 V y GND (8) a masa.</p>
+</section><section class="card" id="ej3">
+<h2>Ejercicio 3 · Taladradora automática</h2>
+<p>Con mordaza abierta (Fc0), broca arriba (Fc2) y pieza (S_Pieza), al pulsar M cierra la mordaza (Q1 hasta Fc1) y baja rápido con el husillo en marcha (Q2 hasta Fc3). Taladrado simple (S_Prof = 0): baja en avance (Q3) hasta Fc4. Profundo (S_Prof = 1): baja hasta Fc4, sube a desahogar (Q4) hasta Fc3 y vuelve a bajar (Q3) hasta Fc5. Al final sube (Q5 hasta Fc2) y abre la mordaza (Q6 hasta Fc0).</p>
+<p class="tags"><span>9 entradas</span><span>6 salidas</span><span>salidas por 74HC138</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej3_taladradora.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej3_taladradora.asm" download>Código .asm</a> <a href="grafcet/ejercicio3-taladradora.html">Ejercicio con bloques RS de LOGO!</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · Fc0 · Fc2 · S_Pieza</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Cerrar mordaza</span></td><td></td><td>X2 si Fc1</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2</b> <span class='mut'>Bajada rápida</span></td><td></td><td>X3 si Fc3 · <span class="ov">S_Prof</span><br>X4 si Fc3 · S_Prof</td></tr>
+<tr><td class='n'>X3</td><td><b>Q3</b> <span class='mut'>Taladrado simple</span></td><td></td><td>X7 si Fc4</td></tr>
+<tr><td class='n'>X4</td><td><b>Q3</b> <span class='mut'>Taladrado hasta media carrera</span></td><td></td><td>X5 si Fc4</td></tr>
+<tr><td class='n'>X5</td><td><b>Q4</b> <span class='mut'>Desahogo de viruta</span></td><td></td><td>X6 si Fc3</td></tr>
+<tr><td class='n'>X6</td><td><b>Q3</b> <span class='mut'>Taladrado hasta el fondo</span></td><td></td><td>X7 si Fc5</td></tr>
+<tr><td class='n'>X7</td><td><b>Q5</b> <span class='mut'>Subir broca</span></td><td></td><td>X8 si Fc2</td></tr>
+<tr><td class='n'>X8</td><td><b>Q6</b> <span class='mut'>Abrir mordaza</span></td><td></td><td>X0 si Fc0</td></tr>
+</tbody></table></div>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 9 de las 13 patillas como entradas y 4 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 3"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">S_Prof · Selector simple (0) / profundo (1)</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn in" text-anchor="end">Fc0 · Mordaza abierta</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn in" text-anchor="end">Fc1 · Mordaza cerrada</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">74HC138 · A (pin 1)</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">74HC138 · B (pin 2)</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn out" text-anchor="end">74HC138 · C (pin 3)</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn out" text-anchor="end">74HC138 · G1 (pin 6) + 10k a masa</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">S_Pieza · Pieza colocada</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Pulsador de marcha</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn in">Fc5 · Broca en el fondo</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn in">Fc4 · Broca a media carrera</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn in">Fc3 · Broca en aproximación</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn in">Fc2 · Broca arriba</text></svg></div>
+<h3>Salidas a través del 74HC138</h3>
+<p>En cada etapa solo hay una salida activa. El PIC envía su número en binario por RB0, RB1 y RB2 y pone RB3 (G1) a 1; el 74HC138 activa esa salida poniéndola a <b>0 V</b>. En reposo, RB3 = 0 y todas quedan apagadas.</p>
+<div class="tw"><table><thead><tr><th>Salida</th><th>Función</th><th>RB2 RB1 RB0</th><th>Patilla del 74HC138</th></tr></thead><tbody>
+<tr><td class='n'>Q1</td><td>Cerrar mordaza</td><td><code>000</code></td><td>Y0 · pin 15</td></tr>
+<tr><td class='n'>Q2</td><td>Husillo y bajada rápida</td><td><code>001</code></td><td>Y1 · pin 14</td></tr>
+<tr><td class='n'>Q3</td><td>Bajada en avance de trabajo</td><td><code>010</code></td><td>Y2 · pin 13</td></tr>
+<tr><td class='n'>Q4</td><td>Subida de desahogo</td><td><code>011</code></td><td>Y3 · pin 12</td></tr>
+<tr><td class='n'>Q5</td><td>Subida de la broca</td><td><code>100</code></td><td>Y4 · pin 11</td></tr>
+<tr><td class='n'>Q6</td><td>Abrir mordaza</td><td><code>101</code></td><td>Y5 · pin 10</td></tr>
+</tbody></table></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej3_taladradora.hex</code></td></tr>
+<tr><td><code>74HC138</code></td><td>1</td><td>Decodificador de 3 a 8 líneas</td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>8</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>11</td><td>Resistencias a masa de las entradas, pull-up de MCLR y la de G1</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>6</td><td>Una por salida</td></tr>
+<tr><td><code>RES 330</code></td><td>6</td><td>Una por LED</td></tr>
+</tbody></table></div>
+<p class='note'>Los LED de salida del 74HC138 se conectan al revés que los del PIC: +5 V → 330 Ω → LED → patilla Y. El LED luce cuando la Y está a 0 V. G2A y G2B van a masa; VCC (16) a +5 V y GND (8) a masa.</p>
+</section><section class="card" id="ej4">
+<h2>Ejercicio 4 · Montacargas de 3 plantas</h2>
+<p>Con la cabina en planta baja (Fc_P0), una llamada a planta 1 (B_P1) o 2 (B_P2) se memoriza y la cabina cierra su puerta (Q1 hasta Fc_PC), sube (Q2) hasta la planta pedida, abre la puerta de esa planta (Q3 o Q4), descarga con la cinta 4 s (Q5), cierra la puerta (Q1) y baja (Q6) hasta Fc_P0.</p>
+<p class="tags"><span>8 entradas</span><span>6 salidas</span><span>salidas por 74HC138</span><span>temporizador</span><span>memoria interna</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej4_montacargas.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej4_montacargas.asm" download>Código .asm</a> <a href="grafcet/ejercicio4-montacargas.html">Ejercicio con bloques RS de LOGO!</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si B_P1 · Fc_P0<br>X1 si B_P2 · Fc_P0</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Cerrar puerta</span></td><td></td><td>X2 si Fc_PC · Mem_P1<br>X4 si Fc_PC · Mem_P2</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2</b> <span class='mut'>Subir a planta 1</span></td><td></td><td>X3 si Fc_P1</td></tr>
+<tr><td class='n'>X3</td><td><b>Q3</b> <span class='mut'>Abrir puerta planta 1</span></td><td></td><td>X6 si Fc_PA1</td></tr>
+<tr><td class='n'>X4</td><td><b>Q2</b> <span class='mut'>Subir a planta 2</span></td><td></td><td>X5 si Fc_P2</td></tr>
+<tr><td class='n'>X5</td><td><b>Q4</b> <span class='mut'>Abrir puerta planta 2</span></td><td></td><td>X6 si Fc_PA2</td></tr>
+<tr><td class='n'>X6</td><td><b>Q5</b> <span class='mut'>Descarga (T1 = 4 s)</span></td><td>4 s → 61 × 65,5 ms</td><td>X7 si T cumplido</td></tr>
+<tr><td class='n'>X7</td><td><b>Q1</b> <span class='mut'>Cerrar puerta</span></td><td></td><td>X8 si Fc_PC</td></tr>
+<tr><td class='n'>X8</td><td><b>Q6</b> <span class='mut'>Bajar a planta 0</span></td><td></td><td>X0 si Fc_P0</td></tr>
+</tbody></table></div>
+<p class="note">La llamada pulsada se guarda en dos bits de memoria (Mem_P1 y Mem_P2) al pasar de X0 a X1, como el RS auxiliar de LOGO!, y se borran al volver a X0.</p>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 8 de las 13 patillas como entradas y 4 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 4"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">Fc_P0 · Cabina en planta 0</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn in" text-anchor="end">Fc_P1 · Cabina en planta 1</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn in" text-anchor="end">Fc_P2 · Cabina en planta 2</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">74HC138 · A (pin 1)</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">74HC138 · B (pin 2)</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn out" text-anchor="end">74HC138 · C (pin 3)</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn out" text-anchor="end">74HC138 · G1 (pin 6) + 10k a masa</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">B_P2 · Llamada a planta 2</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">B_P1 · Llamada a planta 1</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn free">libre</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn in">Fc_PA2 · Puerta planta 2 abierta</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn in">Fc_PA1 · Puerta planta 1 abierta</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn in">Fc_PC · Puerta de cabina cerrada</text></svg></div>
+<h3>Salidas a través del 74HC138</h3>
+<p>En cada etapa solo hay una salida activa. El PIC envía su número en binario por RB0, RB1 y RB2 y pone RB3 (G1) a 1; el 74HC138 activa esa salida poniéndola a <b>0 V</b>. En reposo, RB3 = 0 y todas quedan apagadas.</p>
+<div class="tw"><table><thead><tr><th>Salida</th><th>Función</th><th>RB2 RB1 RB0</th><th>Patilla del 74HC138</th></tr></thead><tbody>
+<tr><td class='n'>Q1</td><td>Cerrar puerta de cabina</td><td><code>000</code></td><td>Y0 · pin 15</td></tr>
+<tr><td class='n'>Q2</td><td>Subir</td><td><code>001</code></td><td>Y1 · pin 14</td></tr>
+<tr><td class='n'>Q3</td><td>Abrir puerta planta 1</td><td><code>010</code></td><td>Y2 · pin 13</td></tr>
+<tr><td class='n'>Q4</td><td>Abrir puerta planta 2</td><td><code>011</code></td><td>Y3 · pin 12</td></tr>
+<tr><td class='n'>Q5</td><td>Cinta de descarga</td><td><code>100</code></td><td>Y4 · pin 11</td></tr>
+<tr><td class='n'>Q6</td><td>Bajar</td><td><code>101</code></td><td>Y5 · pin 10</td></tr>
+</tbody></table></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej4_montacargas.hex</code></td></tr>
+<tr><td><code>74HC138</code></td><td>1</td><td>Decodificador de 3 a 8 líneas</td></tr>
+<tr><td><code>BUTTON</code></td><td>3</td><td>Pulsadores B_P1, B_P2 y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>6</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>10</td><td>Resistencias a masa de las entradas, pull-up de MCLR y la de G1</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>6</td><td>Una por salida</td></tr>
+<tr><td><code>RES 330</code></td><td>6</td><td>Una por LED</td></tr>
+</tbody></table></div>
+<p class='note'>Los LED de salida del 74HC138 se conectan al revés que los del PIC: +5 V → 330 Ω → LED → patilla Y. El LED luce cuando la Y está a 0 V. G2A y G2B van a masa; VCC (16) a +5 V y GND (8) a masa.</p>
+</section><section class="card" id="ej5">
+<h2>Ejercicio 5 · Túnel de lavado</h2>
+<p>Con el puente en origen (Fc_Ini) y el coche colocado (B_Coche), al pulsar M aplica remojo 3 s (Q1). Hace 2 pasadas de cepillos (Q2): avance (Q3) hasta Fc_Fin y retroceso (Q4) hasta Fc_Ini, contando con C1. Después aclara 4 s (Q5), seca 5 s (Q6) y abre la barrera (Q7) hasta que sale el coche.</p>
+<p class="tags"><span>4 entradas</span><span>7 salidas</span><span>salidas directas</span><span>temporizadores</span><span>contador</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej5_tunel_lavado.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej5_tunel_lavado.asm" download>Código .asm</a> <a href="grafcet/ejercicio5-tunel-lavado.html">Ejercicio con bloques RS de LOGO!</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · Fc_Ini · B_Coche</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Remojo (T1 = 3 s)</span></td><td>3 s → 46 × 65,5 ms</td><td>X2 si T cumplido</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2 + Q3</b> <span class='mut'>Cepillos: avance</span></td><td></td><td>X3 si Fc_Fin</td></tr>
+<tr><td class='n'>X3</td><td><b>Q2 + Q4</b> <span class='mut'>Cepillos: retroceso</span></td><td></td><td>X4 si Fc_Ini</td></tr>
+<tr><td class='n'>X4</td><td><b>—</b> <span class='mut'>Cuenta pasada (C1 + 1)</span></td><td></td><td>X2 si C1 &lt; 2<br>X5 si C1 ≥ 2</td></tr>
+<tr><td class='n'>X5</td><td><b>Q5</b> <span class='mut'>Aclarado (T2 = 4 s)</span></td><td>4 s → 61 × 65,5 ms</td><td>X6 si T cumplido</td></tr>
+<tr><td class='n'>X6</td><td><b>Q6</b> <span class='mut'>Secado (T3 = 5 s)</span></td><td>5 s → 76 × 65,5 ms</td><td>X7 si T cumplido</td></tr>
+<tr><td class='n'>X7</td><td><b>Q7</b> <span class='mut'>Barrera abierta</span></td><td></td><td>X0 si <span class="ov">B_Coche</span></td></tr>
+</tbody></table></div>
+<p class="note">El contador C1 es una variable: se pone a 0 al arrancar el ciclo y suma 1 al llegar a X4. X4 no tiene acciones y dura un solo ciclo de programa.</p>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 4 de las 13 patillas como entradas y 7 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 5"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">Fc_Ini · Puente en origen</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn in" text-anchor="end">Fc_Fin · Puente al final</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn free" text-anchor="end">libre</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">Q1 · Remojo</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">Q2 · Giro de cepillos</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn out" text-anchor="end">Q3 · Avance del puente</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn out" text-anchor="end">Q4 · Retroceso del puente</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">B_Coche · Coche en posición</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Pulsador de marcha</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn free">libre</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn out">Q7 · Barrera de salida</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn out">Q6 · Secado</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn out">Q5 · Aclarado</text></svg></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej5_tunel_lavado.hex</code></td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>3</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>5</td><td>Resistencias a masa de las entradas y pull-up de MCLR</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>7</td><td>Una por salida</td></tr>
+<tr><td><code>RES 330</code></td><td>7</td><td>Una por LED</td></tr>
+</tbody></table></div>
+</section><section class="card" id="ej6">
+<h2>Ejercicio 6 · Prensa neumática</h2>
+<p>Con el cilindro recogido (a0), al pulsar M el cilindro sale (Q1 = A+) hasta a1 y vuelve (Q2 = A−) hasta a0.</p>
+<p class="tags"><span>3 entradas</span><span>2 salidas</span><span>salidas directas</span><span>3 LED de etapa</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej6_prensa.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej6_prensa.asm" download>Código .asm</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · a0</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Cilindro sale</span></td><td></td><td>X2 si a1</td></tr>
+<tr><td class='n'>X2</td><td><b>Q2</b> <span class='mut'>Cilindro vuelve</span></td><td></td><td>X0 si a0</td></tr>
+</tbody></table></div>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 3 de las 13 patillas como entradas y 5 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 6"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">a1 · Cilindro fuera</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn free" text-anchor="end">libre</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn free" text-anchor="end">libre</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">Q1 · Cilindro sale (A+)</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">Q2 · Cilindro vuelve (A−)</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn free" text-anchor="end">libre</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn free" text-anchor="end">libre</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">a0 · Cilindro dentro</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Pulsador de marcha</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn free">libre</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn out">LED etapa X2</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn out">LED etapa X1</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn out">LED etapa X0</text></svg></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej6_prensa.hex</code></td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>2</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>4</td><td>Resistencias a masa de las entradas y pull-up de MCLR</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>5</td><td>Una por salida y por etapa</td></tr>
+<tr><td><code>RES 330</code></td><td>5</td><td>Una por LED</td></tr>
+</tbody></table></div>
+</section><section class="card" id="ej7">
+<h2>Ejercicio 7 · Puerta de garaje</h2>
+<p>Con la puerta cerrada (Fc_C), al pulsar el mando M el motor abre (Q1) hasta Fc_A, espera 5 s (T1) y cierra (Q2) hasta Fc_C.</p>
+<p class="tags"><span>3 entradas</span><span>2 salidas</span><span>salidas directas</span><span>4 LED de etapa</span><span>temporizador</span></p>
+<p class="dl"><a class="big" href="pic16f84/ej7_puerta_garaje.hex" download>Programa .hex</a> <a class="big alt" href="pic16f84/ej7_puerta_garaje.asm" download>Código .asm</a></p>
+<h3>GRAFCET en el PIC</h3>
+<div class="tw"><table><thead><tr><th>Etapa</th><th>Acciones</th><th>Tiempo</th><th>Pasa a</th></tr></thead><tbody>
+<tr><td class='n'>X0</td><td><b>—</b> <span class='mut'>Reposo</span></td><td></td><td>X1 si M · Fc_C</td></tr>
+<tr><td class='n'>X1</td><td><b>Q1</b> <span class='mut'>Abrir</span></td><td></td><td>X2 si Fc_A</td></tr>
+<tr><td class='n'>X2</td><td><b>—</b> <span class='mut'>Espera (T1 = 5 s)</span></td><td>5 s → 76 × 65,5 ms</td><td>X3 si T cumplido</td></tr>
+<tr><td class='n'>X3</td><td><b>Q2</b> <span class='mut'>Cerrar</span></td><td></td><td>X0 si Fc_C</td></tr>
+</tbody></table></div>
+<h3>Conexiones del PIC</h3>
+<p class="mut">Entradas en verde, salidas en naranja. Usa 3 de las 13 patillas como entradas y 6 como salidas.</p>
+<div class="svgw"><svg class="pin" viewBox="0 0 900 392" role="img" aria-label="Conexiones del PIC16F84A en el ejercicio 7"><rect x="340" y="20" width="220" height="354" rx="8" class="chip"/><path d="M436.0 20 a14 14 0 0 0 28 0" class="notch"/><text x="450.0" y="192" class="chipt" transform="rotate(-90 450.0 192)" dominant-baseline="middle">PIC16F84A</text><line x1="300" y1="40" x2="340" y2="40" class="leg"/><text x="348" y="45" class="pn">1 RA2</text><text x="292" y="45" class="cn in" text-anchor="end">Fc_A · Puerta abierta</text><line x1="300" y1="78" x2="340" y2="78" class="leg"/><text x="348" y="83" class="pn">2 RA3</text><text x="292" y="83" class="cn free" text-anchor="end">libre</text><line x1="300" y1="116" x2="340" y2="116" class="leg"/><text x="348" y="121" class="pn">3 RA4</text><text x="292" y="121" class="cn free" text-anchor="end">libre</text><line x1="300" y1="154" x2="340" y2="154" class="leg"/><text x="348" y="159" class="pn">4 MCLR</text><text x="292" y="159" class="cn pwr" text-anchor="end">RESET (10k a +5V, pulsador a masa)</text><line x1="300" y1="192" x2="340" y2="192" class="leg"/><text x="348" y="197" class="pn">5 VSS</text><text x="292" y="197" class="cn pwr" text-anchor="end">Masa (0 V)</text><line x1="300" y1="230" x2="340" y2="230" class="leg"/><text x="348" y="235" class="pn">6 RB0</text><text x="292" y="235" class="cn out" text-anchor="end">Q1 · Motor abrir</text><line x1="300" y1="268" x2="340" y2="268" class="leg"/><text x="348" y="273" class="pn">7 RB1</text><text x="292" y="273" class="cn out" text-anchor="end">Q2 · Motor cerrar</text><line x1="300" y1="306" x2="340" y2="306" class="leg"/><text x="348" y="311" class="pn">8 RB2</text><text x="292" y="311" class="cn free" text-anchor="end">libre</text><line x1="300" y1="344" x2="340" y2="344" class="leg"/><text x="348" y="349" class="pn">9 RB3</text><text x="292" y="349" class="cn free" text-anchor="end">libre</text><line x1="560" y1="40" x2="600" y2="40" class="leg"/><text x="552" y="45" class="pn" text-anchor="end">RA1 18</text><text x="608" y="45" class="cn in">Fc_C · Puerta cerrada</text><line x1="560" y1="78" x2="600" y2="78" class="leg"/><text x="552" y="83" class="pn" text-anchor="end">RA0 17</text><text x="608" y="83" class="cn in">M · Mando / pulsador</text><line x1="560" y1="116" x2="600" y2="116" class="leg"/><text x="552" y="121" class="pn" text-anchor="end">OSC1 16</text><text x="608" y="121" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="154" x2="600" y2="154" class="leg"/><text x="552" y="159" class="pn" text-anchor="end">OSC2 15</text><text x="608" y="159" class="cn pwr">Cristal 4 MHz</text><line x1="560" y1="192" x2="600" y2="192" class="leg"/><text x="552" y="197" class="pn" text-anchor="end">VDD 14</text><text x="608" y="197" class="cn pwr">+5 V</text><line x1="560" y1="230" x2="600" y2="230" class="leg"/><text x="552" y="235" class="pn" text-anchor="end">RB7 13</text><text x="608" y="235" class="cn out">LED etapa X3</text><line x1="560" y1="268" x2="600" y2="268" class="leg"/><text x="552" y="273" class="pn" text-anchor="end">RB6 12</text><text x="608" y="273" class="cn out">LED etapa X2</text><line x1="560" y1="306" x2="600" y2="306" class="leg"/><text x="552" y="311" class="pn" text-anchor="end">RB5 11</text><text x="608" y="311" class="cn out">LED etapa X1</text><line x1="560" y1="344" x2="600" y2="344" class="leg"/><text x="552" y="349" class="pn" text-anchor="end">RB4 10</text><text x="608" y="349" class="cn out">LED etapa X0</text></svg></div>
+<h3>Componentes en Proteus</h3>
+<div class="tw"><table><thead><tr><th>Nombre en la librería</th><th>Cant.</th><th>Para qué</th></tr></thead><tbody>
+<tr><td><code>PIC16F84A</code></td><td>1</td><td>Microcontrolador. Program File: <code>ej7_puerta_garaje.hex</code></td></tr>
+<tr><td><code>BUTTON</code></td><td>2</td><td>Pulsador M y pulsador de RESET</td></tr>
+<tr><td><code>SWITCH</code></td><td>2</td><td>Finales de carrera, sensores y selectores (o LOGICSTATE)</td></tr>
+<tr><td><code>RES 10k</code></td><td>4</td><td>Resistencias a masa de las entradas y pull-up de MCLR</td></tr>
+<tr><td><code>LED-YELLOW / LED-GREEN</code></td><td>6</td><td>Una por salida y por etapa</td></tr>
+<tr><td><code>RES 330</code></td><td>6</td><td>Una por LED</td></tr>
+</tbody></table></div>
+</section>
+
+  <section class="card">
+    <h2>Qué más se puede simular en Proteus</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Apartado de la web</th><th>¿En Proteus?</th></tr></thead>
+      <tbody>
+        <tr><td>Electrónica PB1–PB17 (reguladores, transistor, relé, optoacoplador, 555, LM741, LM393)</td><td>Sí. Todos los componentes están en sus librerías y con el osciloscopio virtual se ven las señales del 555.</td></tr>
+        <tr><td>Electrónica PB18–PB20 (ESP32 y WiFi)</td><td>No. Proteus no simula el ESP32; se pueden rehacer con Arduino o con un PIC.</td></tr>
+        <tr><td>Automatismos con contactores (014–023)</td><td>Solo el circuito de mando, usando relés como contactores. La potencia a 400 V y el motor trifásico se simulan mejor en CADe_SIMU.</td></tr>
+        <tr><td>Instalaciones de vivienda y cuadro de protección</td><td>No es lo suyo: mejor los simuladores de esta web.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+</div>
+</body>
+</html>

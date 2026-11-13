@@ -1,12 +1,12 @@
 # Taller de Electricidad y Electrónica
 
-Simuladores, esquemas para completar, cálculos de vivienda, automatismos, electrónica, domótica y normativa.
+Simuladores, esquemas para completar, cálculos de vivienda, automatismos, electrónica, domótica y GRAFCET en PIC16F84.
 
 **Web:** https://bsrtorres.github.io/esquemas-electricidad/
 
 ## Contenido
 
-- `index.html`: portada con un botón de color por sección (Electrónica, Fichas vivienda, Automatismos, GRAFCET, Domótica, Simuladores, Cálculos y Normativa).
+- `index.html`: portada con un botón de color por sección (Electrónica, Fichas vivienda, Automatismos, GRAFCET, Domótica, Simuladores, Cálculos y PIC16F84).
 
 - `menu.js`: menú común de todas las páginas. Al añadir una ficha o página nueva, añadirla también aquí. El apartado Electrónica enlaza a la web de prácticas de protoboard (https://bsrtorres.github.io/electronica-basica/); si se añade una práctica allí, añadirla también aquí.
 
@@ -18,6 +18,7 @@ Simuladores, esquemas para completar, cálculos de vivienda, automatismos, elect
 - `pdf/A4/`: esquemas 001–006 y 013 (telerruptor, con su solución) en A4 apaisado.
 - `pdf/A3/`: esquemas 007–012 en A3 apaisado, con marco y cajetín.
 - `automatismos.html` y `pdf/automatismos/`: automatismos 014–023 (mando de motores con contactores), circuito de potencia y de mando para completar, cada uno con su solución. Juntos en `pdf/automatismos-014-023-A4.pdf` y `pdf/automatismos-014-023-A4-soluciones.pdf`.
+- `pic16f84.html` y `pic16f84/`: los GRAFCET 1–7 programados para PIC16F84A (código .asm comentado, .hex para Proteus o para grabar el PIC, conexiones y componentes para simularlos en Proteus). La página y los programas se generan desde `herramientas/pic16f84/` a partir de una única descripción de cada GRAFCET.
 - `pdf/esquemas-001-006-A4.pdf` y `pdf/esquemas-007-012-A3.pdf`: todas las fichas de cada formato en un solo PDF.
 
 Cada ficha incluye el esquema funcional, el unifilar (planta) y el multifilar de montaje con las cajas de derivación vacías para que el alumnado haga las conexiones.

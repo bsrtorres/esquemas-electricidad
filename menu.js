@@ -102,7 +102,18 @@
       {t: "Teoría del cálculo de secciones (PDF)", href: "calculos/teoria_calculo_secciones_vivienda.pdf"},
       {t: "Vivienda 3D·2B: plano y memoria de cálculo", href: "vivienda-3d2b-instalacion-electrica.html"},
     ]},
-    {t: "Normativa", href: "normativa.html"},
+    {t: "PIC16F84", items: [
+      {t: "PIC16F84 y Proteus", href: "pic16f84.html"},
+      {t: "Los 7 programas (.zip)", href: "pic16f84/pic16f84-grafcet.zip"},
+      {h: "GRAFCET en el PIC16F84A"},
+      {t: "1 · Clasificadora de piezas", href: "pic16f84.html#ej1"},
+      {t: "2 · Mezcladora y dosificadora", href: "pic16f84.html#ej2"},
+      {t: "3 · Taladradora automática", href: "pic16f84.html#ej3"},
+      {t: "4 · Montacargas de 3 plantas", href: "pic16f84.html#ej4"},
+      {t: "5 · Túnel de lavado", href: "pic16f84.html#ej5"},
+      {t: "6 · Prensa neumática", href: "pic16f84.html#ej6"},
+      {t: "7 · Puerta de garaje", href: "pic16f84.html#ej7"},
+    ]},
   ];
 
   const css = `
