@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 4 GRAFCET - Montacargas 3 Plantas (LOGO!Soft RS)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1480px;
+            flex-wrap: wrap;
+        }
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+        .diagram-container {
+            position: relative;
+            width: 720px;
+            height: 850px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+        .output {
+            position: absolute;
+            min-width: 85px;
+            height: 32px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+        .label {
+            position: absolute;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas */
+        #node0 { top: 30px;  left: 339px; }
+        #node1 { top: 145px; left: 339px; }
+        #out1  { top: 150px; left: 400px; }
+
+        /* Bifurcación: Izquierda (Destino P1) vs Derecha (Destino P2) */
+        #node2 { top: 280px; left: 169px; }
+        #out2  { top: 285px; left: 230px; }
+        #node3 { top: 410px; left: 169px; }
+        #out3  { top: 415px; left: 230px; }
+
+        #node4 { top: 280px; left: 509px; }
+        #out4  { top: 285px; left: 570px; }
+        #node5 { top: 410px; left: 509px; }
+        #out5  { top: 415px; left: 570px; }
+
+        /* Convergencia: Descarga (6) -> Cerrar puerta (7) -> Bajar a P0 (8) */
+        #node6 { top: 540px; left: 339px; }
+        #out6  { top: 545px; left: 400px; }
+        #node7 { top: 655px; left: 339px; }
+        #out7  { top: 660px; left: 400px; }
+        #node8 { top: 765px; left: 339px; }
+        #out8  { top: 770px; left: 400px; }
+
+        /* Transiciones */
+        #labelTrans01 { top: 102px; left: 382px; }
+        #labelTrans12 { top: 232px; left: 50px; }
+        #labelTrans14 { top: 232px; left: 545px; }
+        #labelTrans23 { top: 356px; left: 50px; }
+        #labelTrans45 { top: 356px; left: 545px; }
+        #labelTrans36 { top: 478px; left: 50px; }
+        #labelTrans56 { top: 478px; left: 545px; }
+        #labelTrans67 { top: 610px; left: 382px; }
+        #labelTrans78 { top: 722px; left: 382px; }
+        #labelTrans80 { top: 818px; left: 382px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 440px;
+        }
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .control-button {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .btn-temp   { background: #EF6C00; }
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .log {
+            max-height: 160px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+        .log div { margin: 2px 0; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio 4 LOGO!Soft (9 Etapas RS)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Bucle de retorno izquierda (hacia Etapa 0) -->
+                    <line x1="25" y1="15" x2="25" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="25" y1="835" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="25" y1="15" x2="360" y2="15" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="15" x2="360" y2="30" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,30 355,21 365,21" fill="#000"/>
+
+                    <!-- Etapa 0 -> Etapa 1 -->
+                    <line x1="360" y1="72" x2="360" y2="145" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="108" x2="375" y2="108" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="166" x2="400" y2="166" stroke="#000" stroke-width="2"/>
+
+                    <!-- Bifurcación en OR desde Etapa 1 -->
+                    <line x1="360" y1="187" x2="360" y2="215" stroke="#000" stroke-width="2"/>
+                    <line x1="190" y1="215" x2="530" y2="215" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Izquierda: 1 -> 2 -> 3 -->
+                    <line x1="190" y1="215" x2="190" y2="280" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="242" x2="205" y2="242" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="301" x2="230" y2="301" stroke="#000" stroke-width="2"/>
+
+                    <line x1="190" y1="322" x2="190" y2="410" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="366" x2="205" y2="366" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="431" x2="230" y2="431" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Derecha: 1 -> 4 -> 5 -->
+                    <line x1="530" y1="215" x2="530" y2="280" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="242" x2="545" y2="242" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="301" x2="570" y2="301" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="322" x2="530" y2="410" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="366" x2="545" y2="366" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="431" x2="570" y2="431" stroke="#000" stroke-width="2"/>
+
+                    <!-- Convergencia hacia Etapa 6 -->
+                    <line x1="190" y1="452" x2="190" y2="510" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="485" x2="205" y2="485" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="452" x2="530" y2="510" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="485" x2="545" y2="485" stroke="#000" stroke-width="2"/>
+
+                    <line x1="190" y1="510" x2="530" y2="510" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="510" x2="360" y2="540" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="561" x2="400" y2="561" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 6 -> Etapa 7 -->
+                    <line x1="360" y1="582" x2="360" y2="655" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="618" x2="375" y2="618" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="676" x2="400" y2="676" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 7 -> Etapa 8 -->
+                    <line x1="360" y1="697" x2="360" y2="765" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="731" x2="375" y2="731" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="786" x2="400" y2="786" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 8 -> Retorno a 0 -->
+                    <line x1="360" y1="807" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="822" x2="375" y2="822" stroke="#000" stroke-width="2"/>
+                </svg>
+
+                <!-- Etapas y Salidas -->
+                <div id="node0" class="node initial active">0</div>
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1 (Cierra P.)</div>
+
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2 (Sube P1)</div>
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q3 (Abre P1)</div>
+
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Q2 (Sube P2)</div>
+                <div id="node5" class="node">5</div>
+                <div id="out5" class="output">Q4 (Abre P2)</div>
+
+                <div id="node6" class="node">6</div>
+                <div id="out6" class="output">Q5 (Expulsa)</div>
+                <div id="node7" class="node">7</div>
+                <div id="out7" class="output">Q1 (Cierra P.)</div>
+                <div id="node8" class="node">8</div>
+                <div id="out8" class="output">Q6 (Baja P0)</div>
+
+                <!-- Transiciones -->
+                <div id="labelTrans01" class="label">X0 · (B_P1 + B_P2) · Fc_P0</div>
+                <div id="labelTrans12" class="label">X1 · Fc_PC · Mem_P1</div>
+                <div id="labelTrans14" class="label">X1 · Fc_PC · Mem_P2</div>
+                <div id="labelTrans23" class="label">X2 · Fc_P1</div>
+                <div id="labelTrans45" class="label">X4 · Fc_P2</div>
+                <div id="labelTrans36" class="label">X3 · Fc_PA1</div>
+                <div id="labelTrans56" class="label">X5 · Fc_PA2</div>
+                <div id="labelTrans67" class="label">X6 · T1 (4s)</div>
+                <div id="labelTrans78" class="label">X7 · Fc_PC</div>
+                <div id="labelTrans80" class="label">X8 · Fc_P0</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🛗 Enunciado: Montacargas Industrial (3 Plantas)</h3>
+            <div class="enunciado-box">
+                Con la cabina en Planta Baja (<strong>Fc_P0</strong>) en <strong>X0</strong>, al pulsar llamada a <strong>Planta 1 (B_P1)</strong> o <strong>Planta 2 (B_P2)</strong>:<br>
+                1. Cierra la puerta de cabina (<strong>Q1</strong>) hasta <strong>Fc_PC</strong>.<br>
+                2. Sube (<strong>Q2</strong>) hasta la planta solicitada (<strong>Fc_P1</strong> o <strong>Fc_P2</strong>) y abre su puerta (<strong>Q3 → Fc_PA1</strong> o <strong>Q4 → Fc_PA2</strong>).<br>
+                3. Activa la cinta de descarga (<strong>Q5</strong>) durante <strong>T1 (4s)</strong>, vuelve a cerrar puerta (<strong>Q1 → Fc_PC</strong>) y baja automáticamente (<strong>Q6</strong>) hasta <strong>Fc_P0</strong>.<br>
+                <em>Nota:</em> En LOGO!Soft usa un bloque RS auxiliar para memorizar si se pulsó B_P1 o B_P2.
+            </div>
+
+            <h3>🎛️ Pulsadores y Finales de Carrera</h3>
+            <div class="button-grid">
+                <button id="btn-B_P1" class="control-button btn-marcha" onclick="triggerCall('P1')">1️⃣ Llamar P1 (I1)</button>
+                <button id="btn-B_P2" class="control-button btn-marcha" onclick="triggerCall('P2')">2️⃣ Llamar P2 (I2)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I10)</button>
+
+                <button id="btn-Fc_P0" class="control-button btn-sensor" onclick="triggerInput('Fc_P0')">Fc_P0 Planta 0 (I3)</button>
+                <button id="btn-Fc_P1" class="control-button btn-sensor" onclick="triggerInput('Fc_P1')">Fc_P1 Planta 1 (I4)</button>
+                <button id="btn-Fc_P2" class="control-button btn-sensor" onclick="triggerInput('Fc_P2')">Fc_P2 Planta 2 (I5)</button>
+
+                <button id="btn-Fc_PC" class="control-button btn-sensor" onclick="triggerInput('Fc_PC')">Fc_PC Cerrada (I6)</button>
+                <button id="btn-Fc_PA1" class="control-button btn-sensor" onclick="triggerInput('Fc_PA1')">Fc_PA1 Ab.P1 (I7)</button>
+                <button id="btn-Fc_PA2" class="control-button btn-sensor" onclick="triggerInput('Fc_PA2')">Fc_PA2 Ab.P2 (I8)</button>
+
+                <button id="btn-T1" class="control-button btn-temp" style="grid-column: span 3;" onclick="triggerInput('T1')">⏱️ Fin T1 - Descarga (4s)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (Bloques RS + T)</h3>
+            <table class="io-table">
+                <thead>
+                    <tr>
+                        <th>RS</th>
+                        <th>Set (S)</th>
+                        <th>Reset (R)</th>
+                        <th>Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>X0</strong></td><td>X8·Fc_P0 + I10 + M8</td><td>X1</td><td>Reposo</td></tr>
+                    <tr><td><strong>X1</strong></td><td>X0·(B_P1+B_P2)·Fc_P0</td><td>X2 + X4 + I10</td><td>Q1 (Cierra)</td></tr>
+                    <tr><td><strong>X2</strong></td><td>X1·Fc_PC·Mem_P1</td><td>X3 + I10</td><td>Q2 (Sube)</td></tr>
+                    <tr><td><strong>X3</strong></td><td>X2·Fc_P1</td><td>X6 + I10</td><td>Q3 (Ab. P1)</td></tr>
+                    <tr><td><strong>X4</strong></td><td>X1·Fc_PC·Mem_P2</td><td>X5 + I10</td><td>Q2 (Sube)</td></tr>
+                    <tr><td><strong>X5</strong></td><td>X4·Fc_P2</td><td>X6 + I10</td><td>Q4 (Ab. P2)</td></tr>
+                    <tr><td><strong>X6</strong></td><td>X3·Fc_PA1 + X5·Fc_PA2</td><td>X7 + I10</td><td>Q5 + T1(4s)</td></tr>
+                    <tr><td><strong>X7</strong></td><td>X6·T1</td><td>X8 + I10</td><td>Q1 (Cierra)</td></tr>
+                    <tr><td><strong>X8</strong></td><td>X7·Fc_PC</td><td>X0 + I10</td><td>Q6 (Baja)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        let autoTimer = null;
+        const signals = {
+            Mem_P1: false,
+            Mem_P2: false,
+            Fc_P0: true,
+            Fc_P1: false,
+            Fc_P2: false,
+            Fc_PC: false,
+            Fc_PA1: false,
+            Fc_PA2: false,
+            T1: false
+        };
+
+        function getX(n) { return currentState === n; }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) log.removeChild(log.lastChild);
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('valid-next'));
+            const validMap = {
+                0: signals.Fc_P0 ? ['btn-B_P1', 'btn-B_P2'] : ['btn-Fc_P0', 'btn-B_P1', 'btn-B_P2'],
+                1: ['btn-Fc_PC'],
+                2: ['btn-Fc_P1'],
+                3: ['btn-Fc_PA1'],
+                4: ['btn-Fc_P2'],
+                5: ['btn-Fc_PA2'],
+                6: ['btn-T1'],
+                7: ['btn-Fc_PC'],
+                8: ['btn-Fc_P0']
+            };
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function triggerCall(dest) {
+            if (currentState !== 0) {
+                addLog(`ℹ️ Llamada a ${dest} ignorada (cabina ocupada en X${currentState})`);
+                return;
+            }
+            if (!signals.Fc_P0) {
+                addLog('⚠️ La cabina debe estar en Fc_P0 para iniciar');
+                return;
+            }
+            signals.Mem_P1 = (dest === 'P1');
+            signals.Mem_P2 = (dest === 'P2');
+            signals.Fc_P0 = false;
+            addLog(`👆 Llamada memorizada: ${dest}`);
+            updateState(1);
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+            switch (currentState) {
+                case 1:
+                    if (getX(1) && signals.Fc_PC && signals.Mem_P1) { newState = 2; addLog('✅ Transición 1→2: Puerta cerrada, sube a P1'); }
+                    else if (getX(1) && signals.Fc_PC && signals.Mem_P2) { newState = 4; addLog('✅ Transición 1→4: Puerta cerrada, sube a P2'); }
+                    break;
+                case 2:
+                    if (getX(2) && signals.Fc_P1) { newState = 3; addLog('✅ Transición 2→3: Llegada a Planta 1'); }
+                    break;
+                case 3:
+                    if (getX(3) && signals.Fc_PA1) { newState = 6; addLog('✅ Transición 3→6: Puerta P1 abierta'); }
+                    break;
+                case 4:
+                    if (getX(4) && signals.Fc_P2) { newState = 5; addLog('✅ Transición 4→5: Llegada a Planta 2'); }
+                    break;
+                case 5:
+                    if (getX(5) && signals.Fc_PA2) { newState = 6; addLog('✅ Transición 5→6: Puerta P2 abierta'); }
+                    break;
+                case 6:
+                    if (getX(6) && signals.T1) { newState = 7; addLog('✅ Transición 6→7: Fin descarga T1 (4s)'); }
+                    break;
+                case 7:
+                    if (getX(7) && signals.Fc_PC) { newState = 8; addLog('✅ Transición 7→8: Puerta cerrada, bajando a P0'); }
+                    break;
+                case 8:
+                    if (getX(8) && signals.Fc_P0) {
+                        newState = 0;
+                        signals.Mem_P1 = false;
+                        signals.Mem_P2 = false;
+                        addLog('✅ Transición 8→0: Cabina en Planta 0 (Ciclo finalizado)');
+                    }
+                    break;
+            }
+
+            if (newState !== currentState) {
+                updateState(newState);
+            } else {
+                addLog(`ℹ️ Señal sin efecto en etapa X${currentState}`);
+            }
+
+            // Limpiar pulsos momentáneos
+            signals.Fc_P1 = false; signals.Fc_P2 = false; signals.Fc_PC = false;
+            signals.Fc_PA1 = false; signals.Fc_PA2 = false; signals.T1 = false;
+            if (currentState !== 0) signals.Fc_P0 = false;
+            highlightValidButtons();
+        }
+
+        function updateState(newState) {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+            document.getElementById(`node${newState}`)?.classList.add('active');
+            document.getElementById(`out${newState}`)?.classList.add('active');
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+
+            if (newState === 6) {
+                addLog('⏳ Temporizador T1 (4s) descargando... (o pulsa Fin T1)');
+                autoTimer = setTimeout(() => triggerInput('T1'), 4000);
+            }
+        }
+
+        function triggerInput(sig) {
+            signals[sig] = true;
+            addLog(`👆 Activado: ${sig} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            Object.keys(signals).forEach(k => signals[k] = false);
+            signals.Fc_P0 = true;
+            updateState(0);
+            addLog('🔄 RESET general (I10): X0=1, Fc_P0=1');
+        }
+
+        highlightValidButtons();
+        addLog('Iniciado en X0=1 (Cabina en Planta 0, Fc_P0=1)');
+    </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 5 GRAFCET - Túnel de Lavado (LOGO!Soft RS + Contador)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1480px;
+            flex-wrap: wrap;
+        }
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+        .diagram-container {
+            position: relative;
+            width: 720px;
+            height: 850px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+        .output {
+            position: absolute;
+            min-width: 95px;
+            height: 32px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+        .label {
+            position: absolute;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas */
+        #node0 { top: 30px;  left: 339px; }
+        #node1 { top: 140px; left: 339px; }
+        #out1  { top: 145px; left: 400px; }
+
+        #node2 { top: 250px; left: 339px; }
+        #out2  { top: 255px; left: 400px; }
+
+        #node3 { top: 360px; left: 339px; }
+        #out3  { top: 365px; left: 400px; }
+
+        #node4 { top: 470px; left: 339px; }
+        #out4  { top: 475px; left: 400px; }
+
+        #node5 { top: 580px; left: 339px; }
+        #out5  { top: 585px; left: 400px; }
+
+        #node6 { top: 690px; left: 339px; }
+        #out6  { top: 695px; left: 400px; }
+
+        #node7 { top: 775px; left: 339px; }
+        #out7  { top: 780px; left: 400px; }
+
+        /* Transiciones */
+        #labelTrans01 { top: 98px;  left: 382px; }
+        #labelTrans12 { top: 208px; left: 382px; }
+        #labelTrans23 { top: 318px; left: 382px; }
+        #labelTrans34 { top: 428px; left: 382px; }
+        #labelTrans42 { top: 492px; left: 535px; }
+        #labelTrans45 { top: 538px; left: 382px; }
+        #labelTrans56 { top: 648px; left: 382px; }
+        #labelTrans67 { top: 742px; left: 382px; }
+        #labelTrans70 { top: 822px; left: 382px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 440px;
+        }
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .counter-badge {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #e65100;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .control-button {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .btn-temp   { background: #EF6C00; }
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .log {
+            max-height: 160px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+        .log div { margin: 2px 0; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio 5 LOGO!Soft (8 Etapas RS + C1)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Bucle de retorno izquierda (hacia Etapa 0) -->
+                    <line x1="30" y1="15" x2="30" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="835" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="15" x2="360" y2="15" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="15" x2="360" y2="30" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,30 355,21 365,21" fill="#000"/>
+
+                    <!-- Bucle interno de repetición (Etapa 4 -> Etapa 2) por la derecha -->
+                    <line x1="360" y1="512" x2="360" y2="532" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="532" x2="650" y2="532" stroke="#000" stroke-width="2"/>
+                    <line x1="650" y1="532" x2="650" y2="232" stroke="#000" stroke-width="2"/>
+                    <line x1="650" y1="232" x2="360" y2="232" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,232 369,227 369,237" fill="#000"/>
+                    <!-- Barrita transición 4 -> 2 -->
+                    <line x1="515" y1="532" x2="545" y2="532" stroke="#000" stroke-width="4"/>
+
+                    <!-- Etapas 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 0 -->
+                    <line x1="360" y1="72" x2="360" y2="140" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="106" x2="375" y2="106" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="161" x2="400" y2="161" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="182" x2="360" y2="250" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="216" x2="375" y2="216" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="271" x2="400" y2="271" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="292" x2="360" y2="360" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="326" x2="375" y2="326" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="381" x2="400" y2="381" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="402" x2="360" y2="470" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="436" x2="375" y2="436" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="491" x2="400" y2="491" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="532" x2="360" y2="580" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="556" x2="375" y2="556" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="601" x2="400" y2="601" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="622" x2="360" y2="690" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="656" x2="375" y2="656" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="711" x2="400" y2="711" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="732" x2="360" y2="775" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="753" x2="375" y2="753" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="796" x2="400" y2="796" stroke="#000" stroke-width="2"/>
+
+                    <line x1="360" y1="817" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="826" x2="375" y2="826" stroke="#000" stroke-width="2"/>
+                </svg>
+
+                <!-- Etapas y Salidas -->
+                <div id="node0" class="node initial active">0</div>
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1 (Remojo)</div>
+
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2+Q3 (Cep.Ida)</div>
+
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q2+Q4 (Cep.Vta)</div>
+
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Cuenta C1 (+1)</div>
+
+                <div id="node5" class="node">5</div>
+                <div id="out5" class="output">Q5 (Aclarado)</div>
+
+                <div id="node6" class="node">6</div>
+                <div id="out6" class="output">Q6 (Secado)</div>
+
+                <div id="node7" class="node">7</div>
+                <div id="out7" class="output">Q7 (Barrera)</div>
+
+                <!-- Transiciones -->
+                <div id="labelTrans01" class="label">X0 · M · Fc_Ini · B_Coche</div>
+                <div id="labelTrans12" class="label">X1 · T1 (3s)</div>
+                <div id="labelTrans23" class="label">X2 · Fc_Fin</div>
+                <div id="labelTrans34" class="label">X3 · Fc_Ini</div>
+                <div id="labelTrans42" class="label">X4 · /C1 (C1 &lt; 2)</div>
+                <div id="labelTrans45" class="label">X4 · C1 (C1 = 2)</div>
+                <div id="labelTrans56" class="label">X5 · T2 (4s)</div>
+                <div id="labelTrans67" class="label">X6 · T3 (5s)</div>
+                <div id="labelTrans70" class="label">X7 · /B_Coche</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🚗 Enunciado: Puente de Lavado (2 Pasadas)</h3>
+            <div class="enunciado-box">
+                Con el puente en origen (<strong>Fc_Ini</strong>) y coche posicionado (<strong>B_Coche</strong>), al pulsar <strong>M</strong>:<br>
+                1. Aplica espuma/remojo (<strong>Q1</strong>) durante <strong>T1 (3s)</strong>.<br>
+                2. Realiza <strong>2 pasadas completas</strong> de cepillos (<strong>Q2</strong>): avanza (<strong>Q3</strong>) hasta <strong>Fc_Fin</strong> y retrocede (<strong>Q4</strong>) hasta <strong>Fc_Ini</strong>, incrementando el contador <strong>C1</strong> (preseleccionado a 2).<br>
+                3. Al completar las 2 pasadas (<strong>C1=1</strong>), aclara con agua (<strong>Q5</strong>) durante <strong>T2 (4s)</strong>, seca con turbinas (<strong>Q6</strong>) durante <strong>T3 (5s)</strong> y abre barrera de salida (<strong>Q7</strong>) hasta que salga el coche (<strong>/B_Coche</strong>).
+            </div>
+
+            <div class="counter-badge">
+                <span>Contador de Pasadas (C1, límite = 2):</span>
+                <span id="counterDisplay">0 / 2 (C1 = 0)</span>
+            </div>
+
+            <h3>🎛️ Entradas y Temporizadores</h3>
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">▶️ M (I1)</button>
+                <button id="btn-B_Coche" class="control-button btn-sensor" onclick="triggerToggleCoche()">🚘 B_Coche (I2)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I6)</button>
+
+                <button id="btn-Fc_Ini" class="control-button btn-sensor" onclick="triggerInput('Fc_Ini')">Fc_Ini (I3)</button>
+                <button id="btn-Fc_Fin" class="control-button btn-sensor" onclick="triggerInput('Fc_Fin')">Fc_Fin (I4)</button>
+                <button id="btn-T1" class="control-button btn-temp" onclick="triggerInput('T1')">⏱️ Fin T1 (3s)</button>
+
+                <button id="btn-T2" class="control-button btn-temp" onclick="triggerInput('T2')">⏱️ Fin T2 (4s)</button>
+                <button id="btn-T3" class="control-button btn-temp" style="grid-column: span 2;" onclick="triggerInput('T3')">⏱️ Fin T3 Secado (5s)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (RS + Contador C1)</h3>
+            <table class="io-table">
+                <thead>
+                    <tr>
+                        <th>RS</th>
+                        <th>Set (S)</th>
+                        <th>Reset (R)</th>
+                        <th>Salida / Bloque</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>X0</strong></td><td>X7·/B_Coche + I6 + M8</td><td>X1</td><td>Reset C1</td></tr>
+                    <tr><td><strong>X1</strong></td><td>X0·M·Fc_Ini·B_Coche</td><td>X2 + I6</td><td>Q1 + T1(3s)</td></tr>
+                    <tr><td><strong>X2</strong></td><td>X1·T1 + X4·/C1</td><td>X3 + I6</td><td>Q2 + Q3</td></tr>
+                    <tr><td><strong>X3</strong></td><td>X2·Fc_Fin</td><td>X4 + I6</td><td>Q2 + Q4</td></tr>
+                    <tr><td><strong>X4</strong></td><td>X3·Fc_Ini</td><td>X2 + X5 + I6</td><td>Pulso Cnt C1 (ON=2)</td></tr>
+                    <tr><td><strong>X5</strong></td><td>X4·C1</td><td>X6 + I6</td><td>Q5 + T2(4s)</td></tr>
+                    <tr><td><strong>X6</strong></td><td>X5·T2</td><td>X7 + I6</td><td>Q6 + T3(5s)</td></tr>
+                    <tr><td><strong>X7</strong></td><td>X6·T3</td><td>X0 + I6</td><td>Q7</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        let autoTimer = null;
+        let countPasadas = 0;
+
+        const signals = {
+            M: false,
+            B_Coche: true,
+            Fc_Ini: true,
+            Fc_Fin: false,
+            T1: false,
+            T2: false,
+            T3: false
+        };
+
+        function getX(n) { return currentState === n; }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) log.removeChild(log.lastChild);
+        }
+
+        function updateCounterUI() {
+            const c1Out = countPasadas >= 2 ? 1 : 0;
+            document.getElementById('counterDisplay').textContent = `${countPasadas} / 2 (C1 = ${c1Out})`;
+        }
+
+        function triggerToggleCoche() {
+            signals.B_Coche = !signals.B_Coche;
+            addLog(`🚘 Sensor B_Coche cambiado a: ${signals.B_Coche ? '1 (Presente)' : '0 (Salió)'}`);
+            evaluateTransitions();
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('valid-next'));
+            const validMap = {
+                0: (signals.Fc_Ini && signals.B_Coche) ? ['btn-M'] : ['btn-Fc_Ini', 'btn-B_Coche', 'btn-M'],
+                1: ['btn-T1'],
+                2: ['btn-Fc_Fin'],
+                3: ['btn-Fc_Ini'],
+                5: ['btn-T2'],
+                6: ['btn-T3'],
+                7: ['btn-B_Coche']
+            };
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+            switch (currentState) {
+                case 0:
+                    if (getX(0) && signals.M && signals.Fc_Ini && signals.B_Coche) {
+                        newState = 1;
+                        signals.Fc_Ini = false;
+                        addLog('✅ Transición 0→1: Inicio remojo (Q1)');
+                    } else if (getX(0) && signals.M) {
+                        addLog('⚠️ Faltan condiciones iniciales (Fc_Ini=1 y B_Coche=1)');
+                    }
+                    break;
+                case 1:
+                    if (getX(1) && signals.T1) { newState = 2; addLog('✅ Transición 1→2: Fin remojo, cepillos ida (Q2+Q3)'); }
+                    break;
+                case 2:
+                    if (getX(2) && signals.Fc_Fin) { newState = 3; addLog('✅ Transición 2→3: Llegada a Fc_Fin, cepillos vuelta (Q2+Q4)'); }
+                    break;
+                case 3:
+                    if (getX(3) && signals.Fc_Ini) {
+                        countPasadas++;
+                        updateCounterUI();
+                        addLog(`🔢 Etapa X4: Contador C1 incrementa a ${countPasadas}/2`);
+                        if (countPasadas < 2) {
+                            newState = 2;
+                            signals.Fc_Ini = false;
+                            addLog('🔁 Bucle 4→2: C1 < 2, iniciando 2ª pasada de cepillos');
+                        } else {
+                            newState = 5;
+                            addLog('✅ Transición 4→5: C1 = 2 cumplido, pasando a aclarado (Q5)');
+                        }
+                    }
+                    break;
+                case 5:
+                    if (getX(5) && signals.T2) { newState = 6; addLog('✅ Transición 5→6: Fin aclarado, secado (Q6)'); }
+                    break;
+                case 6:
+                    if (getX(6) && signals.T3) { newState = 7; addLog('✅ Transición 6→7: Fin secado, abriendo barrera (Q7)'); }
+                    break;
+                case 7:
+                    if (getX(7) && !signals.B_Coche) {
+                        newState = 0;
+                        countPasadas = 0;
+                        signals.Fc_Ini = true;
+                        updateCounterUI();
+                        addLog('✅ Transición 7→0: Vehículo fuera (/B_Coche), contador C1 reseteado');
+                    }
+                    break;
+            }
+
+            if (newState !== currentState) {
+                updateState(newState);
+            }
+
+            signals.M = false; signals.Fc_Fin = false; signals.T1 = false; signals.T2 = false; signals.T3 = false;
+            if (currentState !== 0) signals.Fc_Ini = false;
+            highlightValidButtons();
+        }
+
+        function updateState(newState) {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+            document.getElementById(`node${newState}`)?.classList.add('active');
+            document.getElementById(`out${newState}`)?.classList.add('active');
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+
+            if (newState === 1) {
+                addLog('⏳ Temporizador T1 (3s) remojo...');
+                autoTimer = setTimeout(() => triggerInput('T1'), 3000);
+            } else if (newState === 5) {
+                addLog('⏳ Temporizador T2 (4s) aclarado...');
+                autoTimer = setTimeout(() => triggerInput('T2'), 4000);
+            } else if (newState === 6) {
+                addLog('⏳ Temporizador T3 (5s) secado...');
+                autoTimer = setTimeout(() => triggerInput('T3'), 5000);
+            }
+        }
+
+        function triggerInput(sig) {
+            signals[sig] = true;
+            addLog(`👆 Activado: ${sig} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            countPasadas = 0;
+            updateCounterUI();
+            signals.M = false; signals.Fc_Fin = false; signals.T1 = false; signals.T2 = false; signals.T3 = false;
+            signals.Fc_Ini = true; signals.B_Coche = true;
+            updateState(0);
+            addLog('🔄 RESET general (I6): X0=1, C1=0, Fc_Ini=1, B_Coche=1');
+        }
+
+        updateCounterUI();
+        highlightValidButtons();
+        addLog('Iniciado en X0=1 (Fc_Ini=1, B_Coche=1)');
+    </script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio GRAFCET - Mezcladora y Dosificadora (LOGO!Soft RS)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1480px;
+            flex-wrap: wrap;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .diagram-container {
+            position: relative;
+            width: 720px;
+            height: 860px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+
+        .output {
+            position: absolute;
+            min-width: 75px;
+            height: 32px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+
+        .label {
+            position: absolute;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas */
+        #node0 { top: 30px;  left: 339px; }
+        #node1 { top: 135px; left: 339px; }
+        #out1  { top: 140px; left: 400px; }
+
+        #node2 { top: 240px; left: 339px; }
+        #out2  { top: 245px; left: 400px; }
+
+        /* Rama Izquierda (Ciclo Normal) */
+        #node3 { top: 365px; left: 169px; }
+        #out3  { top: 370px; left: 230px; }
+
+        #node4 { top: 485px; left: 169px; }
+        #out4  { top: 490px; left: 230px; }
+
+        #node5 { top: 605px; left: 169px; }
+        #out5  { top: 610px; left: 230px; }
+
+        /* Rama Derecha (Lavado) */
+        #node6 { top: 365px; left: 509px; }
+        #out6  { top: 370px; left: 570px; }
+
+        #node7 { top: 530px; left: 509px; }
+        #out7  { top: 535px; left: 570px; }
+
+        /* Etapa Final Común */
+        #node8 { top: 730px; left: 339px; }
+        #out8  { top: 735px; left: 400px; }
+
+        /* Etiquetas de Transición */
+        #labelTrans01 { top: 96px;  left: 382px; }
+        #labelTrans12 { top: 201px; left: 382px; }
+        #labelTrans23 { top: 322px; left: 55px; }
+        #labelTrans26 { top: 322px; left: 550px; }
+        #labelTrans34 { top: 438px; left: 55px; }
+        #labelTrans45 { top: 558px; left: 55px; }
+        #labelTrans58 { top: 672px; left: 55px; }
+        #labelTrans67 { top: 462px; left: 550px; }
+        #labelTrans78 { top: 642px; left: 550px; }
+        #labelTrans80 { top: 796px; left: 382px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 440px;
+        }
+
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .control-button {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .btn-modo   { background: #8E24AA; }
+        .btn-temp   { background: #EF6C00; }
+
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+
+        .mode-toggle-box {
+            background: #f3e5f5;
+            border: 1px solid #ce93d8;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a148c;
+        }
+
+        .toggle-btn {
+            background: #7b1fa2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+        }
+
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .log {
+            max-height: 170px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+
+        .log div {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio 2 LOGO!Soft (9 Etapas RS)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Bucle de retorno izquierda (hacia Etapa 0) -->
+                    <line x1="28" y1="15" x2="28" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="28" y1="835" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="28" y1="15" x2="360" y2="15" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="15" x2="360" y2="30" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,30 355,21 365,21" fill="#000"/>
+
+                    <!-- Etapa 0 -> Etapa 1 -->
+                    <line x1="360" y1="72" x2="360" y2="135" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="104" x2="375" y2="104" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 1 -> Q1 -->
+                    <line x1="381" y1="156" x2="400" y2="156" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 1 -> Etapa 2 -->
+                    <line x1="360" y1="177" x2="360" y2="240" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="209" x2="375" y2="209" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 2 -> Q2 -->
+                    <line x1="381" y1="261" x2="400" y2="261" stroke="#000" stroke-width="2"/>
+
+                    <!-- Bifurcación divergente en OR desde Etapa 2 -->
+                    <line x1="360" y1="282" x2="360" y2="305" stroke="#000" stroke-width="2"/>
+                    <line x1="190" y1="305" x2="530" y2="305" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Izquierda: 2 -> 3 -> 4 -> 5 -->
+                    <line x1="190" y1="305" x2="190" y2="365" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="330" x2="205" y2="330" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="386" x2="230" y2="386" stroke="#000" stroke-width="2"/>
+
+                    <line x1="190" y1="407" x2="190" y2="485" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="446" x2="205" y2="446" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="506" x2="230" y2="506" stroke="#000" stroke-width="2"/>
+
+                    <line x1="190" y1="527" x2="190" y2="605" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="566" x2="205" y2="566" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="626" x2="230" y2="626" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Derecha: 2 -> 6 -> 7 -->
+                    <line x1="530" y1="305" x2="530" y2="365" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="330" x2="545" y2="330" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="386" x2="570" y2="386" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="407" x2="530" y2="530" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="470" x2="545" y2="470" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="551" x2="570" y2="551" stroke="#000" stroke-width="2"/>
+
+                    <!-- Convergencia en OR hacia Etapa 8 -->
+                    <line x1="190" y1="647" x2="190" y2="700" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="680" x2="205" y2="680" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="572" x2="530" y2="700" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="650" x2="545" y2="650" stroke="#000" stroke-width="2"/>
+
+                    <line x1="190" y1="700" x2="530" y2="700" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="700" x2="360" y2="730" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 8 -> Q8 -->
+                    <line x1="381" y1="751" x2="400" y2="751" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 8 -> Retorno a 0 -->
+                    <line x1="360" y1="772" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="804" x2="375" y2="804" stroke="#000" stroke-width="2"/>
+                </svg>
+
+                <!-- Etapas (Nodos) y Acciones (Salidas) -->
+                <div id="node0" class="node initial active">0</div>
+
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1 (V_A)</div>
+
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2 (V_B)</div>
+
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q3 (Mezcla)</div>
+
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Q4 (Calor)</div>
+
+                <div id="node5" class="node">5</div>
+                <div id="out5" class="output">Q5 (Envase)</div>
+
+                <div id="node6" class="node">6</div>
+                <div id="out6" class="output">Q6 (Vapor)</div>
+
+                <div id="node7" class="node">7</div>
+                <div id="out7" class="output">Q7 (Aclar.)</div>
+
+                <div id="node8" class="node">8</div>
+                <div id="out8" class="output">Q8 (Vaciado)</div>
+
+                <!-- Condiciones de Transición -->
+                <div id="labelTrans01" class="label">X0 · M · B0</div>
+                <div id="labelTrans12" class="label">X1 · B1</div>
+                <div id="labelTrans23" class="label">X2 · B2 · /S_Lav</div>
+                <div id="labelTrans26" class="label">X2 · B2 · S_Lav</div>
+                <div id="labelTrans34" class="label">X3 · T1 (5s)</div>
+                <div id="labelTrans45" class="label">X4 · S_Temp</div>
+                <div id="labelTrans58" class="label">X5 · Fc_Env</div>
+                <div id="labelTrans67" class="label">X6 · T2 (4s)</div>
+                <div id="labelTrans78" class="label">X7 · T3 (3s)</div>
+                <div id="labelTrans80" class="label">X8 · B0</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🧪 Enunciado: Mezcladora y Dosificadora</h3>
+            <div class="enunciado-box">
+                Con el depósito vacío (<strong>B0=1</strong>) en <strong>X0</strong>, al pulsar <strong>M</strong>:<br>
+                1. Abre válvula <strong>Q1</strong> (Producto A) hasta nivel <strong>B1</strong>, y luego abre <strong>Q2</strong> (Producto B) hasta nivel <strong>B2</strong>.<br>
+                2. En <strong>X2</strong>, según el selector <strong>S_Lav</strong>:<br>
+                • <strong>Producción (S_Lav = 0):</strong> Agita <strong>Q3</strong> durante <strong>T1 (5s)</strong>, calienta <strong>Q4</strong> hasta <strong>S_Temp</strong> y dosifica envase <strong>Q5</strong> hasta <strong>Fc_Env</strong>.<br>
+                • <strong>Limpieza CIP (S_Lav = 1):</strong> Inyecta vapor <strong>Q6</strong> durante <strong>T2 (4s)</strong> y aclara <strong>Q7</strong> durante <strong>T3 (3s)</strong>.<br>
+                3. En ambos casos pasa a <strong>X8</strong> para vaciar el tanque (<strong>Q8</strong>) hasta que <strong>B0</strong> detecta vacío y vuelve a <strong>X0</strong>.
+            </div>
+
+            <div class="mode-toggle-box">
+                <span>Selector S_Lav (I4): <strong id="slavStatus">0 (Modo Producción)</strong></span>
+                <button class="toggle-btn" onclick="toggleSLav()">Cambiar Selector</button>
+            </div>
+
+            <h3>🎛️ Entradas y Temporizadores</h3>
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">▶️ M (I1)</button>
+                <button id="btn-B0" class="control-button btn-sensor" onclick="triggerInput('B0')">B0 Vacío (I2)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I9)</button>
+
+                <button id="btn-B1" class="control-button btn-sensor" onclick="triggerInput('B1')">B1 Nivel 1 (I3)</button>
+                <button id="btn-B2" class="control-button btn-sensor" onclick="triggerInput('B2')">B2 Nivel 2 (I5)</button>
+                <button id="btn-S_Temp" class="control-button btn-sensor" onclick="triggerInput('S_Temp')">S_Temp (I6)</button>
+
+                <button id="btn-Fc_Env" class="control-button btn-sensor" onclick="triggerInput('Fc_Env')">Fc_Env (I7)</button>
+                <button id="btn-T1" class="control-button btn-temp" onclick="triggerInput('T1')">⏱️ Fin T1 (5s)</button>
+                <button id="btn-T2" class="control-button btn-temp" onclick="triggerInput('T2')">⏱️ Fin T2 (4s)</button>
+
+                <button id="btn-T3" class="control-button btn-temp" style="grid-column: span 3;" onclick="triggerInput('T3')">⏱️ Fin T3 - Aclarado (3s)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (Bloques RS + T)</h3>
+            <table class="io-table">
+                <thead>
+                    <tr>
+                        <th>RS</th>
+                        <th>Set (S)</th>
+                        <th>Reset (R)</th>
+                        <th>Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>X0</strong></td><td>X8·B0 + I9 + M8</td><td>X1</td><td>Reposo</td></tr>
+                    <tr><td><strong>X1</strong></td><td>X0·M·B0</td><td>X2 + I9</td><td>Q1</td></tr>
+                    <tr><td><strong>X2</strong></td><td>X1·B1</td><td>X3 + X6 + I9</td><td>Q2</td></tr>
+                    <tr><td><strong>X3</strong></td><td>X2·B2·/S_Lav</td><td>X4 + I9</td><td>Q3 + T1(5s)</td></tr>
+                    <tr><td><strong>X4</strong></td><td>X3·T1</td><td>X5 + I9</td><td>Q4</td></tr>
+                    <tr><td><strong>X5</strong></td><td>X4·S_Temp</td><td>X8 + I9</td><td>Q5</td></tr>
+                    <tr><td><strong>X6</strong></td><td>X2·B2·S_Lav</td><td>X7 + I9</td><td>Q6 + T2(4s)</td></tr>
+                    <tr><td><strong>X7</strong></td><td>X6·T2</td><td>X8 + I9</td><td>Q7 + T3(3s)</td></tr>
+                    <tr><td><strong>X8</strong></td><td>X5·Fc_Env + X7·T3</td><td>X0 + I9</td><td>Q8</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        let autoTimer = null;
+
+        const signals = {
+            M: false,
+            B0: true,      // Depósito inicialmente vacío
+            B1: false,
+            B2: false,
+            S_Lav: false,  // Selector biestable (false = Producción, true = Lavado)
+            S_Temp: false,
+            Fc_Env: false,
+            T1: false,
+            T2: false,
+            T3: false
+        };
+
+        function getX(n) {
+            return currentState === n;
+        }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function toggleSLav() {
+            signals.S_Lav = !signals.S_Lav;
+            document.getElementById('slavStatus').textContent = signals.S_Lav
+                ? '1 (Modo Lavado CIP)'
+                : '0 (Modo Producción)';
+            addLog(`🔀 Selector S_Lav cambiado a: ${signals.S_Lav ? '1 (Lavado)' : '0 (Producción)'}`);
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => {
+                btn.classList.remove('valid-next');
+            });
+
+            const validMap = {
+                0: signals.B0 ? ['btn-M'] : ['btn-B0', 'btn-M'],
+                1: ['btn-B1'],
+                2: ['btn-B2'],
+                3: ['btn-T1'],
+                4: ['btn-S_Temp'],
+                5: ['btn-Fc_Env'],
+                6: ['btn-T2'],
+                7: ['btn-T3'],
+                8: ['btn-B0']
+            };
+
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function startTimerIfNeeded(state) {
+            if (autoTimer) {
+                clearTimeout(autoTimer);
+                autoTimer = null;
+            }
+            if (state === 3) {
+                addLog('⏳ Temporizador T1 (5s) contando... (o pulsa Fin T1)');
+                autoTimer = setTimeout(() => triggerInput('T1'), 5000);
+            } else if (state === 6) {
+                addLog('⏳ Temporizador T2 (4s) contando... (o pulsa Fin T2)');
+                autoTimer = setTimeout(() => triggerInput('T2'), 4000);
+            } else if (state === 7) {
+                addLog('⏳ Temporizador T3 (3s) contando... (o pulsa Fin T3)');
+                autoTimer = setTimeout(() => triggerInput('T3'), 3000);
+            }
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+
+            switch (currentState) {
+                case 0:
+                    if (getX(0) && signals.M && signals.B0) {
+                        newState = 1;
+                        signals.B0 = false;
+                        addLog('✅ Transición 0→1: X0 · M · B0 cumplida');
+                    } else if (getX(0) && signals.M && !signals.B0) {
+                        addLog('⚠️ Falta sensor de depósito vacío B0=1 para iniciar');
+                    }
+                    break;
+
+                case 1:
+                    if (getX(1) && signals.B1) {
+                        newState = 2;
+                        addLog('✅ Transición 1→2: X1 · B1 cumplida');
+                    }
+                    break;
+
+                case 2:
+                    if (getX(2) && signals.B2) {
+                        if (!signals.S_Lav) {
+                            newState = 3;
+                            addLog('✅ Transición 2→3: X2 · B2 · /S_Lav (Rama Producción)');
+                        } else {
+                            newState = 6;
+                            addLog('✅ Transición 2→6: X2 · B2 · S_Lav (Rama Lavado CIP)');
+                        }
+                    }
+                    break;
+
+                case 3:
+                    if (getX(3) && signals.T1) {
+                        newState = 4;
+                        addLog('✅ Transición 3→4: X3 · T1 cumplida');
+                    }
+                    break;
+
+                case 4:
+                    if (getX(4) && signals.S_Temp) {
+                        newState = 5;
+                        addLog('✅ Transición 4→5: X4 · S_Temp cumplida');
+                    }
+                    break;
+
+                case 5:
+                    if (getX(5) && signals.Fc_Env) {
+                        newState = 8;
+                        addLog('✅ Transición 5→8: X5 · Fc_Env cumplida');
+                    }
+                    break;
+
+                case 6:
+                    if (getX(6) && signals.T2) {
+                        newState = 7;
+                        addLog('✅ Transición 6→7: X6 · T2 cumplida');
+                    }
+                    break;
+
+                case 7:
+                    if (getX(7) && signals.T3) {
+                        newState = 8;
+                        addLog('✅ Transición 7→8: X7 · T3 cumplida');
+                    }
+                    break;
+
+                case 8:
+                    if (getX(8) && signals.B0) {
+                        newState = 0;
+                        addLog('✅ Transición 8→0: X8 · B0 cumplida (Ciclo finalizado)');
+                    }
+                    break;
+            }
+
+            if (newState !== currentState) {
+                updateState(newState);
+            } else if (!(currentState === 0 && signals.M && !signals.B0)) {
+                addLog(`ℹ️ Señal sin efecto en etapa X${currentState}`);
+            }
+
+            // Limpiar pulsos momentáneos manteniendo B0 (si está en X0) y S_Lav
+            const keepB0 = (currentState === 0 && signals.B0);
+            const keepSLav = signals.S_Lav;
+            resetPulseSignals();
+            signals.B0 = keepB0;
+            signals.S_Lav = keepSLav;
+            highlightValidButtons();
+        }
+
+        function resetPulseSignals() {
+            signals.M = false;
+            signals.B0 = false;
+            signals.B1 = false;
+            signals.B2 = false;
+            signals.S_Temp = false;
+            signals.Fc_Env = false;
+            signals.T1 = false;
+            signals.T2 = false;
+            signals.T3 = false;
+        }
+
+        function updateState(newState) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+
+            const nodeEl = document.getElementById(`node${newState}`);
+            if (nodeEl) nodeEl.classList.add('active');
+
+            const outEl = document.getElementById(`out${newState}`);
+            if (outEl) outEl.classList.add('active');
+
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+            startTimerIfNeeded(newState);
+        }
+
+        function triggerInput(signalName) {
+            signals[signalName] = true;
+            addLog(`👆 Activado: ${signalName} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            if (autoTimer) {
+                clearTimeout(autoTimer);
+                autoTimer = null;
+            }
+            resetPulseSignals();
+            signals.B0 = true;
+            updateState(0);
+            addLog('🔄 RESET general (I9): X0=1, B0=1');
+        }
+
+        // Inicialización
+        highlightValidButtons();
+        addLog('Sistema iniciado en X0=1 (B0=1 activo, S_Lav=0)');
+    </script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio GRAFCET - Clasificador de Piezas (LOGO!Soft RS)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1450px;
+            flex-wrap: wrap;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .diagram-container {
+            position: relative;
+            width: 680px;
+            height: 820px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 19px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+
+        .output {
+            position: absolute;
+            min-width: 65px;
+            height: 34px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+
+        .label {
+            position: absolute;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas (Nodos) */
+        #node0 { top: 35px;  left: 318px; }
+        #node1 { top: 145px; left: 318px; }
+        #out1  { top: 150px; left: 382px; }
+
+        #node2 { top: 270px; left: 148px; }
+        #out2  { top: 275px; left: 212px; }
+
+        #node3 { top: 270px; left: 488px; }
+        #out3  { top: 275px; left: 552px; }
+
+        #node4 { top: 410px; left: 148px; }
+        #out4  { top: 415px; left: 212px; }
+
+        #node5 { top: 410px; left: 488px; }
+        #out5  { top: 415px; left: 552px; }
+
+        #node6 { top: 555px; left: 318px; }
+        #out6  { top: 560px; left: 382px; }
+
+        #node7 { top: 685px; left: 318px; }
+        #out7  { top: 690px; left: 382px; }
+
+        /* Etiquetas de Transiciones */
+        #labelTrans01 { top: 104px; left: 365px; }
+        #labelTrans12 { top: 226px; left: 60px; }
+        #labelTrans13 { top: 226px; left: 530px; }
+        #labelTrans24 { top: 354px; left: 60px; }
+        #labelTrans35 { top: 354px; left: 530px; }
+        #labelTrans46 { top: 484px; left: 60px; }
+        #labelTrans56 { top: 484px; left: 530px; }
+        #labelTrans67 { top: 634px; left: 365px; }
+        #labelTrans70 { top: 754px; left: 365px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 420px;
+        }
+
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.4;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .control-button {
+            padding: 11px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .btn-fc     { background: #00897B; }
+
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 5px 8px;
+            text-align: left;
+        }
+
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .transition-info {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            column-count: 2;
+        }
+
+        .transition-info p {
+            margin: 3px 0;
+            font-family: monospace;
+        }
+
+        .log {
+            max-height: 180px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+
+        .log div {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio LOGO!Soft (Bloques RS)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Bucle de retorno izquierda (de abajo hacia etapa 0) -->
+                    <line x1="30" y1="18" x2="30" y2="795" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="795" x2="340" y2="795" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="18" x2="340" y2="18" stroke="#000" stroke-width="2"/>
+                    <line x1="340" y1="18" x2="340" y2="35" stroke="#000" stroke-width="2"/>
+                    <polygon points="340,35 335,26 345,26" fill="#000"/>
+
+                    <!-- Etapa 0 -> Etapa 1 -->
+                    <line x1="340" y1="79" x2="340" y2="145" stroke="#000" stroke-width="2"/>
+                    <line x1="325" y1="112" x2="355" y2="112" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 1 -> Q1 -->
+                    <line x1="362" y1="167" x2="382" y2="167" stroke="#000" stroke-width="2"/>
+
+                    <!-- Bifurcación divergente en OR desde Etapa 1 -->
+                    <line x1="340" y1="189" x2="340" y2="210" stroke="#000" stroke-width="2"/>
+                    <line x1="170" y1="210" x2="510" y2="210" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Izquierda: 1 -> 2 -> 4 -->
+                    <line x1="170" y1="210" x2="170" y2="270" stroke="#000" stroke-width="2"/>
+                    <line x1="155" y1="235" x2="185" y2="235" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 2 -> Q2 -->
+                    <line x1="192" y1="292" x2="212" y2="292" stroke="#000" stroke-width="2"/>
+
+                    <line x1="170" y1="314" x2="170" y2="410" stroke="#000" stroke-width="2"/>
+                    <line x1="155" y1="362" x2="185" y2="362" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 4 -> Q3 -->
+                    <line x1="192" y1="432" x2="212" y2="432" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Derecha: 1 -> 3 -> 5 -->
+                    <line x1="510" y1="210" x2="510" y2="270" stroke="#000" stroke-width="2"/>
+                    <line x1="495" y1="235" x2="525" y2="235" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 3 -> Q4 -->
+                    <line x1="532" y1="292" x2="552" y2="292" stroke="#000" stroke-width="2"/>
+
+                    <line x1="510" y1="314" x2="510" y2="410" stroke="#000" stroke-width="2"/>
+                    <line x1="495" y1="362" x2="525" y2="362" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 5 -> Q5 -->
+                    <line x1="532" y1="432" x2="552" y2="432" stroke="#000" stroke-width="2"/>
+
+                    <!-- Convergencia en OR hacia Etapa 6 -->
+                    <line x1="170" y1="454" x2="170" y2="520" stroke="#000" stroke-width="2"/>
+                    <line x1="155" y1="492" x2="185" y2="492" stroke="#000" stroke-width="2"/>
+
+                    <line x1="510" y1="454" x2="510" y2="520" stroke="#000" stroke-width="2"/>
+                    <line x1="495" y1="492" x2="525" y2="492" stroke="#000" stroke-width="2"/>
+
+                    <line x1="170" y1="520" x2="510" y2="520" stroke="#000" stroke-width="2"/>
+                    <line x1="340" y1="520" x2="340" y2="555" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 6 -> Q6 -->
+                    <line x1="362" y1="577" x2="382" y2="577" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 6 -> Etapa 7 -->
+                    <line x1="340" y1="599" x2="340" y2="685" stroke="#000" stroke-width="2"/>
+                    <line x1="325" y1="642" x2="355" y2="642" stroke="#000" stroke-width="2"/>
+                    <!-- Etapa 7 -> Q7 -->
+                    <line x1="362" y1="707" x2="382" y2="707" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 7 -> Retorno a 0 -->
+                    <line x1="340" y1="729" x2="340" y2="795" stroke="#000" stroke-width="2"/>
+                    <line x1="325" y1="762" x2="355" y2="762" stroke="#000" stroke-width="2"/>
+                </svg>
+
+                <!-- Etapas (Nodos) y Acciones (Salidas) -->
+                <div id="node0" class="node initial active">0</div>
+
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1</div>
+
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2</div>
+
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q4</div>
+
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Q3</div>
+
+                <div id="node5" class="node">5</div>
+                <div id="out5" class="output">Q5</div>
+
+                <div id="node6" class="node">6</div>
+                <div id="out6" class="output">Q6</div>
+
+                <div id="node7" class="node">7</div>
+                <div id="out7" class="output">Q7</div>
+
+                <!-- Condiciones de Transición -->
+                <div id="labelTrans01" class="label">X0 · M · Fc0</div>
+                <div id="labelTrans12" class="label">X1 · S_Metal</div>
+                <div id="labelTrans13" class="label">X1 · S_Plast</div>
+                <div id="labelTrans24" class="label">X2 · Fc1</div>
+                <div id="labelTrans35" class="label">X3 · Fc3</div>
+                <div id="labelTrans46" class="label">X4 · Fc2</div>
+                <div id="labelTrans56" class="label">X5 · Fc4</div>
+                <div id="labelTrans67" class="label">X6 · Fc5</div>
+                <div id="labelTrans70" class="label">X7 · Fc0</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🏭 Enunciado: Clasificadora de Piezas</h3>
+            <div class="enunciado-box">
+                Con el sistema en reposo (<strong>X0</strong> y cilindro en <strong>Fc0</strong>), al pulsar <strong>M</strong> avanza la cinta principal (<strong>Q1</strong>).<br>
+                • Si detecta <strong>pieza metálica (S_Metal)</strong>: abre desviador izq. (<strong>Q2</strong>) hasta <strong>Fc1</strong>, y luego empuja (<strong>Q3</strong>) hasta <strong>Fc2</strong>.<br>
+                • Si detecta <strong>pieza plástica (S_Plast)</strong>: abre desviador der. (<strong>Q4</strong>) hasta <strong>Fc3</strong>, y luego empuja (<strong>Q5</strong>) hasta <strong>Fc4</strong>.<br>
+                • Tras clasificar (<strong>X6</strong>), sella la caja (<strong>Q6</strong>) hasta <strong>Fc5</strong>, y finalmente retorna el carro principal (<strong>Q7</strong>) hasta <strong>Fc0</strong>.
+            </div>
+
+            <h3>🎛️ Pulsadores y Sensores</h3>
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">▶️ M (I1)</button>
+                <button id="btn-Fc0" class="control-button btn-fc" onclick="triggerInput('Fc0')">Fc0 (I2)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I9)</button>
+
+                <button id="btn-S_Metal" class="control-button btn-sensor" onclick="triggerInput('S_Metal')">S_Metal (I3)</button>
+                <button id="btn-S_Plast" class="control-button btn-sensor" onclick="triggerInput('S_Plast')">S_Plast (I4)</button>
+                <button id="btn-Fc1" class="control-button btn-fc" onclick="triggerInput('Fc1')">Fc1 (I5)</button>
+
+                <button id="btn-Fc2" class="control-button btn-fc" onclick="triggerInput('Fc2')">Fc2 (I6)</button>
+                <button id="btn-Fc3" class="control-button btn-fc" onclick="triggerInput('Fc3')">Fc3 (I7)</button>
+                <button id="btn-Fc4" class="control-button btn-fc" onclick="triggerInput('Fc4')">Fc4 (I8)</button>
+
+                <button id="btn-Fc5" class="control-button btn-fc" style="grid-column: span 3;" onclick="triggerInput('Fc5')">Fc5 - Fin Sellado (I10)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (Bloques RS)</h3>
+            <div class="transition-info">
+                <p><strong>Set X1:</strong> X0·M·Fc0</p>
+                <p><strong>Set X2:</strong> X1·S_Metal</p>
+                <p><strong>Set X3:</strong> X1·S_Plast</p>
+                <p><strong>Set X4:</strong> X2·Fc1</p>
+                <p><strong>Set X5:</strong> X3·Fc3</p>
+                <p><strong>Set X6:</strong> X4·Fc2 + X5·Fc4</p>
+                <p><strong>Set X7:</strong> X6·Fc5</p>
+                <p><strong>Set X0:</strong> X7·Fc0 + Reset</p>
+            </div>
+
+            <table class="io-table">
+                <thead>
+                    <tr>
+                        <th>Etapa</th>
+                        <th>Reset (R) del bloque RS</th>
+                        <th>Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>X0 (RS1)</td><td>X1 (y Reset)</td><td>Reposo</td></tr>
+                    <tr><td>X1 (RS2)</td><td>X2 + X3 + Reset</td><td>Q1</td></tr>
+                    <tr><td>X2 (RS3)</td><td>X4 + Reset</td><td>Q2</td></tr>
+                    <tr><td>X3 (RS4)</td><td>X5 + Reset</td><td>Q4</td></tr>
+                    <tr><td>X4 (RS5)</td><td>X6 + Reset</td><td>Q3</td></tr>
+                    <tr><td>X5 (RS6)</td><td>X6 + Reset</td><td>Q5</td></tr>
+                    <tr><td>X6 (RS7)</td><td>X7 + Reset</td><td>Q6</td></tr>
+                    <tr><td>X7 (RS8)</td><td>X0 + Reset</td><td>Q7</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+
+        // Estado de entradas (Fc0 empieza activo por condición inicial)
+        const signals = {
+            M: false,
+            Fc0: true,
+            S_Metal: false,
+            S_Plast: false,
+            Fc1: false,
+            Fc2: false,
+            Fc3: false,
+            Fc4: false,
+            Fc5: false
+        };
+
+        function getX(n) {
+            return currentState === n;
+        }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => {
+                btn.classList.remove('valid-next');
+            });
+
+            const validMap = {
+                0: signals.Fc0 ? ['btn-M'] : ['btn-Fc0', 'btn-M'],
+                1: ['btn-S_Metal', 'btn-S_Plast'],
+                2: ['btn-Fc1'],
+                3: ['btn-Fc3'],
+                4: ['btn-Fc2'],
+                5: ['btn-Fc4'],
+                6: ['btn-Fc5'],
+                7: ['btn-Fc0']
+            };
+
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+
+            switch (currentState) {
+                case 0:
+                    if (getX(0) && signals.M && signals.Fc0) {
+                        newState = 1;
+                        signals.Fc0 = false; // Al arrancar sale de Fc0
+                        addLog('✅ Transición 0→1: X0 · M · Fc0 cumplida');
+                    } else if (getX(0) && signals.M && !signals.Fc0) {
+                        addLog('⚠️ Falta sensor inicial Fc0 activo para arrancar');
+                    }
+                    break;
+
+                case 1:
+                    if (getX(1) && signals.S_Metal) {
+                        newState = 2;
+                        addLog('✅ Transición 1→2: X1 · S_Metal cumplida');
+                    } else if (getX(1) && signals.S_Plast) {
+                        newState = 3;
+                        addLog('✅ Transición 1→3: X1 · S_Plast cumplida');
+                    }
+                    break;
+
+                case 2:
+                    if (getX(2) && signals.Fc1) {
+                        newState = 4;
+                        addLog('✅ Transición 2→4: X2 · Fc1 cumplida');
+                    }
+                    break;
+
+                case 3:
+                    if (getX(3) && signals.Fc3) {
+                        newState = 5;
+                        addLog('✅ Transición 3→5: X3 · Fc3 cumplida');
+                    }
+                    break;
+
+                case 4:
+                    if (getX(4) && signals.Fc2) {
+                        newState = 6;
+                        addLog('✅ Transición 4→6: X4 · Fc2 cumplida');
+                    }
+                    break;
+
+                case 5:
+                    if (getX(5) && signals.Fc4) {
+                        newState = 6;
+                        addLog('✅ Transición 5→6: X5 · Fc4 cumplida');
+                    }
+                    break;
+
+                case 6:
+                    if (getX(6) && signals.Fc5) {
+                        newState = 7;
+                        addLog('✅ Transición 6→7: X6 · Fc5 cumplida');
+                    }
+                    break;
+
+                case 7:
+                    if (getX(7) && signals.Fc0) {
+                        newState = 0;
+                        addLog('✅ Transición 7→0: X7 · Fc0 cumplida (Ciclo completo)');
+                    }
+                    break;
+            }
+
+            if (newState !== currentState) {
+                updateState(newState);
+            } else if (!(currentState === 0 && signals.M && !signals.Fc0)) {
+                addLog(`ℹ️ Señal sin efecto en etapa X${currentState}`);
+            }
+
+            // Limpiar pulsos momentáneos (manteniendo Fc0 si estamos en estado 0)
+            const keepFc0 = (currentState === 0 && signals.Fc0);
+            resetSignals();
+            signals.Fc0 = keepFc0;
+            highlightValidButtons();
+        }
+
+        function resetSignals() {
+            Object.keys(signals).forEach(k => signals[k] = false);
+        }
+
+        function updateState(newState) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+
+            const nodeEl = document.getElementById(`node${newState}`);
+            if (nodeEl) nodeEl.classList.add('active');
+
+            const outEl = document.getElementById(`out${newState}`);
+            if (outEl) outEl.classList.add('active');
+
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+        }
+
+        function triggerInput(signalName) {
+            signals[signalName] = true;
+            addLog(`👆 Activado: ${signalName} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            resetSignals();
+            signals.Fc0 = true;
+            updateState(0);
+            addLog('🔄 RESET general: X0=1, Fc0=1');
+        }
+
+        // Inicialización
+        highlightValidButtons();
+        addLog('Sistema iniciado en X0=1 (Fc0=1 activo)');
+    </script>
+</body>
+</html>

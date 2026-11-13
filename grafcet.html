@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRAFCET · Taller de Electricidad y Electrónica</title>
+<style>
+  :root { --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #5d5d63; --accent: #b4471a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 19px; line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 32px; margin: 0 0 4px; }
+  h2 { font-size: 24px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px;
+          box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card p { margin: 0 0 12px; }
+  .big { display: inline-block; padding: 12px 20px; border-radius: 10px; background: var(--ink);
+         color: #fff; text-decoration: none; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { font-size: 16px; color: var(--muted); font-weight: normal; }
+  td.n { width: 70px; font-weight: bold; }
+  a { color: var(--accent); }
+</style>
+<script src="menu.js?v=14" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>GRAFCET</h1>
+  <p class="lead">Automatismos secuenciales con GRAFCET programados con bloques RS (una etapa = un biestable) en LOGO!Soft Comfort. Cada ejercicio tiene su enunciado, su GRAFCET interactivo y las ecuaciones de Set y Reset de cada etapa.</p>
+
+  <section class="card">
+    <h2>Animaciones de los procesos</h2>
+    <p>Las cinco máquinas en movimiento: los actuadores se mueven, los sensores y finales de carrera se activan solos y el GRAFCET marca en cada momento la etapa activa y la receptividad que se está esperando. Con ciclo automático, selectores y control de velocidad.</p>
+    <p><a class="big" href="grafcet/animaciones.html">Ver las animaciones</a></p>
+  </section>
+
+  <section class="card">
+    <h2>Ejercicios con bloques RS</h2>
+    <table>
+      <thead><tr><th>N.º</th><th>Ejercicio</th></tr></thead>
+      <tbody>
+        <tr><td class="n"><a href="grafcet/ejercicio1-clasificadora.html">1</a></td><td><b>Clasificadora de piezas</b>. Selección de secuencia: piezas metálicas o de plástico, desviadores, empujadores y sellado de caja</td></tr>
+        <tr><td class="n"><a href="grafcet/ejercicio2-mezcladora.html">2</a></td><td><b>Mezcladora y dosificadora</b>. Llenado por niveles, agitado y calentamiento con temporizadores, o limpieza CIP según selector</td></tr>
+        <tr><td class="n"><a href="grafcet/ejercicio3-taladradora.html">3</a></td><td><b>Taladradora automática</b>. Taladrado simple o profundo con subida de desahogo de viruta</td></tr>
+        <tr><td class="n"><a href="grafcet/ejercicio4-montacargas.html">4</a></td><td><b>Montacargas de 3 plantas</b>. Llamada a planta 1 o 2 memorizada con un RS auxiliar, puertas, descarga y retorno</td></tr>
+        <tr><td class="n"><a href="grafcet/ejercicio5-tunel-lavado.html">5</a></td><td><b>Túnel de lavado</b>. Bucle de pasadas de cepillos con contador C1, aclarado, secado y barrera de salida</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px"><a href="grafcet/solucionario-grafcet-rs-logosoft.pdf">Solucionario: GRAFCET con bloques RS en LOGO!Soft Comfort (PDF)</a></p>
+  </section>
+
+  <section class="card">
+    <h2>Simuladores de iniciación</h2>
+    <p>GRAFCET sencillo de 5 etapas con selección de secuencia, para practicar cómo se activan y desactivan las etapas.</p>
+    <p><a href="grafcet/simulador-grafcet-basico.html">Simulador GRAFCET básico</a> · <a href="grafcet/simulador-grafcet-diagrama.html">Simulador GRAFCET con diagrama de etapas</a></p>
+  </section>
+</div>
+</body>
+</html>

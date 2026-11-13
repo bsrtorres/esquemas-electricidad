@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 3 GRAFCET - Taladradora Automática (LOGO!Soft RS)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1480px;
+            flex-wrap: wrap;
+        }
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+        .diagram-container {
+            position: relative;
+            width: 720px;
+            height: 850px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+        .output {
+            position: absolute;
+            min-width: 85px;
+            height: 32px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+        .label {
+            position: absolute;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas */
+        #node0 { top: 30px;  left: 339px; }
+        #node1 { top: 135px; left: 339px; }
+        #out1  { top: 140px; left: 400px; }
+
+        #node2 { top: 245px; left: 339px; }
+        #out2  { top: 250px; left: 400px; }
+
+        /* Bifurcación: Izquierda (Taladrado simple) vs Derecha (Taladrado profundo con desahogo) */
+        #node3 { top: 375px; left: 169px; }
+        #out3  { top: 380px; left: 230px; }
+
+        #node4 { top: 375px; left: 509px; }
+        #out4  { top: 380px; left: 570px; }
+
+        #node5 { top: 495px; left: 509px; }
+        #out5  { top: 500px; left: 570px; }
+
+        #node6 { top: 615px; left: 509px; }
+        #out6  { top: 620px; left: 570px; }
+
+        /* Convergencia en Etapa 7 (Subida final) y Etapa 8 (Aflojar mordaza) */
+        #node7 { top: 685px; left: 339px; }
+        #out7  { top: 690px; left: 400px; }
+
+        #node8 { top: 770px; left: 339px; }
+        #out8  { top: 775px; left: 400px; }
+
+        /* Etiquetas de Transición */
+        #labelTrans01 { top: 96px;  left: 382px; }
+        #labelTrans12 { top: 204px; left: 382px; }
+        #labelTrans23 { top: 330px; left: 45px; }
+        #labelTrans24 { top: 330px; left: 545px; }
+        #labelTrans37 { top: 530px; left: 45px; }
+        #labelTrans45 { top: 448px; left: 545px; }
+        #labelTrans56 { top: 568px; left: 545px; }
+        #labelTrans67 { top: 655px; left: 545px; }
+        #labelTrans78 { top: 738px; left: 382px; }
+        #labelTrans80 { top: 822px; left: 382px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 440px;
+        }
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .mode-toggle-box {
+            background: #f3e5f5;
+            border: 1px solid #ce93d8;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a148c;
+        }
+        .toggle-btn {
+            background: #7b1fa2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .control-button {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .log {
+            max-height: 160px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+        .log div { margin: 2px 0; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio 3 LOGO!Soft (9 Etapas RS)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Bucle de retorno izquierda (hacia Etapa 0) -->
+                    <line x1="25" y1="15" x2="25" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="25" y1="835" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="25" y1="15" x2="360" y2="15" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="15" x2="360" y2="30" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,30 355,21 365,21" fill="#000"/>
+
+                    <!-- Etapa 0 -> Etapa 1 -->
+                    <line x1="360" y1="72" x2="360" y2="135" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="104" x2="375" y2="104" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="156" x2="400" y2="156" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 1 -> Etapa 2 -->
+                    <line x1="360" y1="177" x2="360" y2="245" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="212" x2="375" y2="212" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="266" x2="400" y2="266" stroke="#000" stroke-width="2"/>
+
+                    <!-- Bifurcación en OR desde Etapa 2 -->
+                    <line x1="360" y1="287" x2="360" y2="312" stroke="#000" stroke-width="2"/>
+                    <line x1="190" y1="312" x2="530" y2="312" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Izquierda: 2 -> 3 -> 7 -->
+                    <line x1="190" y1="312" x2="190" y2="375" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="340" x2="205" y2="340" stroke="#000" stroke-width="2"/>
+                    <line x1="211" y1="396" x2="230" y2="396" stroke="#000" stroke-width="2"/>
+                    <line x1="190" y1="417" x2="190" y2="665" stroke="#000" stroke-width="2"/>
+                    <line x1="175" y1="540" x2="205" y2="540" stroke="#000" stroke-width="2"/>
+
+                    <!-- Rama Derecha: 2 -> 4 -> 5 -> 6 -> 7 -->
+                    <line x1="530" y1="312" x2="530" y2="375" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="340" x2="545" y2="340" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="396" x2="570" y2="396" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="417" x2="530" y2="495" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="456" x2="545" y2="456" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="516" x2="570" y2="516" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="537" x2="530" y2="615" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="576" x2="545" y2="576" stroke="#000" stroke-width="2"/>
+                    <line x1="551" y1="636" x2="570" y2="636" stroke="#000" stroke-width="2"/>
+
+                    <line x1="530" y1="657" x2="530" y2="665" stroke="#000" stroke-width="2"/>
+                    <line x1="515" y1="661" x2="545" y2="661" stroke="#000" stroke-width="2"/>
+
+                    <!-- Convergencia en Etapa 7 -->
+                    <line x1="190" y1="665" x2="530" y2="665" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="665" x2="360" y2="685" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="706" x2="400" y2="706" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 7 -> Etapa 8 -->
+                    <line x1="360" y1="727" x2="360" y2="770" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="748" x2="375" y2="748" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="791" x2="400" y2="791" stroke="#000" stroke-width="2"/>
+
+                    <!-- Etapa 8 -> Retorno a 0 -->
+                    <line x1="360" y1="812" x2="360" y2="835" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="824" x2="375" y2="824" stroke="#000" stroke-width="2"/>
+                </svg>
+
+                <!-- Etapas y Salidas -->
+                <div id="node0" class="node initial active">0</div>
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1 (Sujetar)</div>
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2 (Giro+Baj1)</div>
+
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q3 (Baj2 Simp)</div>
+
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Q3 (Baj2 Prof)</div>
+                <div id="node5" class="node">5</div>
+                <div id="out5" class="output">Q4 (Desahogo)</div>
+                <div id="node6" class="node">6</div>
+                <div id="out6" class="output">Q3 (Fondo)</div>
+
+                <div id="node7" class="node">7</div>
+                <div id="out7" class="output">Q5 (Subir Top)</div>
+                <div id="node8" class="node">8</div>
+                <div id="out8" class="output">Q6 (Soltar)</div>
+
+                <!-- Transiciones -->
+                <div id="labelTrans01" class="label">X0 · M · Fc0 · Fc2 · S_Pieza</div>
+                <div id="labelTrans12" class="label">X1 · Fc1</div>
+                <div id="labelTrans23" class="label">X2 · Fc3 · /S_Prof</div>
+                <div id="labelTrans24" class="label">X2 · Fc3 · S_Prof</div>
+                <div id="labelTrans37" class="label">X3 · Fc4</div>
+                <div id="labelTrans45" class="label">X4 · Fc4</div>
+                <div id="labelTrans56" class="label">X5 · Fc3</div>
+                <div id="labelTrans67" class="label">X6 · Fc5</div>
+                <div id="labelTrans78" class="label">X7 · Fc2</div>
+                <div id="labelTrans80" class="label">X8 · Fc0</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🔩 Enunciado: Taladradora con Desahogo de Viruta</h3>
+            <div class="enunciado-box">
+                En reposo (<strong>X0</strong>), con mordaza abierta (<strong>Fc0</strong>), broca arriba (<strong>Fc2</strong>) y pieza detectada (<strong>S_Pieza</strong>), al pulsar <strong>M</strong>:<br>
+                1. Cierra mordaza (<strong>Q1</strong>) hasta <strong>Fc1</strong>, luego arranca husillo y baja rápido (<strong>Q2</strong>) hasta <strong>Fc3</strong>.<br>
+                2. Según el selector <strong>S_Prof</strong> (Taladrado Profundo):<br>
+                • <strong>Simple (S_Prof=0):</strong> Baja en avance de trabajo (<strong>Q3</strong>) hasta <strong>Fc4</strong>.<br>
+                • <strong>Profundo (S_Prof=1):</strong> Baja (<strong>Q3</strong>) hasta mitad de carrera (<strong>Fc4</strong>), sube a desahogar viruta (<strong>Q4</strong>) hasta <strong>Fc3</strong>, y vuelve a bajar (<strong>Q3</strong>) hasta el fondo (<strong>Fc5</strong>).<br>
+                3. En ambos casos sube la broca hasta arriba (<strong>Q5 → Fc2</strong>) y abre mordaza (<strong>Q6 → Fc0</strong>).
+            </div>
+
+            <div class="mode-toggle-box">
+                <span>Selector S_Prof (I4): <strong id="sprofStatus">0 (Taladrado Simple)</strong></span>
+                <button class="toggle-btn" onclick="toggleSProf()">Cambiar Selector</button>
+            </div>
+
+            <h3>🎛️ Entradas Físicas</h3>
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">▶️ M (I1)</button>
+                <button id="btn-S_Pieza" class="control-button btn-sensor" onclick="triggerInput('S_Pieza')">S_Pieza (I2)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I10)</button>
+
+                <button id="btn-Fc0" class="control-button btn-sensor" onclick="triggerInput('Fc0')">Fc0 Abierta (I3)</button>
+                <button id="btn-Fc1" class="control-button btn-sensor" onclick="triggerInput('Fc1')">Fc1 Cerrada (I5)</button>
+                <button id="btn-Fc2" class="control-button btn-sensor" onclick="triggerInput('Fc2')">Fc2 Arriba (I6)</button>
+
+                <button id="btn-Fc3" class="control-button btn-sensor" onclick="triggerInput('Fc3')">Fc3 Aprox (I7)</button>
+                <button id="btn-Fc4" class="control-button btn-sensor" onclick="triggerInput('Fc4')">Fc4 Medio (I8)</button>
+                <button id="btn-Fc5" class="control-button btn-sensor" onclick="triggerInput('Fc5')">Fc5 Fondo (I9)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (Bloques RS)</h3>
+            <table class="io-table">
+                <thead>
+                    <tr>
+                        <th>RS</th>
+                        <th>Set (S)</th>
+                        <th>Reset (R)</th>
+                        <th>Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>X0</strong></td><td>X8·Fc0 + I10 + M8</td><td>X1</td><td>Reposo</td></tr>
+                    <tr><td><strong>X1</strong></td><td>X0·M·Fc0·Fc2·S_Pieza</td><td>X2 + I10</td><td>Q1</td></tr>
+                    <tr><td><strong>X2</strong></td><td>X1·Fc1</td><td>X3 + X4 + I10</td><td>Q2</td></tr>
+                    <tr><td><strong>X3</strong></td><td>X2·Fc3·/S_Prof</td><td>X7 + I10</td><td>Q3</td></tr>
+                    <tr><td><strong>X4</strong></td><td>X2·Fc3·S_Prof</td><td>X5 + I10</td><td>Q3</td></tr>
+                    <tr><td><strong>X5</strong></td><td>X4·Fc4</td><td>X6 + I10</td><td>Q4</td></tr>
+                    <tr><td><strong>X6</strong></td><td>X5·Fc3</td><td>X7 + I10</td><td>Q3</td></tr>
+                    <tr><td><strong>X7</strong></td><td>X3·Fc4 + X6·Fc5</td><td>X8 + I10</td><td>Q5</td></tr>
+                    <tr><td><strong>X8</strong></td><td>X7·Fc2</td><td>X0 + I10</td><td>Q6</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        const signals = {
+            M: false,
+            S_Pieza: true,
+            Fc0: true,
+            Fc1: false,
+            Fc2: true,
+            Fc3: false,
+            Fc4: false,
+            Fc5: false,
+            S_Prof: false
+        };
+
+        function getX(n) { return currentState === n; }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) log.removeChild(log.lastChild);
+        }
+
+        function toggleSProf() {
+            signals.S_Prof = !signals.S_Prof;
+            document.getElementById('sprofStatus').textContent = signals.S_Prof
+                ? '1 (Taladrado Profundo)'
+                : '0 (Taladrado Simple)';
+            addLog(`🔀 Selector S_Prof = ${signals.S_Prof ? '1 (Profundo)' : '0 (Simple)'}`);
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('valid-next'));
+            const validMap = {
+                0: (signals.Fc0 && signals.Fc2 && signals.S_Pieza) ? ['btn-M'] : ['btn-Fc0', 'btn-Fc2', 'btn-S_Pieza', 'btn-M'],
+                1: ['btn-Fc1'],
+                2: ['btn-Fc3'],
+                3: ['btn-Fc4'],
+                4: ['btn-Fc4'],
+                5: ['btn-Fc3'],
+                6: ['btn-Fc5'],
+                7: ['btn-Fc2'],
+                8: ['btn-Fc0']
+            };
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+            switch (currentState) {
+                case 0:
+                    if (getX(0) && signals.M && signals.Fc0 && signals.Fc2 && signals.S_Pieza) {
+                        newState = 1;
+                        signals.Fc0 = false;
+                        signals.Fc2 = false;
+                        addLog('✅ Transición 0→1: X0 · M · Fc0 · Fc2 · S_Pieza');
+                    } else if (getX(0) && signals.M) {
+                        addLog('⚠️ Faltan condiciones iniciales (Fc0, Fc2 o S_Pieza)');
+                    }
+                    break;
+                case 1:
+                    if (getX(1) && signals.Fc1) { newState = 2; addLog('✅ Transición 1→2: X1 · Fc1'); }
+                    break;
+                case 2:
+                    if (getX(2) && signals.Fc3) {
+                        if (!signals.S_Prof) { newState = 3; addLog('✅ Transición 2→3: X2 · Fc3 · /S_Prof'); }
+                        else { newState = 4; addLog('✅ Transición 2→4: X2 · Fc3 · S_Prof'); }
+                    }
+                    break;
+                case 3:
+                    if (getX(3) && signals.Fc4) { newState = 7; addLog('✅ Transición 3→7: X3 · Fc4'); }
+                    break;
+                case 4:
+                    if (getX(4) && signals.Fc4) { newState = 5; addLog('✅ Transición 4→5: X4 · Fc4'); }
+                    break;
+                case 5:
+                    if (getX(5) && signals.Fc3) { newState = 6; addLog('✅ Transición 5→6: X5 · Fc3'); }
+                    break;
+                case 6:
+                    if (getX(6) && signals.Fc5) { newState = 7; addLog('✅ Transición 6→7: X6 · Fc5'); }
+                    break;
+                case 7:
+                    if (getX(7) && signals.Fc2) { newState = 8; addLog('✅ Transición 7→8: X7 · Fc2'); }
+                    break;
+                case 8:
+                    if (getX(8) && signals.Fc0) {
+                        newState = 0;
+                        signals.Fc2 = true;
+                        signals.S_Pieza = true;
+                        addLog('✅ Transición 8→0: X8 · Fc0 (Ciclo completo)');
+                    }
+                    break;
+            }
+
+            if (newState !== currentState) {
+                updateState(newState);
+            } else if (!(currentState === 0 && signals.M)) {
+                addLog(`ℹ️ Señal sin efecto en etapa X${currentState}`);
+            }
+
+            if (currentState !== 0) {
+                signals.M = false; signals.Fc1 = false; signals.Fc3 = false; signals.Fc4 = false; signals.Fc5 = false;
+                if (currentState !== 8) signals.Fc0 = false;
+                if (currentState !== 7) signals.Fc2 = false;
+            } else {
+                signals.M = false;
+            }
+            highlightValidButtons();
+        }
+
+        function updateState(newState) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+            document.getElementById(`node${newState}`)?.classList.add('active');
+            document.getElementById(`out${newState}`)?.classList.add('active');
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+        }
+
+        function triggerInput(sig) {
+            signals[sig] = true;
+            addLog(`👆 Activado: ${sig} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            Object.keys(signals).forEach(k => { if (k !== 'S_Prof') signals[k] = false; });
+            signals.Fc0 = true; signals.Fc2 = true; signals.S_Pieza = true;
+            updateState(0);
+            addLog('🔄 RESET general (I10): X0=1 (Fc0, Fc2, S_Pieza activos)');
+        }
+
+        highlightValidButtons();
+        addLog('Iniciado en X0=1 (Fc0=1, Fc2=1, S_Pieza=1 activos)');
+    </script>
+</body>
+</html>

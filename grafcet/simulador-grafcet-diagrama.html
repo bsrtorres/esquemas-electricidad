@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Circuito Digital - Simulación Local</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            gap: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+        }
+
+        .diagram-container {
+            position: relative;
+            width: 500px;
+            height: 650px;
+            background: white;
+            border: 3px solid #000;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            z-index: 10;
+            transition: all 0.4s ease;
+        }
+
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+            transform: scale(1.1);
+        }
+
+        .output {
+            position: absolute;
+            width: 55px;
+            height: 35px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 10;
+            transition: all 0.4s ease;
+        }
+
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.6);
+        }
+
+        .label {
+            position: absolute;
+            font-size: 15px;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 0 3px;
+        }
+
+        /* Posiciones de nodos */
+        #node0 { top: 40px; left: 227px; }
+        #node1 { top: 150px; left: 227px; }
+        #out1 { top: 152px; left: 290px; }
+        #node2 { top: 280px; left: 127px; }
+        #out2 { top: 282px; left: 190px; }
+        #node3 { top: 280px; left: 327px; }
+        #out3 { top: 282px; left: 390px; }
+        #node4 { top: 450px; left: 127px; }
+        #out4 { top: 452px; left: 190px; }
+
+        /* Labels de condiciones */
+        #labelTrans01 { top: 109px; left: 275px; }
+        #labelTrans12 { top: 239px; left: 50px; }
+        #labelTrans13 { top: 239px; left: 370px; }
+        #labelTrans24 { top: 379px; left: 50px; }
+        #labelTrans40 { top: 544px; left: 50px; }
+        #labelTrans30 { top: 387px; left: 370px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .btn-marcha {
+            background: #4CAF50;
+        }
+
+        .btn-marcha:hover {
+            background: #45a049;
+        }
+
+        .btn-reset {
+            background: #f44336;
+        }
+
+        .btn-reset:hover {
+            background: #da190b;
+        }
+
+        .btn-fc {
+            background: #2196F3;
+        }
+
+        .btn-fc:hover {
+            background: #0b7dda;
+        }
+
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+
+        .states-info {
+            background: #fff3e0;
+            border-left: 4px solid #FF9800;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .states-info p {
+            margin: 5px 0;
+        }
+
+        .states-info strong {
+            color: #E65100;
+        }
+
+        .log {
+            max-height: 250px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log div {
+            margin: 2px 0;
+        }
+
+        .transition-info {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .transition-info p {
+            margin: 3px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Modo Simulación Local (Sin MQTT)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Estado Actual:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <svg>
+                    <!-- Línea de retroalimentación izquierda -->
+                    <line x1="30" y1="20" x2="30" y2="610" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea inferior horizontal -->
+                    <line x1="30" y1="610" x2="350" y2="610" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea superior horizontal con giro a 90 grados -->
+                    <line x1="30" y1="20" x2="248" y2="20" stroke="#000" stroke-width="2"/>
+                    <line x1="248" y1="20" x2="248" y2="40" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Flecha superior entrando a nodo 0 -->
+                    <polygon points="248,40 243,30 253,30" fill="#000"/>
+                    
+                    <!-- Línea de nodo 0 a nodo 1 -->
+                    <line x1="250" y1="85" x2="250" y2="150" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal de transición entre 0 y 1 -->
+                    <line x1="235" y1="117" x2="265" y2="117" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Líneas conectando nodos con sus outputs -->
+                    <!-- Nodo 1 a Q1 -->
+                    <line x1="272" y1="172" x2="290" y2="172" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea horizontal de bifurcación desde nodo 1 -->
+                    <line x1="150" y1="215" x2="350" y2="215" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal en bifurcación izquierda (1 a 2) -->
+                    <line x1="135" y1="247" x2="165" y2="247" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal en bifurcación derecha (1 a 3) -->
+                    <line x1="335" y1="247" x2="365" y2="247" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea de nodo 1 a bifurcación -->
+                    <line x1="250" y1="195" x2="250" y2="215" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea izquierda de bifurcación a nodo 2 -->
+                    <line x1="150" y1="215" x2="150" y2="280" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Nodo 2 a Q2 -->
+                    <line x1="172" y1="302" x2="190" y2="302" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea derecha de bifurcación a nodo 3 -->
+                    <line x1="350" y1="215" x2="350" y2="280" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Nodo 3 a Q3 -->
+                    <line x1="372" y1="302" x2="390" y2="302" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea de nodo 2 a nodo 4 -->
+                    <line x1="150" y1="325" x2="150" y2="450" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal de transición (2 a 4) -->
+                    <line x1="135" y1="387" x2="165" y2="387" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea de nodo 4 hacia abajo -->
+                    <line x1="150" y1="495" x2="150" y2="610" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Nodo 4 a Q3 -->
+                    <line x1="172" y1="472" x2="190" y2="472" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal de transición (4 hacia retroalimentación) -->
+                    <line x1="135" y1="552" x2="165" y2="552" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Línea de nodo 3 hacia abajo y luego a la izquierda -->
+                    <line x1="350" y1="325" x2="350" y2="610" stroke="#000" stroke-width="2"/>
+                    <line x1="150" y1="610" x2="350" y2="610" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Barrita horizontal de transición (3 hacia retroalimentación) -->
+                    <line x1="335" y1="395" x2="365" y2="395" stroke="#000" stroke-width="2"/>
+                    
+                    <!-- Flecha en la línea que baja de nodo 3 -->
+                    <polygon points="350,540 345,530 355,530" fill="#000"/>
+                    
+                    <!-- Flecha inferior única -->
+                    <polygon points="150,610 145,600 155,600" fill="#000"/>
+                    
+                    <!-- Flecha de retroalimentación arriba -->
+                    <polygon points="248,40 243,50 253,50" fill="#000"/>
+                </svg>
+
+                <!-- Nodos y salidas -->
+                <div id="node0" class="node active">0</div>
+                <div id="node1" class="node">1</div>
+                <div id="out1" class="output">Q1</div>
+                <div id="node2" class="node">2</div>
+                <div id="out2" class="output">Q2</div>
+                <div id="node3" class="node">3</div>
+                <div id="out3" class="output">Q3</div>
+                <div id="node4" class="node">4</div>
+                <div id="out4" class="output">Q3</div>
+
+                <!-- Labels de condiciones -->
+                <div id="labelTrans01" class="label">X0 * M</div>
+                <div id="labelTrans12" class="label">Fc1 * x1</div>
+                <div id="labelTrans13" class="label">Fc2 * x1</div>
+                <div id="labelTrans24" class="label">Fc3 * x2</div>
+                <div id="labelTrans40" class="label">Fc5 * x4</div>
+                <div id="labelTrans30" class="label">Fc4 * x3</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🎮 Panel de Control</h3>
+            
+            <div class="states-info">
+                <p><strong>ℹ️ Variables x0-x4:</strong></p>
+                <p>• x0 = 1 cuando estado 0 activo</p>
+                <p>• x1 = 1 cuando estado 1 activo</p>
+                <p>• x2 = 1 cuando estado 2 activo</p>
+                <p>• x3 = 1 cuando estado 3 activo</p>
+                <p>• x4 = 1 cuando estado 4 activo</p>
+            </div>
+
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">
+                    ▶️ MARCHA
+                </button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">
+                    🔄 RESET
+                </button>
+                <button id="btn-Fc1" class="control-button btn-fc" onclick="triggerInput('Fc1')">
+                    Fc1
+                </button>
+                <button id="btn-Fc2" class="control-button btn-fc" onclick="triggerInput('Fc2')">
+                    Fc2
+                </button>
+                <button id="btn-Fc3" class="control-button btn-fc" onclick="triggerInput('Fc3')">
+                    Fc3
+                </button>
+                <button id="btn-Fc4" class="control-button btn-fc" onclick="triggerInput('Fc4')">
+                    Fc4
+                </button>
+                <button id="btn-Fc5" class="control-button btn-fc" onclick="triggerInput('Fc5')">
+                    Fc5
+                </button>
+            </div>
+
+            <div class="transition-info">
+                <p><strong>📋 Transiciones:</strong></p>
+                <p>0→1: X0 * M</p>
+                <p>1→2: Fc1 * x1</p>
+                <p>1→3: Fc2 * x1</p>
+                <p>2→4: Fc3 * x2</p>
+                <p>3→0: Fc4 * x3</p>
+                <p>4→0: Fc5 * x4</p>
+            </div>
+
+            <h3>📝 Log de Eventos</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        
+        // Estado de las señales
+        const signals = {
+            M: false,
+            Fc1: false,
+            Fc2: false,
+            Fc3: false,
+            Fc4: false,
+            Fc5: false
+        };
+
+        // x0-x4 se calculan automáticamente según el estado activo
+        function getX(n) {
+            return currentState === n;
+        }
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            
+            // Limitar a 50 entradas
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(btn => {
+                btn.classList.remove('valid-next');
+            });
+
+            const validMap = {
+                0: ['btn-M'],
+                1: ['btn-Fc1', 'btn-Fc2'],
+                2: ['btn-Fc3'],
+                3: ['btn-Fc4'],
+                4: ['btn-Fc5']
+            };
+
+            (validMap[currentState] || []).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('valid-next');
+            });
+        }
+
+        function evaluateTransitions() {
+            let newState = currentState;
+            
+            switch (currentState) {
+                case 0:
+                    // Transición 0 → 1: X0 * M
+                    if (getX(0) && signals.M) {
+                        newState = 1;
+                        addLog('✅ Transición 0→1: X0 * M cumplida');
+                    }
+                    break;
+                    
+                case 1:
+                    // Transición 1 → 2: Fc1 * x1
+                    if (signals.Fc1 && getX(1)) {
+                        newState = 2;
+                        addLog('✅ Transición 1→2: Fc1 * x1 cumplida');
+                    }
+                    // Transición 1 → 3: Fc2 * x1
+                    else if (signals.Fc2 && getX(1)) {
+                        newState = 3;
+                        addLog('✅ Transición 1→3: Fc2 * x1 cumplida');
+                    }
+                    break;
+                    
+                case 2:
+                    // Transición 2 → 4: Fc3 * x2
+                    if (signals.Fc3 && getX(2)) {
+                        newState = 4;
+                        addLog('✅ Transición 2→4: Fc3 * x2 cumplida');
+                    }
+                    break;
+                    
+                case 3:
+                    // Transición 3 → 0: Fc4 * x3
+                    if (signals.Fc4 && getX(3)) {
+                        newState = 0;
+                        addLog('✅ Transición 3→0: Fc4 * x3 cumplida');
+                    }
+                    break;
+                    
+                case 4:
+                    // Transición 4 → 0: Fc5 * x4
+                    if (signals.Fc5 && getX(4)) {
+                        newState = 0;
+                        addLog('✅ Transición 4→0: Fc5 * x4 cumplida');
+                    }
+                    break;
+            }
+            
+            if (newState !== currentState) {
+                updateState(newState);
+            } else {
+                addLog(`ℹ️ Condición no cumplida en estado ${currentState}`);
+            }
+            
+            // Limpiar señales de pulso tras evaluar
+            resetSignals();
+        }
+
+        function resetSignals() {
+            signals.M = false;
+            signals.Fc1 = false;
+            signals.Fc2 = false;
+            signals.Fc3 = false;
+            signals.Fc4 = false;
+            signals.Fc5 = false;
+        }
+
+        function updateState(newState) {
+            if (newState < 0 || newState > 4) {
+                addLog(`Estado inválido: ${newState}`);
+                return;
+            }
+
+            // Desactivar todos los nodos y salidas
+            document.querySelectorAll('.node').forEach(node => {
+                node.classList.remove('active');
+            });
+            document.querySelectorAll('.output').forEach(output => {
+                output.classList.remove('active');
+            });
+
+            // Activar el nuevo estado
+            const nodeElement = document.getElementById(`node${newState}`);
+            if (nodeElement) {
+                nodeElement.classList.add('active');
+            }
+
+            // Activar salidas según el estado
+            if (newState === 1) {
+                document.getElementById('out1').classList.add('active');
+            } else if (newState === 2) {
+                document.getElementById('out2').classList.add('active');
+            } else if (newState === 3) {
+                document.getElementById('out3').classList.add('active');
+            } else if (newState === 4) {
+                document.getElementById('out4').classList.add('active');
+            }
+
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            highlightValidButtons();
+            addLog(`🔄 Estado cambiado a: ${newState} (x${newState}=1)`);
+        }
+
+        function triggerInput(signalName) {
+            signals[signalName] = true;
+            const label = signalName === 'M' ? 'MARCHA (M)' : signalName;
+            addLog(`👆 Pulsado: ${label} = 1 (x${currentState}=1)`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            resetSignals();
+            updateState(0);
+            addLog('🔄 Sistema reseteado a estado 0');
+        }
+
+        // Inicialización
+        highlightValidButtons();
+        addLog('Sistema inicializado en estado 0 (Modo Local)');
+        addLog('x0 = 1 (estado 0 activo)');
+    </script>
+</body>
+</html>
