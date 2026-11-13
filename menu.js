@@ -142,7 +142,10 @@
     .mnu-top { width: 100%; text-align: left; }
     .mnu-drop { position: static; min-width: 0; max-width: none; max-height: none; box-shadow: none; margin: 2px 0 6px; }
   }
-  @media print { .mnu { display: none; } }`;
+  .mnu-back { max-width: 1400px; margin: 0 auto; padding: 10px 16px 0; font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 17px; }
+  .mnu-back a { display: inline-block; color: #b4471a; text-decoration: none; font-weight: bold; padding: 4px 10px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .mnu-back a:hover, .mnu-back a:focus-visible { background: #f1ece3; outline: none; }
+  @media print { .mnu, .mnu-back { display: none; } }`;
 
   const here = location.href.split("#")[0].split("?")[0];
   const abs = h => new URL(h, BASE).href;
@@ -169,6 +172,23 @@
   const nav = document.createElement("nav"); nav.className = "mnu"; nav.setAttribute("aria-label", "Menú principal");
   nav.innerHTML = html;
   document.body.prepend(nav);
+
+  // Enlace "Volver" a la página superior: la página principal de la sección
+  // (primer elemento del desplegable) o Inicio si ya estamos en ella.
+  if (!isCur("index.html")) {
+    let up = {t: "Inicio", href: "index.html"};
+    for (const g of MENU) {
+      if (!g.items) continue;
+      const i = g.items.findIndex(it => it.href && !it.ext && isCur(it.href));
+      if (i < 0) continue;
+      const first = g.items.find(it => it.href && !it.ext);
+      if (first && first !== g.items[i]) up = {t: g.t, href: first.href};
+      break;
+    }
+    const back = document.createElement("div"); back.className = "mnu-back";
+    back.innerHTML = `<a href="${abs(up.href)}">← Volver a ${esc(up.t)}</a>`;
+    nav.after(back);
+  }
 
   const closeAll = except => nav.querySelectorAll(".mnu-drop.open").forEach(d => {
     if (d === except) return;
