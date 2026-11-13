@@ -6,7 +6,7 @@ Simuladores, esquemas para completar, cálculos de vivienda, automatismos, elect
 
 ## Contenido
 
-- `index.html`: portada con cuatro botones que llevan a `simuladores.html`, `calculos.html`, `fichas.html`, `ecosistema-domotico.html` y `normativa.html`.
+- `index.html`: portada con un botón de color por sección (Electrónica, Fichas vivienda, Automatismos, GRAFCET, Domótica, Simuladores, Cálculos y Normativa).
 
 - `menu.js`: menú común de todas las páginas. Al añadir una ficha o página nueva, añadirla también aquí. El apartado Electrónica enlaza a la web de prácticas de protoboard (https://bsrtorres.github.io/electronica-basica/); si se añade una práctica allí, añadirla también aquí.
 

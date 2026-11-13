@@ -84,9 +84,7 @@
       {t: "5 · Túnel de lavado", href: "grafcet/ejercicio5-tunel-lavado.html"},
       {t: "Solucionario GRAFCET con bloques RS", href: "grafcet/solucionario-grafcet-rs-logosoft.pdf"},
     ]},
-    {t: "Domótica", items: [
-      {t: "Ecosistema domótico Shelly (aula de cocina)", href: "ecosistema-domotico.html"},
-    ]},
+    {t: "Domótica", href: "ecosistema-domotico.html"},
     {t: "Simuladores", items: [
       {t: "Todos los simuladores", href: "simuladores.html"},
       {h: "Simulador vivienda"},
@@ -108,26 +106,31 @@
   ];
 
   const css = `
-  .mnu { position: sticky; top: 0; z-index: 1000; background: #1d1d1f; color: #fff;
+  .mnu { position: sticky; top: 0; z-index: 1000; background: linear-gradient(90deg, #0e1f3a, #17335e); color: #fff;
          font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 18px; line-height: 1.4;
-         box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+         box-shadow: 0 2px 6px rgba(0,0,0,.2); border-bottom: 3px solid #ffc83d; }
+  .mnu, .mnu-back { align-self: stretch; }
   .mnu * { box-sizing: border-box; }
   .mnu-in { max-width: 1400px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; gap: 4px; min-height: 52px; flex-wrap: wrap; }
-  .mnu-brand { color: #fff; font-weight: bold; text-decoration: none; margin-right: 12px; padding: 8px 0; white-space: nowrap; }
+  .mnu-brand { color: #fff; font-weight: bold; text-decoration: none; margin-right: 12px; padding: 8px 0; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+  .mnu-brand .bolt { width: 30px; height: 30px; border-radius: 8px; background: #ffc83d; display: grid; place-items: center; flex: none; }
+  .mnu .mnu-brand .bolt svg { display: block; width: 18px; height: 18px; min-width: 0; max-width: none; position: static; background: none; border: 0; fill: #0e1f3a; }
   .mnu-toggle { display: none; margin-left: auto; font: inherit; color: #fff; background: transparent;
                 border: 2px solid #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
   .mnu-list { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
   .mnu-list > li { position: relative; }
   .mnu-top { display: block; font: inherit; color: #fff; background: transparent; border: 0; border-radius: 8px;
              padding: 8px 12px; cursor: pointer; text-decoration: none; white-space: nowrap; }
-  .mnu-top:hover, .mnu-top:focus-visible, .mnu-top[aria-expanded="true"] { background: #3a3a3f; outline: none; }
-  .mnu-top.cur { box-shadow: inset 0 -3px 0 #ffb27a; }
+  .mnu-top:hover, .mnu-top:focus-visible, .mnu-top[aria-expanded="true"] { background: rgba(255,255,255,.14); outline: none; }
+  .mnu-top.cur { box-shadow: inset 0 -3px 0 #ffc83d; color: #ffc83d; }
   .mnu-top .car { display: inline-block; margin-left: 6px; font-size: 12px; transition: transform .15s; }
   .mnu-top[aria-expanded="true"] .car { transform: rotate(180deg); }
   .mnu-drop { display: none; position: absolute; left: 0; top: calc(100% + 4px); min-width: 380px; max-width: 92vw;
               max-height: 75vh; overflow-y: auto; background: #fff; color: #1d1d1f; border-radius: 10px;
               box-shadow: 0 6px 24px rgba(0,0,0,.25); padding: 6px; list-style: none; margin: 0; }
   .mnu-drop.open { display: block; }
+  .mnu-drop.wide { min-width: 760px; columns: 2; column-gap: 8px; }
+  .mnu-drop.wide li { break-inside: avoid; }
   .mnu-list > li:nth-last-child(-n+2) .mnu-drop { left: auto; right: 0; }
   .mnu-drop a { display: block; color: #1d1d1f; text-decoration: none; padding: 7px 10px; border-radius: 6px; }
   .mnu-drop a:hover, .mnu-drop a:focus-visible { background: #f1ece3; color: #b4471a; outline: none; }
@@ -141,8 +144,9 @@
     .mnu.open .mnu-list { display: flex; }
     .mnu-top { width: 100%; text-align: left; }
     .mnu-drop { position: static; min-width: 0; max-width: none; max-height: none; box-shadow: none; margin: 2px 0 6px; }
+    .mnu-drop.wide { columns: 1; min-width: 0; }
   }
-  .mnu-back { max-width: 1400px; margin: 0 auto; padding: 10px 16px 0; font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 17px; }
+  .mnu-back { max-width: 1400px; margin: 0 auto; padding: 10px 16px 0; font-family: Calibri, "Segoe UI", Arial, sans-serif; font-size: 17px; text-align: left; }
   .mnu-back a { display: inline-block; color: #b4471a; text-decoration: none; font-weight: bold; padding: 4px 10px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
   .mnu-back a:hover, .mnu-back a:focus-visible { background: #f1ece3; outline: none; }
   @media print { .mnu, .mnu-back { display: none; } }`;
@@ -152,7 +156,7 @@
   const isCur = h => abs(h) === here || (h === "index.html" && here === BASE.href);
   const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-  let html = `<div class="mnu-in"><a class="mnu-brand" href="${abs("index.html")}">Taller de Electricidad y Electrónica</a>`
+  let html = `<div class="mnu-in"><a class="mnu-brand" href="${abs("index.html")}"><span class="bolt" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span>Taller de Electricidad y Electrónica</a>`
     + `<button class="mnu-toggle" aria-expanded="false" aria-controls="mnu-list">Menú</button><ul class="mnu-list" id="mnu-list">`;
   MENU.forEach((g, i) => {
     if (g.href) {
@@ -161,7 +165,7 @@
     }
     const cur = g.items.some(it => it.href && isCur(it.href));
     html += `<li><button class="mnu-top ${cur ? "cur" : ""}" aria-expanded="false" aria-controls="mnu-d${i}">${esc(g.t)}<span class="car" aria-hidden="true">▼</span></button>`
-      + `<ul class="mnu-drop" id="mnu-d${i}">`
+      + `<ul class="mnu-drop${g.items.length > 15 ? " wide" : ""}" id="mnu-d${i}">`
       + g.items.map(it => it.h ? `<li class="mnu-h">${esc(it.h)}</li>`
         : `<li><a href="${it.ext ? it.href : abs(it.href)}" ${it.ext ? 'target="_blank" rel="noopener"' : ""} class="${isCur(it.href) ? "cur" : ""}" ${isCur(it.href) ? 'aria-current="page"' : ""}>${esc(it.t)}${/\.pdf$/.test(it.href) ? '<span class="pdf">PDF</span>' : ""}</a></li>`).join("")
       + `</ul></li>`;
