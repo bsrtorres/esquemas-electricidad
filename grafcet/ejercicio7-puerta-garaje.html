@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 7 GRAFCET - Puerta de Garaje (LOGO!Soft RS)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0 0 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 20px;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1480px;
+            flex-wrap: wrap;
+        }
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .status-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #1565C0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+        .current-state-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        .state-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: center;
+        }
+        .diagram-container {
+            position: relative;
+            width: 720px;
+            height: 850px;
+            background: white;
+            border: 3px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .node.initial {
+            outline: 2px solid #000;
+            outline-offset: -5px;
+        }
+        .node.active {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 18px rgba(76, 175, 80, 0.75);
+            transform: scale(1.08);
+        }
+        .output {
+            position: absolute;
+            min-width: 95px;
+            height: 32px;
+            padding: 0 8px;
+            border: 2px solid #000;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        .output.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+        .label {
+            position: absolute;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+            z-index: 10;
+            background: white;
+            padding: 1px 4px;
+            color: #222;
+        }
+
+        /* Posiciones de Etapas */
+        #node0 { top: 30px;  left: 339px; }
+        #node1 { top: 140px; left: 339px; }
+        #out1  { top: 145px; left: 400px; }
+
+        #node2 { top: 250px; left: 339px; }
+        #out2  { top: 255px; left: 400px; }
+
+        #node3 { top: 360px; left: 339px; }
+        #out3  { top: 365px; left: 400px; }
+
+        #node4 { top: 470px; left: 339px; }
+        #out4  { top: 475px; left: 400px; }
+
+        #node5 { top: 580px; left: 339px; }
+        #out5  { top: 585px; left: 400px; }
+
+        #node6 { top: 690px; left: 339px; }
+        #out6  { top: 695px; left: 400px; }
+
+        #node7 { top: 775px; left: 339px; }
+        #out7  { top: 780px; left: 400px; }
+
+        /* Transiciones */
+        #labelTrans01 { top: 98px;  left: 382px; }
+        #labelTrans12 { top: 208px; left: 382px; }
+        #labelTrans23 { top: 318px; left: 382px; }
+        #labelTrans34 { top: 428px; left: 382px; }
+        #labelTrans42 { top: 492px; left: 535px; }
+        #labelTrans45 { top: 538px; left: 382px; }
+        #labelTrans56 { top: 648px; left: 382px; }
+        #labelTrans67 { top: 742px; left: 382px; }
+        #labelTrans70 { top: 822px; left: 382px; }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 440px;
+        }
+        .control-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+        .enunciado-box {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .counter-badge {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #e65100;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .control-button {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-marcha { background: #4CAF50; }
+        .btn-reset  { background: #f44336; }
+        .btn-sensor { background: #2196F3; }
+        .btn-temp   { background: #EF6C00; }
+        .control-button.valid-next {
+            outline: 3px solid #FF9800;
+            outline-offset: 2px;
+        }
+        .io-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11.5px;
+        }
+        .io-table th, .io-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        .io-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .log {
+            max-height: 160px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+        .log div { margin: 2px 0; }
+    </style>
+<script src="../menu.js?v=18" defer></script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-section">
+            <div class="status-bar">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>Ejercicio 7 LOGO!Soft (4 Etapas RS + T1)</span>
+                </div>
+                <div class="current-state-display">
+                    <span>Etapa Activa:</span>
+                    <span class="state-number" id="stateDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="diagram-container" style="height:537px">
+                <svg>
+                    <line x1="30" y1="15" x2="30" y2="512" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="512" x2="360" y2="512" stroke="#000" stroke-width="2"/>
+                    <line x1="30" y1="15" x2="360" y2="15" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="15" x2="360" y2="30" stroke="#000" stroke-width="2"/>
+                    <polygon points="360,30 355,21 365,21" fill="#000"/>
+                    <line x1="381" y1="181" x2="400" y2="181" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="311" x2="400" y2="311" stroke="#000" stroke-width="2"/>
+                    <line x1="381" y1="441" x2="400" y2="441" stroke="#000" stroke-width="2"/>
+                    <line x1="360" y1="72" x2="360" y2="160" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="116" x2="375" y2="116" stroke="#000" stroke-width="4"/>
+                    <line x1="360" y1="202" x2="360" y2="290" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="246" x2="375" y2="246" stroke="#000" stroke-width="4"/>
+                    <line x1="360" y1="332" x2="360" y2="420" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="376" x2="375" y2="376" stroke="#000" stroke-width="4"/>
+                    <line x1="360" y1="462" x2="360" y2="512" stroke="#000" stroke-width="2"/>
+                    <line x1="345" y1="487" x2="375" y2="487" stroke="#000" stroke-width="4"/>
+                </svg>
+
+                <div id="node0" class="node initial active" style="top:30px;left:339px">0</div>
+                <div id="node1" class="node" style="top:160px;left:339px">1</div>
+                <div id="out1" class="output" style="top:165px;left:400px">Q1 (Abrir)</div>
+                <div id="node2" class="node" style="top:290px;left:339px">2</div>
+                <div id="out2" class="output" style="top:295px;left:400px">Espera T1 (5s)</div>
+                <div id="node3" class="node" style="top:420px;left:339px">3</div>
+                <div id="out3" class="output" style="top:425px;left:400px">Q2 (Cerrar)</div>
+
+                <div id="labelTrans01" class="label" style="top:107px;left:336px;transform:translateX(-100%)">X0 · M · Fc_C</div>
+                <div id="labelTrans12" class="label" style="top:237px;left:336px;transform:translateX(-100%)">X1 · Fc_A</div>
+                <div id="labelTrans23" class="label" style="top:367px;left:336px;transform:translateX(-100%)">X2 · T1 (5s)</div>
+                <div id="labelTrans30" class="label" style="top:478px;left:336px;transform:translateX(-100%)">X3 · Fc_C</div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h3>🚪 Enunciado: Puerta de Garaje Automática</h3>
+            <div class="enunciado-box">
+                Con la puerta cerrada (<strong>Fc_C</strong>) en reposo (<strong>X0</strong>), al pulsar el mando <strong>M</strong>:<br>1. El motor abre la puerta (<strong>Q1</strong>) hasta el final de carrera de abierta <strong>Fc_A</strong>.<br>2. La puerta espera abierta durante <strong>T1 (5s)</strong> para que pase el coche.<br>3. El motor cierra la puerta (<strong>Q2</strong>) hasta <strong>Fc_C</strong> y vuelve al reposo.
+            </div>
+            <div class="enunciado-box"><strong>Asignación de E/S:</strong> I1 = M (Mando) | I2 = Fc_C (puerta cerrada) | I3 = Fc_A (puerta abierta) | I4 = Reset | T1 = Retardo a la conexión 5 s</div>
+
+            <h3>🎛️ Pulsadores y Sensores</h3>
+            <div class="button-grid">
+                <button id="btn-M" class="control-button btn-marcha" onclick="triggerInput('M')">▶️ M Mando (I1)</button>
+                <button id="btn-Fc_C" class="control-button btn-sensor" onclick="triggerInput('Fc_C')">Fc_C Cerrada (I2)</button>
+                <button id="btn-Fc_A" class="control-button btn-sensor" onclick="triggerInput('Fc_A')">Fc_A Abierta (I3)</button>
+                <button id="btn-T1" class="control-button btn-temp" onclick="triggerInput('T1')">⏱️ Fin T1 (5s)</button>
+                <button id="btn-reset" class="control-button btn-reset" onclick="triggerReset()">🔄 RESET (I4)</button>
+            </div>
+
+            <h3>📋 Ecuaciones para LOGO!Soft (Bloques RS)</h3>
+            <table class="io-table">
+                <thead><tr><th>RS</th><th>Set (S)</th><th>Reset (R)</th><th>Salida</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>X0</strong></td><td>X3·Fc_C + I4 + M8</td><td>X1</td><td>Reposo</td></tr>
+                    <tr><td><strong>X1</strong></td><td>X0·M·Fc_C</td><td>X2 + I4</td><td>Q1 (Abrir)</td></tr>
+                    <tr><td><strong>X2</strong></td><td>X1·Fc_A</td><td>X3 + I4</td><td>Trg T1 (5s)</td></tr>
+                    <tr><td><strong>X3</strong></td><td>X2·T1</td><td>X0 + I4</td><td>Q2 (Cerrar)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>📝 Log de Simulación</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = 0;
+        let autoTimer = null;
+        const LATCH = 'Fc_C';
+        const RESET_IN = 'I4';
+        const TRANS = [{"f": 0, "t": 1, "need": ["M", "Fc_C"], "lab": "X0 · M · Fc_C"}, {"f": 1, "t": 2, "need": ["Fc_A"], "lab": "X1 · Fc_A"}, {"f": 2, "t": 3, "need": ["T1"], "lab": "X2 · T1 (5s)"}, {"f": 3, "t": 0, "need": ["Fc_C"], "lab": "X3 · Fc_C"}];
+        const TIMERS = {"2": ["T1", 5000]};
+        const signals = {"M": false, "Fc_C": true, "Fc_A": false, "T1": false};
+
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            while (log.children.length > 50) log.removeChild(log.lastChild);
+        }
+
+        function highlightValidButtons() {
+            document.querySelectorAll('.control-button').forEach(b => b.classList.remove('valid-next'));
+            TRANS.filter(t => t.f === currentState).forEach(t => t.need.forEach(k => {
+                if (!signals[k] || k === 'M') document.getElementById('btn-' + k)?.classList.add('valid-next');
+            }));
+        }
+
+        function evaluateTransitions() {
+            const tr = TRANS.find(t => t.f === currentState && t.need.every(k => signals[k]));
+            if (tr) {
+                addLog(`✅ Transición ${tr.f}→${tr.t}: ${tr.lab} cumplida`);
+                updateState(tr.t);
+            } else if (signals.M && currentState === 0) {
+                addLog(`⚠️ No se cumple ${TRANS[0].lab}: falta ${LATCH} = 1`);
+            } else {
+                addLog(`ℹ️ Señal sin efecto en etapa X${currentState}`);
+            }
+            // Los pulsos se borran; el sensor de reposo solo se mantiene activo en X0
+            const keep = currentState === 0 && signals[LATCH];
+            Object.keys(signals).forEach(k => signals[k] = false);
+            signals[LATCH] = keep;
+            highlightValidButtons();
+        }
+
+        function updateState(newState) {
+            if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.output').forEach(o => o.classList.remove('active'));
+            document.getElementById(`node${newState}`)?.classList.add('active');
+            document.getElementById(`out${newState}`)?.classList.add('active');
+            currentState = newState;
+            document.getElementById('stateDisplay').textContent = newState;
+            addLog(`🔄 Etapa activa: X${newState}=1`);
+            const tm = TIMERS[newState];
+            if (tm) {
+                addLog(`⏳ Temporizador ${tm[0]} (${tm[1] / 1000}s) en marcha...`);
+                autoTimer = setTimeout(() => triggerInput(tm[0]), tm[1]);
+            }
+        }
+
+        function triggerInput(sig) {
+            signals[sig] = true;
+            addLog(`👆 Activado: ${sig} = 1 (en X${currentState})`);
+            evaluateTransitions();
+        }
+
+        function triggerReset() {
+            Object.keys(signals).forEach(k => signals[k] = false);
+            signals[LATCH] = true;
+            updateState(0);
+            highlightValidButtons();
+            addLog(`🔄 RESET general (${RESET_IN}): X0=1, ${LATCH}=1`);
+        }
+
+        highlightValidButtons();
+        addLog(`Sistema iniciado en X0=1 (${LATCH}=1 activo)`);
+    </script>
+</body>
+</html>

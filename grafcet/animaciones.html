@@ -70,7 +70,7 @@ svg{display:block;width:100%;height:auto}
 .big{font:700 15px 'Segoe UI',Arial;fill:#1f2937}
 .clk{cursor:pointer}
 </style>
-<script src="../menu.js?v=17" defer></script>
+<script src="../menu.js?v=18" defer></script>
 </head>
 <body>
 <header>
@@ -539,7 +539,101 @@ const EX5={
   }
 };
 
-const EXS=[EX1,EX2,EX3,EX4,EX5];
+/* =====================================================================
+   EJERCICIO 6 · PRENSA NEUMÁTICA (muy fácil)
+   ===================================================================== */
+const EX6={
+  tab:'6 · Prensa',title:'Prensa neumática de estampado',
+  enun:`<p>Una prensa estampa piezas con un <b>cilindro neumático A</b> de doble efecto.</p>
+  <p>Con el sistema en reposo (<b>X0</b>) y el cilindro recogido (<b>a0</b>), al pulsar <b>M</b>:</p>
+  <p>1. El cilindro sale (<b>Q1 = A+</b>) hasta el final de carrera <b>a1</b>.</p>
+  <p>2. El cilindro vuelve (<b>Q2 = A−</b>) hasta <b>a0</b> y queda en reposo esperando otra pulsación de <b>M</b>.</p>
+  <p style="color:#6b7280">En la animación, al terminar cada ciclo la pieza estampada sale y entra una nueva.</p>`,
+  inputs:[['M','Marcha (I1)'],['a0','Cilindro dentro (I2)'],['a1','Cilindro fuera (I3)']],
+  outputs:[['Q1','A+ salida del cilindro'],['Q2','A− vuelta del cilindro']],
+  steps:[{n:0,c:0,r:0,Q:[]},{n:1,c:0,r:1,act:'Q1 A+ Sale',Q:['Q1']},{n:2,c:0,r:2,act:'Q2 A− Vuelve',Q:['Q2']}],
+  trans:[{f:0,t:1,l:'X0 · M · a0',c:S=>S.M&&S.a0},{f:1,t:2,l:'X1 · a1',c:S=>S.a1},{f:2,t:0,l:'X2 · a0',c:S=>S.a0}],
+  init:()=>({z:0,stamped:false,p:0,swap:0,done:0}),
+  ready:S=>S.a0,
+  physics(m,Q,h,sim){
+    if(Q.Q1)m.z=clamp(m.z+h/1.5);
+    if(Q.Q2)m.z=clamp(m.z-h/1.5);
+    if(m.z>=0.98)m.stamped=true;
+    if(sim.step===0&&m.swap===0&&m.stamped&&m.z<=0)m.swap=1;
+    if(m.swap===1){m.p+=h/0.7;if(m.p>=1){m.p=-1;m.stamped=false;m.done++;m.swap=2;}}
+    else if(m.swap===2){m.p+=h/0.7;if(m.p>=0){m.p=0;m.swap=0;}}
+  },
+  sensors:m=>({a0:m.z<=0,a1:m.z>=1}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:360,width:640,height:60,fill:'#cbd5e1'},svg);
+    el('rect',{x:170,y:340,width:300,height:22,fill:'#475569'},svg);
+    el('rect',{x:190,y:60,width:20,height:282,fill:'#64748b'},svg);el('rect',{x:430,y:60,width:20,height:282,fill:'#64748b'},svg);
+    el('rect',{x:180,y:56,width:280,height:30,rx:4,fill:'#475569'},svg);
+    el('rect',{x:280,y:86,width:80,height:90,rx:6,fill:'#e2e8f0',stroke:'#334155','stroke-width':3},svg);
+    tx(svg,320,48,'Cilindro A',{class:'ttl','text-anchor':'middle'});
+    R.piston=el('rect',{x:284,width:72,height:12,fill:'#334155'},svg);
+    R.rod=el('rect',{x:313,width:14,fill:'#94a3b8',stroke:'#64748b'},svg);
+    R.punch=el('rect',{x:282,width:76,height:30,rx:3,fill:'#334155'},svg);
+    R.piece=el('g',{},svg);
+    el('rect',{x:270,y:310,width:100,height:30,rx:3,fill:'#cbd5e1',stroke:'#64748b','stroke-width':2},R.piece);
+    R.mark=el('rect',{x:298,y:310,width:44,height:7,fill:'#475569'},R.piece);
+    R.portA=el('line',{x1:360,y1:96,x2:520,y2:96,'stroke-width':5},svg);R.portB=el('line',{x1:360,y1:166,x2:520,y2:166,'stroke-width':5},svg);
+    tx(svg,526,100,'aire A+',{class:'lbl'});tx(svg,526,170,'aire A−',{class:'lbl'});
+    mkLed(R,svg,268,100,'a0','a0','end');mkLed(R,svg,268,160,'a1','a1','end');
+    mkTag(R,svg,470,60,'Q1','Q1 A+ (sale)');mkTag(R,svg,470,186,'Q2','Q2 A− (vuelve)');
+    R.cnt=tx(svg,20,404,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    attr(R.piston,{y:90+m.z*72});
+    const pt=180+m.z*100;attr(R.punch,{y:pt});attr(R.rod,{y:102+m.z*72,height:pt-(102+m.z*72)});
+    attr(R.piece,{transform:`translate(${m.p*360} 0)`,opacity:1-Math.abs(m.p)});
+    R.mark.style.display=m.stamped?'':'none';
+    attr(R.portA,{stroke:Q.Q1?'#2196F3':'#cbd5e1'});attr(R.portB,{stroke:Q.Q2?'#2196F3':'#cbd5e1'});
+    R.cnt.textContent=`Piezas estampadas: ${m.done}`;
+  }
+};
+
+/* =====================================================================
+   EJERCICIO 7 · PUERTA DE GARAJE (muy fácil)
+   ===================================================================== */
+const EX7={
+  tab:'7 · Puerta de garaje',title:'Puerta de garaje automática',
+  enun:`<p>Con la puerta cerrada (<b>Fc_C</b>) en reposo (<b>X0</b>), al pulsar el mando <b>M</b>:</p>
+  <p>1. El motor abre la puerta (<b>Q1</b>) hasta el final de carrera de abierta <b>Fc_A</b>.</p>
+  <p>2. La puerta espera abierta durante <b>T1 (5 s)</b> para que pase el coche.</p>
+  <p>3. El motor cierra la puerta (<b>Q2</b>) hasta <b>Fc_C</b> y vuelve al reposo.</p>`,
+  inputs:[['M','Mando (I1)'],['Fc_C','Puerta cerrada (I2)'],['Fc_A','Puerta abierta (I3)'],['T1','Temporizador 5 s']],
+  outputs:[['Q1','Motor abrir'],['Q2','Motor cerrar']],
+  steps:[{n:0,c:0,r:0,Q:[]},{n:1,c:0,r:1,act:'Q1 Abrir',Q:['Q1']},{n:2,c:0,r:2,act:'Espera T1',Q:[],timer:['T1',5]},{n:3,c:0,r:3,act:'Q2 Cerrar',Q:['Q2']}],
+  trans:[{f:0,t:1,l:'X0 · M · Fc_C',c:S=>S.M&&S.Fc_C},{f:1,t:2,l:'X1 · Fc_A',c:S=>S.Fc_A},{f:2,t:3,l:'X2 · T1 (5s)',c:S=>S.T1},{f:3,t:0,l:'X3 · Fc_C',c:S=>S.Fc_C}],
+  init:()=>({open:0}),
+  ready:S=>S.Fc_C,
+  physics(m,Q,h){if(Q.Q1)m.open=clamp(m.open+h/4);if(Q.Q2)m.open=clamp(m.open-h/4);},
+  sensors:m=>({Fc_C:m.open<=0,Fc_A:m.open>=1}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:340,width:640,height:80,fill:'#94a3b8'},svg);
+    el('rect',{x:150,y:70,width:340,height:270,fill:'#e7d7c1',stroke:'#a8916f','stroke-width':3},svg);
+    el('rect',{x:190,y:120,width:260,height:220,fill:'#1f2937'},svg);
+    el('rect',{x:200,y:290,width:120,height:44,rx:10,fill:'#2563eb',opacity:.85},svg);
+    el('circle',{cx:225,cy:334,r:9,fill:'#111'},svg);el('circle',{cx:295,cy:334,r:9,fill:'#111'},svg);
+    R.door=el('g',{},svg);
+    R.panel=el('rect',{x:190,y:120,width:260,fill:'#cbd5e1',stroke:'#64748b','stroke-width':2},R.door);
+    R.lines=[];for(let i=1;i<6;i++)R.lines.push(el('line',{x1:190,x2:450,stroke:'#94a3b8','stroke-width':2},R.door));
+    el('rect',{x:280,y:84,width:80,height:30,rx:4,fill:'#334155'},svg);tx(svg,320,104,'MOTOR',{'text-anchor':'middle',style:'font:700 11px Segoe UI;fill:#fff'});
+    mkLed(R,svg,466,126,'Fc_A','Fc_A abierta');mkLed(R,svg,466,334,'Fc_C','Fc_C cerrada');
+    mkTag(R,svg,370,30,'Q1','▲ Q1 Abrir');mkTag(R,svg,370,52,'Q2','▼ Q2 Cerrar');
+    R.tt=tx(svg,20,404,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    const h=220*(1-m.open);attr(R.panel,{height:Math.max(h,0.01)});
+    R.lines.forEach((l,i)=>{const y=120+h-(i*44);attr(l,{y1:y,y2:y});l.style.display=y>122?'':'none';});
+    R.tt.textContent=sim.step===2?`T1 en marcha: ${sim.t.toFixed(1)} / 5 s`:(m.open>0&&m.open<1?'Puerta en movimiento…':'');
+  }
+};
+
+const EXS=[EX1,EX2,EX3,EX4,EX5,EX6,EX7];
 
 /* =====================================================================
    MOTOR DE SIMULACIÓN
@@ -632,7 +726,7 @@ function buildGrafcet(ex){
 }
 function drawGrafcet(dtReal){
   const ex=sim.ex;
-  for(const n in G.steps){const on=+n===sim.step;G.steps[n].classList.toggle('on',on);if(G.acts[n])G.acts[n].classList.toggle('on',on&&ex.steps.find(s=>s.n===+n).Q.length>0||on&&+n===4&&ex===EX5);}
+  for(const n in G.steps){const on=+n===sim.step;G.steps[n].classList.toggle('on',on);const st=ex.steps.find(s=>s.n===+n);if(G.acts[n])G.acts[n].classList.toggle('on',on&&(st.Q.length>0||!!st.timer||(+n===4&&ex===EX5)));}
   ex.steps.forEach(s=>{if(s.timer){const f=s.n===sim.step?clamp(sim.t/s.timer[1]):0;G.tb[s.n].setAttribute('width',G.aw[s.n]*f);}});
   ex.trans.forEach((tr,i)=>{
     const wait=tr.f===sim.step;
