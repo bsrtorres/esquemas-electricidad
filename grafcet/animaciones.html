@@ -69,19 +69,21 @@ svg{display:block;width:100%;height:auto}
 .ttl{font:700 12px 'Segoe UI',Arial;fill:#6b7280}
 .big{font:700 15px 'Segoe UI',Arial;fill:#1f2937}
 .clk{cursor:pointer}
+.nosol{display:none;background:#fffde7;border-left:4px solid #fbc02d;border-radius:6px;padding:14px;font-size:14px;line-height:1.5}
+.nosol a{color:#4c51bf;font-weight:700}
 </style>
 <script src="../menu.js?v=18" defer></script>
 </head>
 <body>
 <header>
   <h1>Animaciones GRAFCET · Bloques RS (LOGO!Soft)</h1>
-  <p>La máquina se simula: los actuadores (Q) se mueven y los sensores (Fc, B, S…) se activan solos al llegar a su posición. Pulsa M (o activa el ciclo automático) y observa cómo evoluciona el GRAFCET.</p>
+  <p>La máquina se simula: los actuadores (Q) se mueven y los sensores (Fc, B, S…) se activan solos al llegar a su posición. Pulsa M (o activa el ciclo automático) y observa cómo evoluciona el GRAFCET. En los ejercicios propuestos que todavía no tienen la solución publicada solo se ve la máquina: el GRAFCET lo dibuja el alumnado.</p>
   <div class="tabs" id="tabs"></div>
 </header>
 <main>
   <div class="col">
     <div class="card">
-      <h2><span id="ptitle">Proceso</span><span class="badge">Etapa activa:<b id="badge">X0</b></span></h2>
+      <h2><span id="ptitle">Proceso</span><span class="badge" id="badgebox">Etapa activa:<b id="badge">X0</b></span></h2>
       <svg id="psvg" viewBox="0 0 640 420"></svg>
       <div class="controls" id="controls"></div>
       <div class="io">
@@ -94,7 +96,8 @@ svg{display:block;width:100%;height:auto}
     <div class="card">
       <h2>GRAFCET</h2>
       <svg id="gsvg" viewBox="0 0 620 600"></svg>
-      <div class="hint"><span style="color:#22a55a;font-weight:700">■</span> etapa activa · <span style="color:#2196F3;font-weight:700">■</span> acción en curso · <span style="color:#d97706;font-weight:700">texto naranja</span> = receptividad que se está esperando · barra amarilla = transición franqueada</div>
+      <div class="nosol" id="gnosol"></div>
+      <div class="hint" id="ghint"><span style="color:#22a55a;font-weight:700">■</span> etapa activa · <span style="color:#2196F3;font-weight:700">■</span> acción en curso · <span style="color:#d97706;font-weight:700">texto naranja</span> = receptividad que se está esperando · barra amarilla = transición franqueada</div>
     </div>
     <div class="card">
       <h2>Enunciado</h2>
@@ -633,22 +636,368 @@ const EX7={
   }
 };
 
-const EXS=[EX1,EX2,EX3,EX4,EX5,EX6,EX7];
+/* =====================================================================
+   EJERCICIO 8 · CINTA CLASIFICADORA POR ALTURA (propuesto, sin solución)
+   ===================================================================== */
+const EX8={
+  tab:'8 · Cinta clasificadora',title:'Cinta clasificadora por altura',noSol:true,ficha:'ejercicio8-cinta-clasificadora.html',
+  enun:`<p>Una <b>cinta transportadora reversible</b> recibe las cajas en su centro. Una fotocélula de altura <b>S_A</b> se activa solo con las cajas altas.</p>
+  <p>Con el sistema en reposo, al pulsar <b>M</b>:</p>
+  <p>• Si la caja es <b>alta</b> (S_A = 1), la cinta gira a la <b>derecha</b> (<b>Q1</b>) hasta que la caja llega a <b>Fc_D</b>.</p>
+  <p>• Si la caja es <b>baja</b> (S_A = 0), la cinta gira a la <b>izquierda</b> (<b>Q2</b>) hasta <b>Fc_I</b>.</p>
+  <p>Después la cinta se para y espera otra pulsación de <b>M</b>.</p>
+  <p style="color:#6b7280">En la animación, la caja cae al contenedor y llega una caja nueva. Con el selector eliges cómo será la próxima caja.</p>`,
+  inputs:[['M','Marcha (I1)'],['S_A','Caja alta (I2)'],['Fc_D','Caja a la derecha (I3)'],['Fc_I','Caja a la izquierda (I4)']],
+  outputs:[['Q1','Cinta a la derecha'],['Q2','Cinta a la izquierda']],
+  selectors:[{k:'caja',label:'Próxima caja',opts:[['alt','Alternar'],['alta','Alta'],['baja','Baja'],['rand','Aleatoria']]}],
+  steps:[{n:0,c:0,r:0,Q:[]},{n:1,c:0,r:1,Q:['Q1']},{n:2,c:0,r:2,Q:['Q2']}],
+  trans:[{f:0,t:1,l:'X0·M·S_A',c:S=>S.M&&S.S_A},{f:0,t:2,l:'X0·M·/S_A',c:S=>S.M&&!S.S_A},{f:1,t:0,l:'X1·Fc_D',c:S=>S.Fc_D},{f:2,t:0,l:'X2·Fc_I',c:S=>S.Fc_I}],
+  init:()=>({x:0,tall:true,drop:1,belt:0,altas:0,bajas:0,fall:0,fx:0,ftall:true}),
+  ready:S=>true,
+  physics(m,Q,h,sim){
+    if(Q.Q1){m.x=clamp(m.x+h/2.5,-1,1);m.belt+=h;}
+    if(Q.Q2){m.x=clamp(m.x-h/2.5,-1,1);m.belt-=h;}
+    if(m.drop<1)m.drop=clamp(m.drop+h/0.6);
+    if(m.fall>0)m.fall=clamp(m.fall-h/0.7);
+    if(sim.step===0&&Math.abs(m.x)>=1&&m.drop>=1){
+      if(m.x>0)m.altas++;else m.bajas++;
+      m.fall=1;m.fx=m.x;m.ftall=m.tall;
+      const s=sim.sel.caja;m.tall=s==='alta'?true:s==='baja'?false:s==='rand'?Math.random()<0.5:!m.tall;
+      m.x=0;m.drop=0;
+    }
+  },
+  sensors:m=>({S_A:m.drop>=1&&m.tall&&Math.abs(m.x)<0.25,Fc_D:m.x>=1,Fc_I:m.x<=-1}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:370,width:640,height:50,fill:'#cbd5e1'},svg);
+    // contenedores
+    [[20,'Bajas'],[540,'Altas']].forEach(([x,t])=>{el('path',{d:`M${x},300 L${x+10},368 L${x+70},368 L${x+80},300`,fill:'#dbeafe',stroke:'#475569','stroke-width':3},svg);tx(svg,x+40,392,t,{class:'ttl','text-anchor':'middle'});});
+    // cinta
+    el('rect',{x:90,y:262,width:460,height:22,rx:11,fill:'#334155'},svg);
+    R.marks=[];for(let i=0;i<14;i++)R.marks.push(el('line',{y1:266,y2:280,stroke:'#94a3b8','stroke-width':3},svg));
+    el('circle',{cx:101,cy:273,r:9,fill:'#94a3b8'},svg);el('circle',{cx:539,cy:273,r:9,fill:'#94a3b8'},svg);
+    el('rect',{x:300,y:284,width:40,height:86,fill:'#64748b'},svg);
+    R.box=el('g',{},svg);R.boxr=el('rect',{x:-30,width:60,fill:'#d6a764',stroke:'#8d6e63','stroke-width':2},R.box);
+    R.boxl=el('line',{x1:-30,x2:30,stroke:'#8d6e63','stroke-width':2},R.box);
+    R.fall=el('rect',{width:60,fill:'#d6a764',stroke:'#8d6e63','stroke-width':2},svg);
+    // fotocélula S_A
+    el('rect',{x:236,y:140,width:10,height:122,fill:'#64748b'},svg);el('rect',{x:394,y:140,width:10,height:122,fill:'#64748b'},svg);
+    el('rect',{x:230,y:166,width:20,height:16,rx:3,fill:'#1f2937'},svg);el('rect',{x:390,y:166,width:20,height:16,rx:3,fill:'#1f2937'},svg);
+    R.beam=el('line',{x1:250,y1:174,x2:390,y2:174,'stroke-width':2,'stroke-dasharray':'6 4'},svg);
+    mkLed(R,svg,240,128,'S_A','S_A fotocélula de altura');
+    mkLed(R,svg,590,226,'Fc_D','Fc_D');mkLed(R,svg,50,226,'Fc_I','Fc_I','end');
+    el('rect',{x:568,y:228,width:8,height:34,fill:'#475569'},svg);el('rect',{x:64,y:228,width:8,height:34,fill:'#475569'},svg);
+    mkTag(R,svg,360,300,'Q1','Q1 Cinta →');mkTag(R,svg,190,300,'Q2','← Q2 Cinta');
+    R.cnt=tx(svg,20,30,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    R.marks.forEach((l,i)=>{const x=105+((i*33+m.belt*176)%430+430)%430;attr(l,{x1:x,x2:x});});
+    const hgt=m.tall?110:60,cx=320+m.x*220,yb=262-(1-m.drop)*230;
+    attr(R.box,{transform:`translate(${cx} 0)`,opacity:m.drop<1?0.4+0.6*m.drop:1});
+    attr(R.boxr,{y:yb-hgt,height:hgt});attr(R.boxl,{y1:yb-hgt+18,y2:yb-hgt+18});
+    if(m.fall>0){const fh=m.ftall?110:60,fx=m.fx>0?550:30,yy=262-fh+(1-m.fall)*100;attr(R.fall,{x:fx+(m.fx>0?0:0),y:yy,height:fh,opacity:m.fall});R.fall.style.display='';}else R.fall.style.display='none';
+    attr(R.beam,{stroke:S.S_A?'#ef4444':'#fca5a5',opacity:S.S_A?0.4:1});
+    R.cnt.textContent=`Cajas altas: ${m.altas}   ·   Cajas bajas: ${m.bajas}`;
+  }
+};
+
+/* =====================================================================
+   EJERCICIO 9 · PRENSA DE PEGADO CON DOS CILINDROS (simultaneidad)
+   ===================================================================== */
+const EX9={
+  tab:'9 · Prensa de pegado',title:'Prensa de pegado con dos cilindros (simultaneidad)',
+  enun:`<p>Una prensa pega dos tablas con <b>dos cilindros neumáticos A y B</b> de doble efecto.</p>
+  <p>Con el sistema en reposo (<b>X0</b>) y los dos cilindros arriba (<b>a0</b> y <b>b0</b>), al pulsar <b>M</b> se activan <b>a la vez</b> dos ramas:</p>
+  <p>• Rama izquierda (<b>X1</b>): A baja (<b>Q1 = A+</b>) hasta <b>a1</b>.<br>• Rama derecha (<b>X2</b>): B baja (<b>Q2 = B+</b>) hasta <b>b1</b>.</p>
+  <p>Solo cuando las <b>dos etapas</b> están activas y los dos cilindros abajo (<b>a1·b1</b>) se pasa a <b>X3</b>: suben los dos (<b>Q3 = A−</b>, <b>Q4 = B−</b>) hasta <b>a0·b0</b>.</p>
+  <p style="color:#6b7280">El cilindro B es más lento: fíjate en que X1 sigue activa esperando a que B llegue abajo. La doble raya marca el inicio y el final de las ramas simultáneas.</p>`,
+  inputs:[['M','Marcha (I1)'],['a0','A arriba (I2)'],['a1','A abajo (I3)'],['b0','B arriba (I4)'],['b1','B abajo (I5)']],
+  outputs:[['Q1','A+ baja A'],['Q2','B+ baja B'],['Q3','A− sube A'],['Q4','B− sube B']],
+  steps:[{n:0,Q:[]},{n:1,act:'Q1 A+',Q:['Q1']},{n:2,act:'Q2 B+',Q:['Q2']},{n:3,act:'Q3 A− · Q4 B−',Q:['Q3','Q4']}],
+  trans:[{f:0,t:[1,2],l:'X0 · M · a0 · b0',c:S=>S.M&&S.a0&&S.b0},{f:[1,2],t:3,l:'X1 · X2 · a1 · b1',c:S=>S.a1&&S.b1},{f:3,t:0,l:'X3 · a0 · b0',c:S=>S.a0&&S.b0}],
+  init:()=>({za:0,zb:0,glued:false,p:0,swap:0,done:0}),
+  ready:S=>S.a0&&S.b0,
+  physics(m,Q,h,sim){
+    if(Q.Q1)m.za=clamp(m.za+h/1.4);if(Q.Q3)m.za=clamp(m.za-h/1.4);
+    if(Q.Q2)m.zb=clamp(m.zb+h/2.6);if(Q.Q4)m.zb=clamp(m.zb-h/2.6);
+    if(m.za>=0.98&&m.zb>=0.98)m.glued=true;
+    if(sim.step===0&&m.swap===0&&m.glued&&m.za<=0&&m.zb<=0)m.swap=1;
+    if(m.swap===1){m.p+=h/0.8;if(m.p>=1){m.p=-1;m.glued=false;m.done++;m.swap=2;}}
+    else if(m.swap===2){m.p+=h/0.8;if(m.p>=0){m.p=0;m.swap=0;}}
+  },
+  sensors:m=>({a0:m.za<=0,a1:m.za>=1,b0:m.zb<=0,b1:m.zb>=1}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:362,width:640,height:58,fill:'#cbd5e1'},svg);
+    el('rect',{x:90,y:330,width:460,height:32,fill:'#475569'},svg);
+    el('rect',{x:100,y:60,width:18,height:272,fill:'#64748b'},svg);el('rect',{x:522,y:60,width:18,height:272,fill:'#64748b'},svg);
+    el('rect',{x:90,y:52,width:460,height:26,rx:4,fill:'#475569'},svg);
+    R.cyl={};
+    [['A',220,'Q1','Q3','a0','a1'],['B',420,'Q2','Q4','b0','b1']].forEach(([n,x,qd,qu,s0,s1])=>{
+      el('rect',{x:x-36,y:78,width:72,height:90,rx:6,fill:'#e2e8f0',stroke:'#334155','stroke-width':3},svg);
+      tx(svg,x,44,'Cilindro '+n,{class:'ttl','text-anchor':'middle'});
+      const c={piston:el('rect',{x:x-32,width:64,height:12,fill:'#334155'},svg),rod:el('rect',{x:x-7,width:14,fill:'#94a3b8',stroke:'#64748b'},svg),
+        plate:el('rect',{x:x-60,width:120,height:18,rx:3,fill:'#334155'},svg)};
+      R.cyl[n]=c;
+      mkLed(R,svg,x+(n==='A'?-50:50),92,s0,s0,n==='A'?'end':'start');mkLed(R,svg,x+(n==='A'?-50:50),152,s1,s1,n==='A'?'end':'start');
+    });
+    R.piece=el('g',{},svg);
+    el('rect',{x:150,y:296,width:340,height:16,fill:'#d6a764',stroke:'#8d6e63'},R.piece);
+    R.top=el('rect',{x:150,y:280,width:340,height:16,fill:'#c08f55',stroke:'#8d6e63'},R.piece);
+    R.glue=el('rect',{x:150,y:294,width:340,height:4,fill:'#fde68a'},R.piece);
+    mkTag(R,svg,20,190,'Q1','Q1 A+ baja');mkTag(R,svg,20,214,'Q3','Q3 A− sube');
+    mkTag(R,svg,540,190,'Q2','Q2 B+ baja');mkTag(R,svg,540,214,'Q4','Q4 B− sube');
+    R.cnt=tx(svg,20,404,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    [['A',m.za],['B',m.zb]].forEach(([n,z])=>{const c=R.cyl[n];attr(c.piston,{y:82+z*72});const pt=170+z*92;attr(c.plate,{y:pt});attr(c.rod,{y:94+z*72,height:pt-(94+z*72)});});
+    attr(R.piece,{transform:`translate(${m.p*420} 0)`,opacity:1-Math.abs(m.p)});
+    attr(R.glue,{fill:m.glued?'#a16207':'#fde68a'});
+    R.cnt.textContent=`Piezas pegadas: ${m.done}`;
+  },
+  buildG(svg){
+    // GRAFCET con divergencia y convergencia en Y (doble raya)
+    svg.setAttribute('viewBox','0 0 620 400');
+    const g={steps:{},acts:{},tb:{},aw:{},bars:[],lbls:[]};
+    const gl=el('g',{},svg),gb=el('g',{},svg),gs=el('g',{},svg);
+    const L=(pts)=>el('polyline',{points:pts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#111','stroke-width':2},gl);
+    const step=(n,x,top,act)=>{const sg=el('g',{class:'g-step'},gs);el('rect',{x:x-20,y:top,width:40,height:40,class:'box'},sg);
+      if(n===0)el('rect',{x:x-16,y:top+4,width:32,height:32,class:'inner'},sg);tx(sg,x,top+26,String(n),{'text-anchor':'middle',class:'num'});g.steps[n]=sg;
+      if(act){const w=act.length*6.6+16,ag=el('g',{class:'g-act'},gs);el('line',{x1:x+20,y1:top+20,x2:x+30,y2:top+20,stroke:'#111','stroke-width':2},ag);
+        el('rect',{x:x+30,y:top+6,width:w,height:28,class:'abox'},ag);tx(ag,x+38,top+24,act,{class:'atxt'});g.acts[n]=ag;}};
+    const bar=(i,x,y,lab)=>{g.bars[i]=el('line',{x1:x-12,y1:y,x2:x+12,y2:y,class:'g-bar'},gb);g.lbls[i]=tx(gb,x+16,y+4,lab,{class:'g-lbl'});};
+    const dbl=(x1,x2,y)=>{el('line',{x1,y1:y-3,x2,y2:y-3,stroke:'#111','stroke-width':2},gl);el('line',{x1,y1:y+3,x2,y2:y+3,stroke:'#111','stroke-width':2},gl);};
+    const XA=150,XB=430,CX=290;
+    step(0,CX,36);L([[CX,76],[CX,117]]);bar(0,CX,98,'X0 · M · a0 · b0');
+    dbl(XA,XB,120);L([[XA,123],[XA,150]]);L([[XB,123],[XB,150]]);
+    step(1,XA,150,'Q1 A+');step(2,XB,150,'Q2 B+');
+    L([[XA,190],[XA,227]]);L([[XB,190],[XB,227]]);dbl(XA,XB,230);
+    L([[CX,233],[CX,280]]);bar(1,CX,256,'X1 · X2 · a1 · b1');
+    step(3,CX,280,'Q3 A− · Q4 B−');
+    L([[CX,320],[CX,370],[12,370],[12,18],[CX,18],[CX,36]]);bar(2,CX,346,'X3 · a0 · b0');
+    el('polygon',{points:`${CX-5},26 ${CX+5},26 ${CX},36`,fill:'#111'},gl);
+    return g;
+  }
+};
+
+/* =====================================================================
+   EJERCICIO 10 · REMACHADORA DE TRES GOLPES (propuesto, sin solución)
+   ===================================================================== */
+const EX10={
+  tab:'10 · Remachadora',title:'Remachadora de tres golpes',noSol:true,ficha:'ejercicio10-remachadora.html',
+  enun:`<p>Una <b>remachadora</b> fija un remache dando <b>3 golpes</b> con un cilindro neumático A.</p>
+  <p>Con el sistema en reposo y el cilindro recogido (<b>a0</b>), al pulsar <b>M</b>:</p>
+  <p>1. El cilindro sale (<b>Q1 = A+</b>) hasta <b>a1</b> (golpe).</p>
+  <p>2. El cilindro vuelve (<b>Q2 = A−</b>) hasta <b>a0</b>. Cada vuelta suma 1 al contador <b>C1</b> (preselección = 3).</p>
+  <p>3. Si no ha dado 3 golpes, repite. Con los 3 golpes (<b>C1 = 1</b>) vuelve a reposo y el contador se pone a cero.</p>
+  <p style="color:#6b7280">En la animación, al terminar sale la pieza remachada y entra una nueva.</p>`,
+  inputs:[['M','Marcha (I1)'],['a0','Cilindro dentro (I2)'],['a1','Cilindro fuera (I3)'],['C1','Contador ≥ 3']],
+  outputs:[['Q1','A+ sale (golpe)'],['Q2','A− vuelve']],
+  steps:[{n:0,Q:[]},{n:1,Q:['Q1']},{n:2,Q:['Q2']}],
+  trans:[{f:0,t:1,l:'X0·M·a0',c:S=>S.M&&S.a0},{f:1,t:2,l:'X1·a1',c:S=>S.a1},{f:2,t:1,l:'X2·a0·/C1',c:S=>S.a0&&!S.C1},{f:2,t:0,l:'X2·a0·C1',c:S=>S.a0&&S.C1}],
+  init:()=>({z:0,count:0,hits:0,hitOn:false,p:0,swap:0,done:0}),
+  ready:S=>S.a0,
+  onEnter(n,m){if(n===2)m.count++;if(n===0)m.count=0;},
+  physics(m,Q,h,sim){
+    if(Q.Q1)m.z=clamp(m.z+h/0.5);if(Q.Q2)m.z=clamp(m.z-h/0.7);
+    if(m.z>=0.98&&!m.hitOn){m.hitOn=true;m.hits=Math.min(3,m.hits+1);}
+    if(m.z<0.9)m.hitOn=false;
+    if(sim.step===0&&m.swap===0&&m.hits>=3&&m.z<=0)m.swap=1;
+    if(m.swap===1){m.p+=h/0.7;if(m.p>=1){m.p=-1;m.hits=0;m.done++;m.swap=2;}}
+    else if(m.swap===2){m.p+=h/0.7;if(m.p>=0){m.p=0;m.swap=0;}}
+  },
+  sensors:m=>({a0:m.z<=0,a1:m.z>=1,C1:m.count>=3}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:362,width:640,height:58,fill:'#cbd5e1'},svg);
+    el('rect',{x:180,y:320,width:280,height:42,fill:'#475569'},svg);
+    el('rect',{x:200,y:60,width:18,height:262,fill:'#64748b'},svg);el('rect',{x:422,y:60,width:18,height:262,fill:'#64748b'},svg);
+    el('rect',{x:190,y:52,width:260,height:26,rx:4,fill:'#475569'},svg);
+    el('rect',{x:284,y:78,width:72,height:100,rx:6,fill:'#e2e8f0',stroke:'#334155','stroke-width':3},svg);
+    tx(svg,320,44,'Cilindro A',{class:'ttl','text-anchor':'middle'});
+    R.piston=el('rect',{x:288,width:64,height:12,fill:'#334155'},svg);
+    R.rod=el('rect',{x:313,width:14,fill:'#94a3b8',stroke:'#64748b'},svg);
+    R.ham=el('rect',{x:296,width:48,height:22,rx:3,fill:'#334155'},svg);
+    R.piece=el('g',{},svg);
+    el('rect',{x:240,y:300,width:160,height:10,fill:'#cbd5e1',stroke:'#64748b'},R.piece);el('rect',{x:240,y:310,width:160,height:10,fill:'#b6c2cf',stroke:'#64748b'},R.piece);
+    el('rect',{x:315,y:290,width:10,height:30,fill:'#a16207'},R.piece);
+    R.head=el('rect',{fill:'#ca8a04',stroke:'#713f12'},R.piece);
+    mkLed(R,svg,272,92,'a0','a0','end');mkLed(R,svg,272,164,'a1','a1','end');
+    mkTag(R,svg,470,100,'Q1','Q1 A+ golpe');mkTag(R,svg,470,130,'Q2','Q2 A− vuelve');
+    el('rect',{x:470,y:190,width:150,height:70,rx:10,fill:'#fff3e0',stroke:'#ffb74d','stroke-width':2},svg);
+    tx(svg,545,214,'Contador C1',{'text-anchor':'middle',style:'font:700 13px Segoe UI;fill:#e65100'});
+    R.cv=tx(svg,545,246,'',{'text-anchor':'middle',style:'font:700 22px Segoe UI;fill:#e65100'});
+    mkLed(R,svg,490,280,'C1','C1');
+    R.cnt=tx(svg,20,404,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    attr(R.piston,{y:82+m.z*84});const ht=200+m.z*68;attr(R.ham,{y:ht});attr(R.rod,{y:94+m.z*84,height:ht-(94+m.z*84)});
+    const hh=[16,11,7,4][m.hits],hw=[16,22,28,34][m.hits];attr(R.head,{x:320-hw/2,y:290-hh,width:hw,height:hh,rx:hh/2});
+    attr(R.piece,{transform:`translate(${m.p*420} 0)`,opacity:1-Math.abs(m.p)});
+    R.cv.textContent=`${m.count} / 3`;
+    R.cnt.textContent=`Golpes en esta pieza: ${m.hits}   ·   Piezas remachadas: ${m.done}`;
+  }
+};
+
+/* =====================================================================
+   EJERCICIO 11 · SEMÁFORO DE PASO DE PEATONES (propuesto, sin solución)
+   ===================================================================== */
+const EX11={
+  tab:'11 · Semáforo',title:'Semáforo de paso de peatones',noSol:true,ficha:'ejercicio11-semaforo.html',
+  enun:`<p>En reposo los coches tienen <b>verde</b> (Q1) y los peatones <b>rojo</b> (Q5). Al pulsar <b>P</b>:</p>
+  <p>1. Coches en <b>ámbar</b> (Q2) y peatones en rojo (Q5) durante <b>T1 = 3 s</b>.</p>
+  <p>2. Coches en <b>rojo</b> (Q3) y peatones en <b>verde</b> (Q4) durante <b>T2 = 10 s</b>.</p>
+  <p>3. Coches en rojo (Q3) y peatones en rojo (Q5) durante <b>T3 = 2 s</b> para despejar el paso.</p>
+  <p>Después vuelve a reposo: verde para los coches.</p>`,
+  inputs:[['P','Pulsador peatones (I1)'],['T1','Temporizador 3 s'],['T2','Temporizador 10 s'],['T3','Temporizador 2 s']],
+  outputs:[['Q1','Verde coches'],['Q2','Ámbar coches'],['Q3','Rojo coches'],['Q4','Verde peatones'],['Q5','Rojo peatones']],
+  startButtons:[['P','🚶 P Pulsador peatones (I1)']],
+  auto:sim=>sim.press('P'),
+  steps:[{n:0,Q:['Q1','Q5']},{n:1,Q:['Q2','Q5'],timer:['T1',3]},{n:2,Q:['Q3','Q4'],timer:['T2',10]},{n:3,Q:['Q3','Q5'],timer:['T3',2]}],
+  trans:[{f:0,t:1,l:'X0·P',c:S=>S.P},{f:1,t:2,l:'X1·T1',c:S=>S.T1},{f:2,t:3,l:'X2·T2',c:S=>S.T2},{f:3,t:0,l:'X3·T3',c:S=>S.T3}],
+  init:()=>({cars:[-60,-250,-440,150],py:0,crossed:0,walk:0}),
+  ready:S=>true,
+  physics(m,Q,h,sim){
+    const STOP=268,V=150;
+    const order=m.cars.map((x,i)=>i).sort((a,b)=>m.cars[b]-m.cars[a]);
+    order.forEach((i,k)=>{let x=m.cars[i],nx=x+V*h;const front=x+80;
+      if(!Q.Q1&&front<=STOP+2&&front+V*h>STOP)nx=STOP-80;
+      if(k>0){const ahead=m.cars[order[k-1]];if(ahead>x&&nx>ahead-110)nx=Math.max(x,ahead-110);}
+      if(nx>700){const minx=Math.min(...m.cars);nx=Math.min(-120,minx-130);}
+      m.cars[i]=nx;});
+    if(Q.Q4||(m.py>0&&m.py<1)){m.py=clamp(m.py+h/5.5);m.walk+=h;}
+    if(m.py>=1){m.py=0;m.crossed++;}
+  },
+  sensors:()=>({}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#d9f99d'},svg);
+    el('rect',{x:0,y:200,width:640,height:150,fill:'#6b7280'},svg);
+    el('rect',{x:0,y:184,width:640,height:16,fill:'#d1d5db'},svg);el('rect',{x:0,y:350,width:640,height:16,fill:'#d1d5db'},svg);
+    for(let i=0;i<6;i++)el('rect',{x:290,y:206+i*24,width:70,height:14,fill:'#f9fafb'},svg);
+    el('line',{x1:268,y1:280,x2:268,y2:346,stroke:'#f9fafb','stroke-width':4},svg);
+    for(let x=0;x<640;x+=60)if(x<270||x>370)el('rect',{x,y:272,width:34,height:5,fill:'#facc15'},svg);
+    R.cars=[0,1,2,3].map(i=>{const g=el('g',{},svg);const col=['#dc2626','#2563eb','#16a34a','#9333ea'][i];
+      el('rect',{x:0,y:292,width:80,height:30,rx:8,fill:col},g);el('rect',{x:18,y:284,width:44,height:16,rx:5,fill:col},g);
+      el('rect',{x:24,y:287,width:14,height:10,fill:'#bfdbfe'},g);el('rect',{x:42,y:287,width:14,height:10,fill:'#bfdbfe'},g);
+      el('circle',{cx:18,cy:324,r:7,fill:'#111'},g);el('circle',{cx:62,cy:324,r:7,fill:'#111'},g);return g;});
+    // semáforo coches
+    el('rect',{x:226,y:150,width:6,height:40,fill:'#334155'},svg);
+    el('rect',{x:206,y:40,width:46,height:116,rx:8,fill:'#1f2937'},svg);
+    R.lc=[['Q3','#ef4444',62],['Q2','#f59e0b',98],['Q1','#22c55e',134]].map(([k,c,y])=>({k,c,e:el('circle',{cx:229,cy:y,r:14},svg)}));
+    tx(svg,229,30,'Coches',{class:'ttl','text-anchor':'middle'});
+    // semáforo peatones
+    el('rect',{x:413,y:140,width:6,height:44,fill:'#334155'},svg);
+    el('rect',{x:394,y:60,width:44,height:84,rx:8,fill:'#1f2937'},svg);
+    R.lp=[['Q5','#ef4444',82],['Q4','#22c55e',120]].map(([k,c,y])=>({k,c,e:el('circle',{cx:416,cy:y,r:14},svg)}));
+    tx(svg,416,50,'Peatones',{class:'ttl','text-anchor':'middle'});
+    el('rect',{x:452,y:140,width:22,height:30,rx:4,fill:'#fde047',stroke:'#334155','stroke-width':2},svg);tx(svg,463,134,'P',{class:'ttl','text-anchor':'middle'});
+    mkLed(R,svg,486,156,'P','pulsador');
+    // peatón
+    R.ped=el('g',{},svg);el('circle',{cx:0,cy:-30,r:7,fill:'#f5d0a9',stroke:'#7c2d12'},R.ped);
+    el('line',{x1:0,y1:-23,x2:0,y2:-6,stroke:'#1e3a8a','stroke-width':5},R.ped);
+    R.legs=[el('line',{x1:0,y1:-6,y2:6,stroke:'#1f2937','stroke-width':4},R.ped),el('line',{x1:0,y1:-6,y2:6,stroke:'#1f2937','stroke-width':4},R.ped)];
+    mkTag(R,svg,20,40,'Q1','Q1 Verde coches');mkTag(R,svg,20,64,'Q2','Q2 Ámbar coches');mkTag(R,svg,20,88,'Q3','Q3 Rojo coches');
+    mkTag(R,svg,500,64,'Q4','Q4 Verde peatones');mkTag(R,svg,500,88,'Q5','Q5 Rojo peatones');
+    R.tt=tx(svg,20,400,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    m.cars.forEach((x,i)=>attr(R.cars[i],{transform:`translate(${x} 0)`}));
+    R.lc.concat(R.lp).forEach(l=>attr(l.e,{fill:Q[l.k]?l.c:'#374151'}));
+    const y=190+m.py*170,sw=Math.sin(m.walk*12)*6;attr(R.ped,{transform:`translate(325 ${y})`});
+    attr(R.legs[0],{x2:sw});attr(R.legs[1],{x2:-sw});
+    const st=sim.ex.steps.find(s=>s.n===sim.step);
+    R.tt.textContent=(st.timer?`Tiempo: ${Math.min(sim.t,st.timer[1]).toFixed(1)} / ${st.timer[1]} s   ·   `:'Esperando a que un peatón pulse P   ·   ')+`Peatones que han cruzado: ${m.crossed}`;
+  }
+};
+
+/* =====================================================================
+   EJERCICIO 12 · MESA ELEVADORA DE PALETS (propuesto, sin solución)
+   ===================================================================== */
+const EX12={
+  tab:'12 · Mesa elevadora',title:'Mesa elevadora de palets',noSol:true,ficha:'ejercicio12-mesa-elevadora.html',
+  enun:`<p>Una <b>mesa elevadora</b> sube los palets de la planta baja a un altillo.</p>
+  <p>Con la mesa abajo (<b>Fc_Ab</b>), el empujador recogido (<b>e0</b>) y un palet en la entrada (<b>S1</b>), al pulsar <b>M</b>:</p>
+  <p>1. Los rodillos (<b>Q1</b>) meten el palet en la mesa hasta <b>S2</b>.</p>
+  <p>2. La mesa sube (<b>Q2</b>) hasta <b>Fc_Arr</b>.</p>
+  <p>3. El empujador sale (<b>Q3 = E+</b>) y deja el palet en el altillo hasta <b>e1</b>.</p>
+  <p>4. El empujador vuelve (<b>Q4 = E−</b>) y la mesa baja (<b>Q5</b>) a la vez, hasta <b>e0</b> y <b>Fc_Ab</b>.</p>
+  <p style="color:#6b7280">En la animación llega un palet nuevo a la entrada cuando la mesa vuelve a reposo.</p>`,
+  inputs:[['M','Marcha (I1)'],['S1','Palet en la entrada (I2)'],['S2','Palet en la mesa (I3)'],['Fc_Ab','Mesa abajo (I4)'],['Fc_Arr','Mesa arriba (I5)'],['e0','Empujador dentro (I6)'],['e1','Empujador fuera (I7)']],
+  outputs:[['Q1','Rodillos de entrada'],['Q2','Subir mesa'],['Q3','E+ sale empujador'],['Q4','E− vuelve empujador'],['Q5','Bajar mesa']],
+  steps:[{n:0,Q:[]},{n:1,Q:['Q1']},{n:2,Q:['Q2']},{n:3,Q:['Q3']},{n:4,Q:['Q4','Q5']}],
+  trans:[{f:0,t:1,l:'X0·M·S1·Fc_Ab·e0',c:S=>S.M&&S.S1&&S.Fc_Ab&&S.e0},{f:1,t:2,l:'X1·S2',c:S=>S.S2},{f:2,t:3,l:'X2·Fc_Arr',c:S=>S.Fc_Arr},{f:3,t:4,l:'X3·e1',c:S=>S.e1},{f:4,t:0,l:'X4·e0·Fc_Ab',c:S=>S.e0&&S.Fc_Ab}],
+  init:()=>({stage:'entry',px:0,th:0,e:0,ux:0,roll:0,done:0}),
+  ready:S=>S.S1&&S.Fc_Ab&&S.e0,
+  physics(m,Q,h,sim){
+    if(Q.Q1){m.roll+=h;if(m.stage==='entry'){m.px=clamp(m.px+h/2.5);if(m.px>=1)m.stage='table';}}
+    if(Q.Q2)m.th=clamp(m.th+h/3);if(Q.Q5)m.th=clamp(m.th-h/3);
+    if(Q.Q3)m.e=clamp(m.e+h/1.5);if(Q.Q4)m.e=clamp(m.e-h/1.5);
+    if(m.stage==='table'&&m.th>=1&&m.e>0){m.stage='push';}
+    if(m.stage==='push'){m.ux=Math.max(m.ux,m.e);if(m.ux>=1)m.stage='upper';}
+    if(m.stage==='upper'&&Q.Q4){m.ux+=h/1.2;if(m.ux>=2.2){m.stage='gone';m.done++;}}
+    if(m.stage==='upper'&&sim.step===0){m.ux+=h/1.2;if(m.ux>=2.2){m.stage='gone';m.done++;}}
+    if(m.stage==='gone'&&sim.step===0){m.stage='arriving';m.px=-0.9;}
+    if(m.stage==='arriving'){m.px+=h/1.6;m.roll+=h;if(m.px>=0){m.px=0;m.stage='entry';}}
+  },
+  sensors:m=>({S1:m.stage==='entry'&&m.px<=0.05,S2:m.stage==='table'&&m.px>=1,Fc_Ab:m.th<=0,Fc_Arr:m.th>=1,e0:m.e<=0,e1:m.e>=1}),
+  build(svg,R){
+    el('rect',{x:0,y:0,width:640,height:420,fill:'#eef1f5'},svg);
+    el('rect',{x:0,y:380,width:640,height:40,fill:'#94a3b8'},svg);
+    el('rect',{x:430,y:150,width:210,height:14,fill:'#475569'},svg);el('rect',{x:600,y:164,width:14,height:216,fill:'#64748b'},svg);
+    tx(svg,535,186,'ALTILLO',{class:'ttl','text-anchor':'middle'});
+    // rodillos de entrada
+    el('rect',{x:20,y:366,width:210,height:8,fill:'#475569'},svg);
+    R.rolls=[];for(let i=0;i<7;i++){const cx=34+i*30;el('circle',{cx,cy:360,r:9,fill:'#cbd5e1',stroke:'#475569','stroke-width':2},svg);R.rolls.push(el('line',{x1:cx,y1:360,x2:cx,y2:351,stroke:'#475569','stroke-width':2},svg));}
+    // mesa (tijera)
+    R.scis=el('path',{fill:'none',stroke:'#475569','stroke-width':5},svg);
+    R.table=el('rect',{x:240,width:180,height:14,fill:'#1d4ed8'},svg);
+    el('rect',{x:240,y:374,width:180,height:6,fill:'#334155'},svg);
+    // empujador fijo en la pared, a la altura del altillo
+    el('rect',{x:150,y:40,width:12,height:120,fill:'#64748b'},svg);
+    el('rect',{x:162,y:112,width:76,height:28,rx:4,fill:'#e2e8f0',stroke:'#334155','stroke-width':2},svg);tx(svg,200,104,'Empujador E',{class:'ttl','text-anchor':'middle'});
+    R.erod=el('rect',{x:238,y:122,height:8,fill:'#94a3b8',stroke:'#64748b'},svg);R.epad=el('rect',{y:108,width:10,height:36,fill:'#334155'},svg);
+    // palet
+    R.pal=el('g',{},svg);el('rect',{x:0,y:-34,width:100,height:26,fill:'#d6a764',stroke:'#8d6e63','stroke-width':2},R.pal);
+    [4,44,84].forEach(x=>el('rect',{x,y:-8,width:12,height:8,fill:'#a16207'},R.pal));
+    mkLed(R,svg,40,326,'S1','S1');mkLed(R,svg,330,250,'S2','S2');
+    mkLed(R,svg,430,372,'Fc_Ab','Fc_Ab');mkLed(R,svg,430,142,'Fc_Arr','Fc_Arr');
+    mkLed(R,svg,262,160,'e0','e0','end');mkLed(R,svg,470,100,'e1','e1');
+    mkTag(R,svg,20,200,'Q1','Q1 Rodillos');mkTag(R,svg,20,224,'Q2','Q2 Subir mesa');mkTag(R,svg,20,248,'Q5','Q5 Bajar mesa');
+    mkTag(R,svg,20,40,'Q3','Q3 E+ sale');mkTag(R,svg,20,64,'Q4','Q4 E− vuelve');
+    R.cnt=tx(svg,440,40,'',{class:'big'});
+  },
+  draw(m,Q,S,sim,R){
+    R.rolls.forEach((l,i)=>{const cx=34+i*30,a=m.roll*8;attr(l,{x2:cx+9*Math.sin(a),y2:360-9*Math.cos(a)});});
+    const ty=366-m.th*216;attr(R.table,{y:ty});
+    attr(R.scis,{d:`M250,374 L410,${ty+14} M410,374 L250,${ty+14}`});
+    const ex=270+m.e*190;attr(R.erod,{width:Math.max(0,ex-238)});attr(R.epad,{x:ex});
+    let x,y;
+    if(m.stage==='entry'||m.stage==='arriving'){x=40+m.px*240;y=352;}
+    else if(m.stage==='table'){x=280;y=ty;}
+    else{x=280+Math.min(m.ux,1)*190+Math.max(0,m.ux-1)*200;y=150;}
+    attr(R.pal,{transform:`translate(${x} ${y})`});R.pal.style.display=m.stage==='gone'?'none':'';
+    R.cnt.textContent=`Palets subidos: ${m.done}`;
+  }
+};
+
+
+const EXS=[EX1,EX2,EX3,EX4,EX5,EX6,EX7,EX8,EX9,EX10,EX11,EX12];
 
 /* =====================================================================
    MOTOR DE SIMULACIÓN
    ===================================================================== */
 const H=1/240;
-const sim={ex:null,m:null,step:0,t:0,clock:0,Q:{},S:{},paused:false,auto:false,speed:1,pulses:{},vis:{},sel:{},flash:{},autoWait:0,
+const arr=v=>Array.isArray(v)?v:[v];
+const sim={ex:null,m:null,act:new Set([0]),get step(){let m=Infinity;for(const n of this.act)if(n<m)m=n;return m;},set step(v){this.act=new Set([v]);},t:0,clock:0,Q:{},S:{},paused:false,auto:false,speed:1,pulses:{},vis:{},sel:{},flash:{},autoWait:0,
   press(k){const ex=this.ex;if(ex.onPress)ex.onPress(k,this.m,this);this.pulses[k]=true;this.vis[k]=0.35;addLog(`👆 Pulsado ${k} (en X${this.step})`);}};
 let G=null,R=null;
 
 function addLog(s){const L=$('#log');const d=document.createElement('div');d.textContent=`[${sim.clock.toFixed(1).padStart(6)} s] ${s}`;L.insertBefore(d,L.firstChild);while(L.children.length>80)L.removeChild(L.lastChild);}
 
-function computeQ(){const Q={};sim.ex.outputs.forEach(([k])=>Q[k]=false);sim.ex.steps.find(s=>s.n===sim.step).Q.forEach(k=>Q[k]=true);sim.Q=Q;return Q;}
+function computeQ(){const Q={};sim.ex.outputs.forEach(([k])=>Q[k]=false);sim.ex.steps.forEach(s=>{if(sim.act.has(s.n))s.Q.forEach(k=>Q[k]=true);});sim.Q=Q;return Q;}
 function computeS(){
   const ex=sim.ex,S=ex.sensors(sim.m,sim);
-  ex.steps.forEach(s=>{if(s.timer)S[s.timer[0]]=sim.step===s.n&&sim.t>=s.timer[1];});
+  ex.steps.forEach(s=>{if(s.timer)S[s.timer[0]]=sim.act.has(s.n)&&sim.t>=s.timer[1];});
   for(const k in sim.pulses)S[k]=true;
   sim.S=S;return S;
 }
@@ -661,20 +1010,22 @@ function substep(h){
   const hadPulse=Object.keys(sim.pulses).length>0;
   let fired=false;
   if(!(st.dwell&&sim.t<st.dwell)){
-    for(let i=0;i<ex.trans.length;i++){const tr=ex.trans[i];if(tr.f===sim.step&&tr.c(S,sim)){fire(i);fired=true;break;}}
+    for(let i=0;i<ex.trans.length;i++){const tr=ex.trans[i];if(arr(tr.f).every(n=>sim.act.has(n))&&tr.c(S,sim)){fire(i);fired=true;break;}}
   }
   if(hadPulse&&!fired){
-    const tr0=ex.trans.find(t=>t.f===sim.step);
-    addLog(sim.step===0?`⚠️ No se cumple la receptividad: ${tr0?tr0.l:''}`:`ℹ️ Señal sin efecto en X${sim.step}`);
+    const tr0=ex.trans.find(t=>arr(t.f).includes(sim.step));
+    if(ex.noSol)addLog(sim.step===0?'⚠️ La máquina no está en condiciones de arrancar':'ℹ️ La señal no tiene efecto ahora');
+    else addLog(sim.step===0?`⚠️ No se cumple la receptividad: ${tr0?tr0.l:''}`:`ℹ️ Señal sin efecto en X${sim.step}`);
   }
   sim.pulses={};
 }
 function fire(i){
-  const tr=sim.ex.trans[i];
-  addLog(`✅ Transición ${tr.f}→${tr.t}: ${tr.l}`);
-  sim.flash[i]=0.6;sim.step=tr.t;sim.t=0;
-  if(sim.ex.onEnter)sim.ex.onEnter(tr.t,sim.m,sim);
-  addLog(`🔄 Etapa activa X${tr.t}`);
+  const tr=sim.ex.trans[i],ex=sim.ex,prev=Object.assign({},sim.Q);
+  if(!ex.noSol)addLog(`✅ Transición ${arr(tr.f).join('+')}→${arr(tr.t).join('+')}: ${tr.l}`);
+  sim.flash[i]=0.6;arr(tr.f).forEach(n=>sim.act.delete(n));arr(tr.t).forEach(n=>sim.act.add(n));sim.t=0;
+  if(ex.onEnter)arr(tr.t).forEach(n=>ex.onEnter(n,sim.m,sim));
+  if(!ex.noSol)addLog(`🔄 Etapa activa ${[...sim.act].sort((a,b)=>a-b).map(n=>'X'+n).join(' y ')}`);
+  else{const Q=computeQ(),ch=ex.outputs.filter(([k])=>!!Q[k]!==!!prev[k]).map(([k,d])=>`${k} ${Q[k]?'ON':'OFF'} (${d})`);if(ch.length)addLog('💡 '+ch.join(' · '));}
 }
 function reset(){
   sim.m=sim.ex.init(sim);sim.step=0;sim.t=0;sim.pulses={};sim.autoWait=0;sim.flash={};
@@ -684,6 +1035,8 @@ function reset(){
 /* ---------- GRAFCET ---------- */
 function buildGrafcet(ex){
   const svg=$('#gsvg');svg.innerHTML='';
+  if(ex.noSol)return null;
+  if(ex.buildG)return ex.buildG(svg);
   const W=620,CX=310,COLW=160,ROWH=84,TOP=36;
   const P={};ex.steps.forEach(s=>{const x=CX+s.c*COLW,top=TOP+s.r*ROWH;P[s.n]={x,top,bot:top+40,c:s.c};});
   const maxBot=Math.max(...Object.values(P).map(p=>p.bot));
@@ -726,15 +1079,16 @@ function buildGrafcet(ex){
 }
 function drawGrafcet(dtReal){
   const ex=sim.ex;
-  for(const n in G.steps){const on=+n===sim.step;G.steps[n].classList.toggle('on',on);const st=ex.steps.find(s=>s.n===+n);if(G.acts[n])G.acts[n].classList.toggle('on',on&&(st.Q.length>0||!!st.timer||(+n===4&&ex===EX5)));}
-  ex.steps.forEach(s=>{if(s.timer){const f=s.n===sim.step?clamp(sim.t/s.timer[1]):0;G.tb[s.n].setAttribute('width',G.aw[s.n]*f);}});
+  $('#badge').textContent=[...sim.act].sort((a,b)=>a-b).map(n=>'X'+n).join(' · ');
+  if(!G)return;
+  for(const n in G.steps){const on=sim.act.has(+n);G.steps[n].classList.toggle('on',on);const st=ex.steps.find(s=>s.n===+n);if(G.acts[n])G.acts[n].classList.toggle('on',on&&(st.Q.length>0||!!st.timer||(+n===4&&ex===EX5)));}
+  ex.steps.forEach(s=>{if(s.timer&&G.tb[s.n]){const f=sim.act.has(s.n)?clamp(sim.t/s.timer[1]):0;G.tb[s.n].setAttribute('width',G.aw[s.n]*f);}});
   ex.trans.forEach((tr,i)=>{
-    const wait=tr.f===sim.step;
+    const wait=arr(tr.f).every(n=>sim.act.has(n));
     if(sim.flash[i]>0)sim.flash[i]-=dtReal;
     G.bars[i].classList.toggle('wait',wait);G.bars[i].classList.toggle('fired',sim.flash[i]>0);
     G.lbls[i].classList.toggle('wait',wait);
   });
-  $('#badge').textContent='X'+sim.step;
 }
 
 /* ---------- UI ---------- */
@@ -758,6 +1112,9 @@ function buildUI(ex){
   const mk=(list,id,cls)=>{const box=$(id);box.innerHTML='';const map={};list.forEach(([k,d])=>{const r=document.createElement('div');r.className='sig '+cls;r.innerHTML=`<span class="dot"></span><b>${k}</b><span>${d}</span>`;box.appendChild(r);map[k]=r;});return map;};
   sim.inEls=mk(ex.inputs,'#ins','');sim.outEls=mk(ex.outputs,'#outs','out');
   $('#enun').innerHTML=ex.enun;$('#ptitle').textContent=ex.title;
+  $('#gsvg').style.display=ex.noSol?'none':'';$('#ghint').style.display=ex.noSol?'none':'';$('#badgebox').style.display=ex.noSol?'none':'';
+  const ns=$('#gnosol');ns.style.display=ex.noSol?'block':'none';
+  if(ex.noSol)ns.innerHTML=`✏️ <b>El GRAFCET de este ejercicio lo dibujas tú.</b><br>Observa la máquina: qué salidas Q se encienden en cada momento y qué sensor hace que pase a la siguiente fase. Así sabrás cuáles son las etapas, sus acciones y sus receptividades.<br><br>📄 <a href="${ex.ficha}">Abrir la ficha del ejercicio</a>`;
 }
 function drawIO(){
   for(const k in sim.inEls)sim.inEls[k].classList.toggle('on',!!sim.S[k]||(sim.vis[k]>0));
@@ -796,8 +1153,8 @@ function frame(now){
   render(dtReal);
   requestAnimationFrame(frame);
 }
-const tabs=$('#tabs');EXS.forEach((ex,i)=>{const b=document.createElement('button');b.className='tab';b.textContent=ex.tab;b.onclick=()=>loadEx(i);tabs.appendChild(b);});
-loadEx(0);
+const tabs=$('#tabs');EXS.forEach((ex,i)=>{const b=document.createElement('button');b.className='tab';b.textContent=ex.tab;b.onclick=()=>{loadEx(i);history.replaceState(null,'','#ej'+(i+1));};tabs.appendChild(b);});
+{const mh=/^#ej(\d+)$/.exec(location.hash),k=mh?+mh[1]-1:0;loadEx(k>=0&&k<EXS.length?k:0);}
 requestAnimationFrame(frame);
 </script>
 </body>

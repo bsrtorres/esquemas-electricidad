@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejercicio 8 GRAFCET - Cinta clasificadora por altura (propuesto)</title>
+<style>
+body { margin:0; padding:0 0 30px; background:#f0f2f5; font-family:'Segoe UI', Arial, sans-serif; color:#222; }
+.wrap { max-width:1180px; margin:0 auto; padding:20px 16px; }
+.status-bar { background:#fff; padding:15px 25px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.1);
+  display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
+.status-bar .t { font-weight:bold; color:#1565C0; font-size:18px; }
+.tag { background:#fff3e0; border:1px solid #ffb74d; color:#e65100; font-weight:bold; padding:6px 12px; border-radius:6px; font-size:13px; }
+.grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+.card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.1); }
+.card h3 { margin:0 0 12px; color:#333; border-bottom:2px solid #667eea; padding-bottom:8px; font-size:16px; }
+.enunciado-box { background:#eef2ff; border-left:4px solid #667eea; padding:10px 12px; margin-bottom:15px; border-radius:5px; font-size:14px; line-height:1.55; }
+.enunciado-box p { margin:0 0 6px; }
+.pista { background:#fffde7; border-left:4px solid #fbc02d; padding:10px 12px; border-radius:5px; font-size:14px; line-height:1.5; }
+.ilus { background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; padding:8px; margin-bottom:15px; }
+.ilus svg { width:100%; height:auto; display:block; }
+table.io { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:14px; }
+table.io th, table.io td { border:1px solid #ccc; padding:5px 7px; text-align:left; }
+table.io th { background:#f5f5f5; }
+table.rs td { height:30px; }
+ol.tareas { margin:0 0 14px; padding-left:20px; font-size:14px; line-height:1.6; }
+.dibujo { height:520px; border:2px dashed #9e9e9e; border-radius:8px;
+  background-image: linear-gradient(#eceff1 1px, transparent 1px), linear-gradient(90deg, #eceff1 1px, transparent 1px);
+  background-size: 20px 20px; position:relative; }
+.dibujo span { position:absolute; top:8px; left:12px; color:#757575; font-size:13px; background:#fff; padding:0 4px; }
+.btn { display:inline-block; background:#1565C0; color:#fff; border:none; border-radius:7px; padding:9px 14px; font-weight:bold; cursor:pointer; font-size:13px; }
+.nav { display:flex; justify-content:space-between; margin-top:18px; font-size:14px; }
+.nav a { color:#1565C0; }
+@media print {
+  body { background:#fff; } .mnu, .btn, .nav { display:none !important; }
+  .card, .status-bar { box-shadow:none; border:1px solid #ccc; } .grid { grid-template-columns:1fr 1fr; }
+  .card { break-inside: avoid; } .dibujo { height:600px; }
+}
+</style>
+<script src="../menu.js?v=18" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="status-bar">
+    <span class="t">📦 Ejercicio 8 · Cinta clasificadora por altura</span>
+    <span class="tag">3 etapas RS · Selección de secuencia (divergencia en O)</span>
+    <button class="btn" onclick="window.print()">🖨️ Imprimir ficha</button>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>📄 Enunciado</h3>
+      <div class="ilus"><svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1565C0"/></marker></defs><rect x="30" y="140" width="380" height="22" rx="11" fill="#455a64"/><circle cx="41" cy="151" r="9" fill="#90a4ae"/><circle cx="399" cy="151" r="9" fill="#90a4ae"/><rect x="195" y="98" width="50" height="42" fill="#d7a86e" stroke="#8d6e63" stroke-width="2"/><text x="220" y="124" text-anchor="middle">caja</text><line x1="220" y1="30" x2="220" y2="60" stroke="#333" stroke-width="2"/><rect x="213" y="59" width="14" height="14" rx="3" fill="#2196F3"/><text x="220" y="54" text-anchor="middle" font-weight="bold"></text><text x="232" y="56">S_A (sensor de altura)</text><path d="M250,190 L340,190" stroke="#1565C0" stroke-width="3" marker-end="url(#ar)"/><text x="295" y="210" text-anchor="middle" fill="#1565C0">Q1 derecha</text><path d="M190,190 L100,190" stroke="#1565C0" stroke-width="3" marker-end="url(#ar)"/><text x="145" y="210" text-anchor="middle" fill="#1565C0">Q2 izquierda</text><rect x="388" y="113" width="14" height="14" rx="3" fill="#2196F3"/><text x="395" y="108" text-anchor="middle" font-weight="bold">Fc_D</text><rect x="38" y="113" width="14" height="14" rx="3" fill="#2196F3"/><text x="45" y="108" text-anchor="middle" font-weight="bold">Fc_I</text><rect x="160" y="20" width="0" height="0"/><rect x="63" y="23" width="14" height="14" rx="3" fill="#4CAF50"/><text x="70" y="18" text-anchor="middle" font-weight="bold"></text><text x="84" y="34">M</text></svg></div>
+      <div class="enunciado-box"><p>Una <strong>cinta transportadora reversible</strong> recibe las cajas en su centro. Encima hay un <strong>sensor de altura S_A</strong> que se activa solo con las cajas altas.</p><p>Con el sistema en reposo (<strong>X0</strong>), al pulsar <strong>M</strong>:</p><p>• Si la caja es <strong>alta</strong> (S_A = 1), la cinta gira hacia la <strong>derecha</strong> (<strong>Q1</strong>) hasta que la caja llega al final de carrera <strong>Fc_D</strong>.</p><p>• Si la caja es <strong>baja</strong> (S_A = 0), la cinta gira hacia la <strong>izquierda</strong> (<strong>Q2</strong>) hasta que la caja llega a <strong>Fc_I</strong>.</p><p>Cuando la caja llega a su final de carrera, la cinta se para y el sistema vuelve a reposo esperando otra pulsación de <strong>M</strong>.</p></div>
+      <div class="pista">💡 <b>Pista:</b> Desde X0 salen <b>dos caminos</b> y solo puede activarse uno. Las dos receptividades tienen que ser <b>excluyentes</b>: piensa cómo escribir «caja alta» y «caja baja» con la misma entrada S_A.</div>
+    </div>
+    <div class="card">
+      <h3>🔌 Asignación de entradas y salidas (LOGO!)</h3>
+      <table class="io">
+        <tr><th>Entrada</th><th>Señal</th><th>Función</th></tr><tr><td><b>I1</b></td><td>M</td><td>Pulsador de marcha</td></tr><tr><td><b>I2</b></td><td>S_A</td><td>Sensor de caja alta</td></tr><tr><td><b>I3</b></td><td>Fc_D</td><td>Caja en el extremo derecho</td></tr><tr><td><b>I4</b></td><td>Fc_I</td><td>Caja en el extremo izquierdo</td></tr><tr><td><b>I5</b></td><td>Reset</td><td>Vuelta a reposo</td></tr>
+        <tr><th>Salida</th><th colspan="2">Función</th></tr><tr><td><b>Q1</b></td><td colspan='2'>Cinta hacia la derecha</td></tr><tr><td><b>Q2</b></td><td colspan='2'>Cinta hacia la izquierda</td></tr>
+      </table>
+      <h3>✏️ Lo que tienes que hacer</h3>
+      <ol class="tareas">
+        <li>Dibuja el <b>GRAFCET</b> del proceso: etapas, transiciones con su receptividad y acciones de cada etapa.</li>
+        <li>Completa la tabla de <b>ecuaciones</b> de cada biestable RS (usa M8 para arrancar en X0 y el Reset general).</li>
+        <li>Programa el GRAFCET en <b>LOGO!Soft Comfort</b> con bloques RS y comprueba el funcionamiento en simulación.</li>
+      </ol>
+      <h3>📋 Ecuaciones de los bloques RS</h3>
+      <table class="io rs">
+        <tr><th style="width:52px">RS</th><th>Set (S)</th><th>Reset (R)</th><th>Salidas</th></tr><tr><td><b>X0</b></td><td></td><td></td><td></td></tr><tr><td><b>X1</b></td><td></td><td></td><td></td></tr><tr><td><b>X2</b></td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <h3>📐 Dibuja aquí el GRAFCET</h3>
+    <div class="dibujo"><span>GRAFCET del ejercicio 8</span></div>
+  </div>
+  <div class="nav"><span></span><a href="ejercicio9-prensa-pegado.html">Ejercicio 9 →</a></div>
+</div>
+</body>
+</html>
