@@ -85,6 +85,12 @@
       {t: "6 · Prensa neumática", href: "grafcet/ejercicio6-prensa.html"},
       {t: "7 · Puerta de garaje", href: "grafcet/ejercicio7-puerta-garaje.html"},
       {t: "Solucionario GRAFCET con bloques RS", href: "grafcet/solucionario-grafcet-rs-logosoft.pdf"},
+      {h: "Ejercicios propuestos"},
+      {t: "8 · Cinta clasificadora por altura", href: "grafcet/ejercicio8-cinta-clasificadora.html"},
+      {t: "9 · Prensa de pegado con dos cilindros", href: "grafcet/ejercicio9-prensa-pegado.html"},
+      {t: "10 · Remachadora de tres golpes", href: "grafcet/ejercicio10-remachadora.html"},
+      {t: "11 · Semáforo de paso de peatones", href: "grafcet/ejercicio11-semaforo.html"},
+      {t: "12 · Mesa elevadora de palets", href: "grafcet/ejercicio12-mesa-elevadora.html"},
     ]},
     {t: "Domótica", href: "ecosistema-domotico.html"},
     {t: "Simuladores", items: [
